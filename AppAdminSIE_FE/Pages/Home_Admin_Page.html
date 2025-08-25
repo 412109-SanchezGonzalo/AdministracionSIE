@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../Images/logo_SIE.png">
+    <link rel="stylesheet" href="../Styles/home_admin_styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="../Scripts/home_admin_script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <title>SIE | Administrador</title>
+</head>
+<body>
+<!-- navbar -->
+<nav class="navbar">
+    <button class="navbar-toggle" aria-label="Toggle navigation">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
+    <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
+    <ul class="navbar-menu">
+        <li><a href="#">Inicio</a></li>
+        <li id="li-profile">Perfil</li>
+        <li id="li-history">Historial de Horarios</li>
+        <li><a href="#">Cerrar sesión</a></li>
+    </ul>
+</nav>
+
+
+<div class="right-panel">
+    <div class="compact-header">
+        <h4 style="color: white">📋 Asignación de Tareas</h4>
+    </div>
+
+    <div class="search-container">
+        <div class="row g-2 align-items-end">
+            <div class="col-6">
+                <label for="search-name" class="form-label small">Buscar:</label>
+                <input type="text" class="form-control form-control-sm" id="search-name" placeholder="Nombre...">
+            </div>
+            <div class="col-3">
+                <button class="btn btn-primary btn-sm w-100" id="btnSearch">🔍 Buscar</button>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-success btn-sm w-100" id="btnAll">👥 Todos</button>
+            </div>
+        </div>
+        <div class="row g-2 mt-1">
+            <div class="col-6">
+                <button class="btn btn-outline-secondary btn-sm w-100" id="btnClear">🗑️ Limpiar</button>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Usuarios: <span id="user-count" class="badge bg-primary badge-xs">0</span></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div id="loading" class="loading d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 small">Cargando...</p>
+        </div>
+        <div id="error-message" class="error-message d-none">
+            <h6>❌ Error</h6>
+            <p class="small" id="error-details"></p>
+            <button class="btn btn-outline-primary btn-sm" id="btnRetry">🔄 Reintentar</button>
+        </div>
+        <div id="no-data-message" class="text-center p-3 d-none">
+            <h6 class="text-muted">📭 Sin datos</h6>
+            <p class="small text-muted">No se encontraron usuarios.</p>
+        </div>
+        <div id="table-wrapper" class="d-none">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover compact-table">
+                    <thead class="table-dark">
+                    <tr>
+                        <th scope="col" style="width: 15%;">ID</th>
+                        <th scope="col" style="width: 40%;">Nombre</th>
+                        <th scope="col" style="width: 25%;">DNI</th>
+                        <th scope="col" style="width: 20%;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de ubicación -->
+<div class="modal-overlay-location" id="locationModal">
+    <div class="modal-content-location">
+        <h3>📍 Ubicación del empleado</h3>
+        <iframe id="mapFrame"
+                width="100%"
+                height="300"
+                style="border:0;"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+        <div class="modal-buttons">
+            <button class="modal-button close-button" id="closeLocationBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
