@@ -6,8 +6,12 @@ WORKDIR /app
 COPY AppAdminSIE_BE/*.csproj ./AppAdminSIE_BE/
 COPY AppAdminSIE_FE/*.csproj ./AppAdminSIE_FE/
 
-# Restaura las dependencias
+# Restaura las dependencias del backend
 WORKDIR /app/AppAdminSIE_BE
+RUN dotnet restore
+
+# Restaura las dependencias del frontend (si es necesario)
+WORKDIR /app/AppAdminSIE_FE  
 RUN dotnet restore
 
 # Copia todo el código fuente
