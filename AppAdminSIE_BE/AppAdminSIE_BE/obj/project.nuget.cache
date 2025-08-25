@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "uTkfHqZRaNQ=",
+  "dgSpecHash": "Lbvh2xv7nRY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
+  "projectFilePath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Gonza Sanchez\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.8\\microsoft.aspnetcore.authentication.jwtbearer.8.0.8.nupkg.sha512",
     "C:\\Users\\Gonza Sanchez\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj": {}
+    "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj": {
+    "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
+        "projectUniqueName": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
         "projectName": "AppAdminSIE_BE",
-        "projectPath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
+        "projectPath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\AppAdminSIE_BE.csproj",
         "packagesPath": "C:\\Users\\Gonza Sanchez\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\BackEnd\\AppAdminSIE_BE\\AppAdminSIE_BE\\obj\\",
+        "outputPath": "C:\\Users\\Gonza Sanchez\\Desktop\\AppAdministracionSIE\\AdministracionSIE\\AppAdminSIE_BE\\AppAdminSIE_BE\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
