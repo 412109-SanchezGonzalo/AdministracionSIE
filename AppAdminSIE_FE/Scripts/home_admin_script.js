@@ -268,78 +268,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 `;
 
                 const cell = tr.querySelector("td:last-child");
-                const ubicacion = usuario.ultimaUbicacion;
-                console.log(`📍 Ubicación de ${formatFullName(usuario)}:`, ubicacion);
-
-                // Solo mostrar botón si hay ubicación válida
-                if (ubicacion && ubicacion.lat && ubicacion.lon) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-outline-info btn-xs';
-                    btn.textContent = '📍';
-                    btn.title = 'Ver ubicación en mapa';
-
-                    btn.addEventListener('click', () => {
-                        showUserLocation(userId, ubicacion.lat, ubicacion.lon);
-                    });
-                    cell.appendChild(btn);
-                } else {
-                    // Si no hay ubicación, mostrar texto indicativo o celda vacía
-                    cell.innerHTML = '<span class="text-muted small">Sin Ubicación</span>';
-                }
-
-                tableBody.appendChild(tr);
             });
 
             showTable(querySnapshot.size);
 
-            // 🔥 Escuchar cambios en tiempo real
-            console.log('👂 Configurando listener en tiempo real...');
-            onSnapshot(collection(db, "usuarios"), (snapshot) => {
-                console.log('🔄 Cambio detectado en Firestore:', snapshot.docChanges().length, 'cambios');
-
-                snapshot.docChanges().forEach((change) => {
-                    console.log(`🔄 Tipo de cambio: ${change.type}, Doc: ${change.doc.id}`);
-
-                    if (change.type === "modified") {
-                        const userId = change.doc.id;
-                        const userData = change.doc.data();
-                        const row = document.getElementById(`row-${userId}`);
-
-                        console.log('🔄 Usuario modificado:', { userId, userData });
-
-                        if (row) {
-                            // Actualizar el nombre completo en la fila existente
-                            const nameCell = row.querySelector('td:nth-child(2) strong');
-                            if (nameCell) {
-                                nameCell.textContent = formatFullName(userData);
-                            }
-
-                            const cell = row.querySelector("td:last-child");
-                            cell.innerHTML = '';
-
-                            const ubicacion = userData.ultimaUbicacion;
-
-                            // Solo crear botón si hay ubicación válida
-                            if (ubicacion && ubicacion.lat && ubicacion.lon) {
-                                const btn = document.createElement('button');
-                                btn.className = 'btn btn-outline-info btn-xs';
-                                btn.textContent = '📍';
-                                btn.title = 'Ver ubicación en mapa';
-
-                                btn.addEventListener('click', () => {
-                                    showUserLocation(userId, ubicacion.lat, ubicacion.lon);
-                                });
-                                cell.appendChild(btn);
-                            } else {
-                                // Si no hay ubicación, mostrar guion
-                                cell.innerHTML = '<span class="text-muted small">-</span>';
-                            }
-                        }
-                    }
-                });
-            }, (error) => {
-                console.error('❌ Error en onSnapshot:', error);
-            });
 
         } catch (e) {
             console.error("❌ Error en loadAllUsers:", e);

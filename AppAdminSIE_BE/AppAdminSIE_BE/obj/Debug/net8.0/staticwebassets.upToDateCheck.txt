@@ -1,0 +1,10 @@
+wwwroot\Images\logo_SIE.png
+wwwroot\Images\menu.png
+wwwroot\Images\salida.png
+wwwroot\Pages\Login_page.html
+wwwroot\Scripts\firebase.js
+wwwroot\Scripts\home_admin_script.js
+wwwroot\Scripts\login_script.js
+wwwroot\Styles\login_styles.css
+wwwroot\Pages\Home_Admin_Page.html
+wwwroot\Styles\home_admin_styles.css

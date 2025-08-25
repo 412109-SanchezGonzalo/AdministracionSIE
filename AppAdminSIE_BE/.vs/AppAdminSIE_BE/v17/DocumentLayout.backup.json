@@ -18,7 +18,7 @@
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 256,
+      "VerticalTabListWidth": 100,
       "DocumentGroups": [
         {
           "DockedWidth": 200,
@@ -34,8 +34,7 @@
               "RelativeToolTip": "AppAdminSIE_BE\\Controllers\\SIEController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-25T15:12:33.208Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-25T15:12:33.208Z"
             },
             {
               "$type": "Document",
@@ -47,8 +46,7 @@
               "RelativeToolTip": "AppAdminSIE_BE\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-25T15:11:42.083Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-25T15:11:42.083Z"
             },
             {
               "$type": "Document",
