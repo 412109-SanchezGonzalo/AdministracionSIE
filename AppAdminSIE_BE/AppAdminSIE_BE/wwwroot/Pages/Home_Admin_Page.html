@@ -52,13 +52,24 @@
             <div class="col-6">
                 <button class="btn btn-outline-secondary btn-sm w-100" id="btnClear">🗑️ Limpiar</button>
             </div>
+
             <div class="col-6">
-                <small class="text-muted">Usuarios: <span id="user-count" class="badge bg-primary badge-xs">0</span></small>
-                <button class="btn-add-task" id="btnNewTask">
-                    ➕ Asignar Nueva Tarea
-                </button>
+                <!-- Texto Usuarios en la primera fila -->
+                <div class="w-100">
+                    <small class="text-muted">Usuarios:
+                        <span id="user-count" class="badge bg-primary badge-xs">0</span>
+                    </small>
+                </div>
+                <!-- Botón en la segunda fila, alineado a la derecha -->
+                <div class="d-flex justify-content-center mt-1">
+                    <button class="btn-add-task ms-5" id="btnNewTask">
+                        ➕ Asignar Nueva Tarea
+                    </button>
+                </div>
             </div>
         </div>
+
+
     </div>
 
     <div class="table-container">
