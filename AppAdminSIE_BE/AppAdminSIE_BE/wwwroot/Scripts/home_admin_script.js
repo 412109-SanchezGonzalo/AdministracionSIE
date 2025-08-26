@@ -142,53 +142,36 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Obtén una referencia al menú desplegable
     const dropdownMenu = document.querySelector('.dropdown-menu');
 
-    // Función para cargar las actividades
-    async function cargarActividades() {
-        console.log('Cargando actividades desde la API...');
-        try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const actividades = await response.json();
-            console.log('Actividades obtenidas:', actividades);
-
-            dropdownMenu.innerHTML = '';
-
-            if (actividades.length === 0) {
-                console.log('No se encontraron actividades.');
-                dropdownMenu.innerHTML = '<li><span class="dropdown-item-text">No hay actividades</span></li>';
-                return;
-            }
-
-            actividades.forEach(actividad => {
-                const listItem = document.createElement('li');
-                const link = document.createElement('a');
-                link.className = 'dropdown-item';
-                link.href = '#';
-
-                // ⚠️ Corrección aquí: Usar las propiedades correctas de la API
-                link.textContent = actividad.descripcion;
-                link.dataset.id = actividad.idActividad;
-
-                link.addEventListener('click', () => {
-                    // Puedes almacenar el ID en algún lugar o hacer algo con él
-                    console.log(`Actividad seleccionada: ${actividad.descripcion} (ID: ${actividad.idActividad})`);
-                    const activitySelected = document.getElementById('activitySelected');
-                    activitySelected.textContent = actividad.descripcion;
-                });
-
-                listItem.appendChild(link);
-                dropdownMenu.appendChild(listItem);
-            });
-
-        } catch (error) {
-            console.error('Error al cargar las actividades:', error);
-            dropdownMenu.innerHTML = '<li><span class="dropdown-item-text">Error al cargar</span></li>';
+   async function cargarActividades() {
+    console.log('Cargando actividades desde la API...');
+    try {
+        const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
+        console.log('URL completa:', url); // Debug
+        
+        const response = await fetch(url);
+        
+        console.log('Response object:', response); // Debug
+        console.log('Response status:', response.status); // Debug
+        console.log('Response statusText:', response.statusText); // Debug
+        console.log('Response ok:', response.ok); // Debug
+        
+        if (!response.ok) {
+            // Intenta leer el body del error
+            const errorText = await response.text();
+            console.error('Error response body:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}, body: ${errorText}`);
         }
+        
+        const actividades = await response.json();
+        console.log('Actividades obtenidas:', actividades);
+        
+        // ... resto del código igual
+        
+    } catch (error) {
+        console.error('Error completo:', error);
+        console.error('Error al cargar las actividades:', error);
     }
+}
 
 
     const closeNewTaskModalBtn = document.getElementById('closeNewTaskModalBtn');
