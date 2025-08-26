@@ -351,6 +351,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
 
+     btnNewTask.addEventListener('click', async () => {
+        if (empleadosSeleccionados.length === 0) {
+            alert("Por favor selecciona al menos un empleado.");
+            return;
+        }
+
+        // Pasar todos los seleccionados al modal
+        openModalNewTask(empleadosSeleccionados);
+    })
+
     if (searchNameInput) {
         searchNameInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') searchByName();
