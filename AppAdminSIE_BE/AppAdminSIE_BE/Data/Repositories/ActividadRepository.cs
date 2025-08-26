@@ -33,7 +33,7 @@ namespace JobOclock_BackEnd.Data.Repositories
             {
                 list.Add(new Actividad
                 {
-                    IdActividad = reader.GetInt32(reader.GetOrdinal("id_actividad")),
+                    IdActividad = reader.GetInt32(reader.GetOrdinal("id_servicio")),
                     Descripcion = reader.GetString(reader.GetOrdinal("descripcion")),
                 });
             }
