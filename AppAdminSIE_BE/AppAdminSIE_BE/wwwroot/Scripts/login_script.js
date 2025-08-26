@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const apiUrlLogin = '/api/SIE/Obtener-usuario-por-credenciales';
+        const apiUrlLogin = 'https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-credenciales';
 
         try {
             const response = await fetch(apiUrlLogin, {
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('admin_password', password);
                 localStorage.setItem('admin_token', data.token);
 
-                window.location.href = '/Pages/Home_Admin_Page.html';
+                window.location.href = 'https://administracionsie.onrender.com/Pages/Home_Admin_Page.html';
             } 
             else if (userRole === 'Usuario') {
                 // Guardar claves separadas para usuario
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('user_token', data.token);
                 localStorage.setItem('user_password', password); // 👈 cambie "password" por "user_password" para no mezclar
 
-                window.location.href = '/Pages/Home_User_Page.html';
+                window.location.href = 'https://administracionsie.onrender.com/Pages/Home_User_Page.html';
             } 
             else {
                 errorMessage.textContent = 'Rol desconocido. Contacte al administrador.';
