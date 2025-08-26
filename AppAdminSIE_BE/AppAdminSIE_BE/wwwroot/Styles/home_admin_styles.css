@@ -128,11 +128,12 @@
         color: #333;
     }
 
-    .btn-close{
-        align-items: end;
+    .modal-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
     }
-
-
 
     /*Barra De Navegacion*/
 .navbar {
