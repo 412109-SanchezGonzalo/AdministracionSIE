@@ -319,6 +319,24 @@
     }
 
 
+    .btn-add-task{
+        width: 23rem;
+        background-color: #dc6900;
+        color: white;
+        border-radius: 0.5rem;
+        border-color: #dc6900;
+        border-style: solid;
+        position: absolute;
+        right: 18rem;
+        top: 8.5rem;
+        font-size: 1rem;
+        font-family:  sans-serif;
+
+    }
+    .btn-add-task:hover{
+        background-color: #dc5700;
+    }
+
     /*Table Empleados*/
 
     .right-panel {
