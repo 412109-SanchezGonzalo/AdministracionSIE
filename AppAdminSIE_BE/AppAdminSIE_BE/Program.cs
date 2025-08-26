@@ -7,6 +7,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configura el servidor Kestrel para que escuche en el puerto de Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // 1️⃣ CORS
 builder.Services.AddCors(options =>
 {
@@ -58,13 +62,15 @@ builder.Services.AddDirectoryBrowser();
 var app = builder.Build();
 
 // 6️⃣ Pipeline
+// Mueve el middleware de Swagger fuera del bloque IsDevelopment
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Solo usa la redirección HTTPS en el entorno de desarrollo local
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.UseHttpsRedirection();
 }
-
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
