@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando admin_home.js...');
     console.log('🔥 Firebase DB objeto:', db);
 
+    // 🔹 Array global para guardar seleccionados
+    let empleadosSeleccionados = [];
+
     const navbarToggle = document.querySelector('.navbar-toggle');
     const navbarMenu = document.querySelector('.navbar-menu');
     const saludoSpan = document.querySelector('.navbar-saludo');
@@ -31,6 +34,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnAll = document.getElementById('btnAll');
     const btnClear = document.getElementById('btnClear');
     const btnRetry = document.getElementById('btnRetry');
+    const btnNewTask = document.getElementById('btnNewTask');
+
+    btnNewTask.style.disabled = true;
 
     // 🔍 VERIFICAR ELEMENTOS HTML
     console.log('📋 Elementos encontrados:', {
@@ -232,17 +238,28 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 const cell = tr.querySelector('td:last-child');
 
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-outline-info btn-xs';
-                btn.textContent = '➕';
-                btn.title = 'Asignar nueva tarea';
+                const check = document.createElement('input');
+                check.type = 'checkbox';
+                check.className = 'form-check-input';
+                check.title = 'Seleccionar empleado';
 
-                // ⚠️ Aquí el cambio en el event listener
-                btn.addEventListener('click', () => {
+                // ⚠️ Ahora el listener se ejecuta al marcar/desmarcar
+                check.addEventListener('change', () => {
                     const nombreCompleto = formatFullName(usuario);
-                    openModalNewTask(nombreCompleto);
-                });
 
+                    if (check.checked) {
+                        // Agregar si está marcado
+                        empleadosSeleccionados.push(nombreCompleto);
+                    } else {
+                        // Quitar si se desmarca
+                        empleadosSeleccionados = empleadosSeleccionados.filter(
+                            emp => emp !== nombreCompleto
+                        );
+                    }
+
+                    console.log("Seleccionados:", empleadosSeleccionados);
+                });
+                
                 cell.appendChild(btn);
                 tableBody.appendChild(tr);
 
@@ -293,15 +310,26 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 const cell = tr.querySelector("td:last-child");
 
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-outline-info btn-xs';
-                btn.textContent = '➕';
-                btn.title = 'Asignar nueva tarea';
+                const check = document.createElement('input');
+                check.type = 'checkbox';
+                check.className = 'form-check-input';
+                check.title = 'Seleccionar empleado';
 
-                // ⚠️ Aquí el cambio en el event listener
-                btn.addEventListener('click', () => {
+                // ⚠️ Ahora el listener se ejecuta al marcar/desmarcar
+                check.addEventListener('change', () => {
                     const nombreCompleto = formatFullName(usuario);
-                    openModalNewTask(nombreCompleto);
+
+                    if (check.checked) {
+                        // Agregar si está marcado
+                        empleadosSeleccionados.push(nombreCompleto);
+                    } else {
+                        // Quitar si se desmarca
+                        empleadosSeleccionados = empleadosSeleccionados.filter(
+                            emp => emp !== nombreCompleto
+                        );
+                    }
+
+                    console.log("Seleccionados:", empleadosSeleccionados);
                 });
 
                 cell.appendChild(btn);
