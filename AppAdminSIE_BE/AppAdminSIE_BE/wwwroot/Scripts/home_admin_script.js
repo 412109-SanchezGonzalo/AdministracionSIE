@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 🔹 Array global para guardar seleccionados
     let empleadosSeleccionados = [];
+    // 🔹 Variable global para almacenar actividades
+    let actividadesDisponibles = [];
 
     const navbarToggle = document.querySelector('.navbar-toggle');
     const navbarMenu = document.querySelector('.navbar-menu');
@@ -130,86 +132,150 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 🔹 Función para abrir el modal de nueva tarea
-    function openModalNewTask(nombreEmpleado) {
-        const modalNewTask = document.getElementById('modal-NewTask');
-        const inputUserName = document.getElementById('userName'); // ⚠️ Asegúrate de que este ID sea correcto
-
-        // Rellena el input con el nombre del empleado
-        inputUserName.value = nombreEmpleado;
-        inputUserName.disabled = true;
-        // Muestra el modal
-        modalNewTask.style.display = 'flex';
-
-        // Carga las actividades en el dropdown
-        cargarActividades();
-    }
-    function llenarDropdownActividades(actividades) {
-    const dropdown = document.getElementById('actividadDropdown'); // ID de tu dropdown
+   // 🔹 Función para llenar el dropdown de actividades
+function llenarDropdownActividades(actividades) {
+    console.log('🔄 Llenando dropdown con actividades:', actividades);
     
-    // Limpiar opciones
+    // Buscar el dropdown menu (ul) dentro del modal
+    const dropdown = document.querySelector('#modal-NewTask .dropdown-menu');
+    
+    if (!dropdown) {
+        console.error('❌ No se encontró el dropdown de actividades');
+        console.log('🔍 Elementos disponibles:', {
+            modal: document.getElementById('modal-NewTask'),
+            dropdownMenu: document.querySelector('.dropdown-menu'),
+            allDropdowns: document.querySelectorAll('.dropdown-menu')
+        });
+        return;
+    }
+    
+    console.log('✅ Dropdown encontrado:', dropdown);
+    
+    // Limpiar opciones existentes
     dropdown.innerHTML = '';
     
-    // Opción por defecto
-    const defaultOption = document.createElement('button');
-    defaultOption.className = 'dropdown-item';
-    defaultOption.textContent = 'Seleccione una actividad';
-    defaultOption.setAttribute('data-value', '');
-    dropdown.appendChild(defaultOption);
-    
-    // Agregar actividades
-    actividades.forEach(actividad => {
-        const item = document.createElement('button');
-        item.className = 'dropdown-item';
-        item.textContent = actividad.descripcion;
-        item.setAttribute('data-value', actividad.id);
-        item.onclick = () => seleccionarActividad(actividad.id, actividad.descripcion);
-        dropdown.appendChild(item);
+    // Agregar actividades como <li> con <button> dentro
+    actividades.forEach((actividad, index) => {
+        console.log(`➕ Agregando actividad ${index + 1}:`, actividad);
+        
+        // Crear li
+        const li = document.createElement('li');
+        
+        // Crear button dentro del li
+        const button = document.createElement('button');
+        button.className = 'dropdown-item';
+        button.type = 'button';
+        button.textContent = actividad.descripcion;
+        button.setAttribute('data-value', actividad.id);
+        
+        button.addEventListener('click', () => {
+            seleccionarActividad(actividad.id, actividad.descripcion);
+        });
+        
+        li.appendChild(button);
+        dropdown.appendChild(li);
     });
+    
+    console.log('✅ Dropdown poblado exitosamente con', actividades.length, 'actividades');
 }
 
+// 🔹 Función para seleccionar una actividad
 function seleccionarActividad(id, descripcion) {
-    const botonDropdown = document.querySelector('.dropdown-toggle');
-    botonDropdown.textContent = descripcion;
-    botonDropdown.setAttribute('data-selected', id);
+    console.log('🎯 Actividad seleccionada:', { id, descripcion });
+    
+    // Buscar el botón del dropdown específico del modal
+    const botonDropdown = document.querySelector('#modal-NewTask .dropdown-toggle');
+    
+    if (botonDropdown) {
+        botonDropdown.textContent = descripcion;
+        botonDropdown.setAttribute('data-selected', id);
+        console.log('✅ Botón dropdown actualizado');
+        
+        // Cerrar el dropdown después de seleccionar
+        const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+        if (dropdown) {
+            dropdown.hide();
+        }
+    } else {
+        console.error('❌ No se encontró el botón dropdown');
+        console.log('🔍 Botones disponibles:', {
+            allDropdownToggles: document.querySelectorAll('.dropdown-toggle'),
+            modalDropdownToggle: document.querySelector('#modal-NewTask .dropdown-toggle'),
+            activitySelected: document.getElementById('activitySelected')
+        });
+    }
 }
 
-    // Obtén una referencia al menú desplegable
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-
-  async function cargarActividades() {
-    console.log('Cargando actividades desde la API...');
+// 🔹 Función para cargar actividades desde la API
+async function cargarActividades() {
+    console.log('🔄 Cargando actividades desde la API...');
+    
     try {
         const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
-        console.log('URL completa:', url);
+        console.log('📡 URL completa:', url);
         
         const response = await fetch(url);
         
-        console.log('Response object:', response);
-        console.log('Response status:', response.status);
-        console.log('Response statusText:', response.statusText);
-        console.log('Response ok:', response.ok);
+        console.log('📊 Response status:', response.status);
+        console.log('📊 Response ok:', response.ok);
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Error response body:', errorText);
-            throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}, body: ${errorText}`);
+            console.error('❌ Error response body:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const actividades = await response.json();
-        console.log('Actividades obtenidas:', actividades);
+        console.log('✅ Actividades obtenidas:', actividades);
         
-        // ✅ AQUÍ ES DONDE FALTABA EL CÓDIGO
-        // Guardar las actividades
+        // Verificar que sea un array
+        if (!Array.isArray(actividades)) {
+            console.error('❌ Las actividades no son un array:', typeof actividades);
+            throw new Error('Formato de actividades inválido');
+        }
+        
+        // Guardar las actividades globalmente
         actividadesDisponibles = actividades;
         
-        // Llenar el dropdown
-        llenarDropdownActividades(actividades);
+        // Esperar un poco para que el DOM esté listo
+        setTimeout(() => {
+            llenarDropdownActividades(actividades);
+        }, 100);
         
     } catch (error) {
-        console.error('Error completo:', error);
-        console.error('Error al cargar las actividades:', error);
+        console.error('❌ Error al cargar actividades:', error);
+        alert('Error al cargar actividades: ' + error.message);
     }
+}
+
+// 🔹 Función mejorada para abrir el modal
+function openModalNewTask(nombreEmpleado) {
+    console.log('🔓 Abriendo modal para:', nombreEmpleado);
+    
+    const modalNewTask = document.getElementById('modal-NewTask');
+    const inputUserName = document.getElementById('userName');
+
+    if (!modalNewTask) {
+        console.error('❌ Modal no encontrado');
+        return;
+    }
+
+    if (!inputUserName) {
+        console.error('❌ Input userName no encontrado');
+        return;
+    }
+
+    // Rellena el input con el nombre del empleado
+    inputUserName.value = Array.isArray(nombreEmpleado) ? nombreEmpleado.join(', ') : nombreEmpleado;
+    inputUserName.disabled = true;
+    
+    // Muestra el modal
+    modalNewTask.style.display = 'flex';
+    
+    // Carga las actividades después de mostrar el modal
+    setTimeout(() => {
+        cargarActividades();
+    }, 200);
 }
 
     
