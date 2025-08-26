@@ -1,4 +1,4 @@
-﻿using JobOclock_BackEnd.Data.Interfaces;
+using JobOclock_BackEnd.Data.Interfaces;
 using JobOclock_BackEnd.Data.Repositories;
 using JobOclock_BackEnd.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -62,15 +62,16 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 // 🌐 Servir archivos estáticos desde wwwroot
-app.UseDefaultFiles();   // sirve automáticamente index.html si está en wwwroot
+app.UseDefaultFiles();    // sirve automáticamente index.html si está en wwwroot
 app.UseStaticFiles();    // habilita wwwroot
 
 // 👉 Fallback: si no encuentra ruta, devuelve el index.html de Pages
