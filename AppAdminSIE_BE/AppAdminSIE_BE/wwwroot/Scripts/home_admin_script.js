@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const password = localStorage.getItem('admin_password');
         console.log('🔐 Admin password:', password);
 
-        const response = await fetch('/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
+        const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(password)
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Menú hamburguesa
     navbarToggle.addEventListener('click', () => {
-        window.location.href = "/Pages/Login_page.html";
+        window.location.href = "https://administracionsie.onrender.com/Pages/Login_page.html";
     });
 
     // 📌 Funciones de UI
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function cargarActividades() {
         console.log('Cargando actividades desde la API...');
         try {
-            const response = await fetch('/api/SIE/Obtener-todas-las-actividades');
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
