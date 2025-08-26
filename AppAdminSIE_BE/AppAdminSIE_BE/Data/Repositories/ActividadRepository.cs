@@ -26,7 +26,7 @@ namespace JobOclock_BackEnd.Data.Repositories
         {
             var list = new List<Actividad>();
             using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand("SELECT * FROM Actividad", conn);
+            using var cmd = new MySqlCommand("SELECT * FROM Servicio", conn);
             conn.Open();
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
