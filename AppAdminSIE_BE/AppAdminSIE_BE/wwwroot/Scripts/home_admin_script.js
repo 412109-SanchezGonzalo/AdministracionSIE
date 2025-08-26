@@ -283,9 +283,21 @@ function openModalNewTask(nombreEmpleado) {
     // Cerrar modal
     if (closeNewTaskModalBtn) {
         closeNewTaskModalBtn.addEventListener('click', () => {
-            empleadosSeleccionados= [];
-            document.getElementById('modal-NewTask').style.display = "none";
+            console.log('🔄 Desmarcando todos los usuarios...');
+    
+        // Buscar todos los checkboxes en la tabla
+        const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
+        
+        // Desmarcar cada checkbox
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                checkbox.checked = false;
+                console.log('✅ Usuario desmarcado');
+            }
         });
+        empleadosSeleccionados= [];
+        document.getElementById('modal-NewTask').style.display = "none";
+    });
     }
 
     // Cerrar modal al hacer clic fuera del contenido
