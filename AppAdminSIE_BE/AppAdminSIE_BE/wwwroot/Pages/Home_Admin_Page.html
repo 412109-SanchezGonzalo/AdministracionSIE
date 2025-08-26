@@ -63,7 +63,7 @@
                 <!-- Botón en la segunda fila, alineado a la derecha -->
                 <div class="d-flex justify-content-center mt-1">
                     <button class="btn-add-task ms-5" id="btnNewTask">
-                        ➕ Asignar Nueva Tarea
+                        Asignar Nueva Tarea
                     </button>
                 </div>
             </div>
@@ -109,10 +109,11 @@
 <!-- Modal de Nueva Tarea Asignada -->
 <div class="modal-overlay-newTask" id="modal-NewTask">
     <div class="modal-content-location">
-        <button type="button" class="btn-close" id="closeNewTaskModalBtn" aria-label="Close"></button>
-
+        <div class="modal-header-container">
+            <h2>📌 Asignar Nueva Tarea</h2>
+            <button type="button" class="btn-close" id="closeNewTaskModalBtn" aria-label="Close"></button>
+        </div>
         <form>
-            <h2>➕ Asignar Nueva Tarea</h2>
             <div class="mb-3">
                 <label for="userName" class="form-label">Empleado/s</label>
                 <input type="input" class="form-control" id="userName" aria-describedby="username">
@@ -125,7 +126,23 @@
                     </ul>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="mb-3">
+                <label for="menuEdificios" class="form-label">Edificio</label>
+                <div class="input-group mb-3" id="menuEdificios">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelected">Seleccione un edificio</button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="dateActivity" class="form-label d-block">Fecha de Actividad</label>
+                <input type="date" class="form-control-sm" id="dateActivity">
+            </div>
+            <div class="mb-3">
+                <label for="comments" class="form-label">Observaciones</label>
+                <textarea class="form-control" id="comments" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="background-color: #2e7700">Confirmar</button>
         </form>
     </div>
 </div>
