@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     console.log("Seleccionados:", empleadosSeleccionados);
                 });
                 
-                cell.appendChild(btn);
+                cell.appendChild(check);
                 tableBody.appendChild(tr);
 
             });
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     console.log("Seleccionados:", empleadosSeleccionados);
                 });
 
-                cell.appendChild(btn);
+                cell.appendChild(check);
                 tableBody.appendChild(tr);
             });
 
