@@ -34,7 +34,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                 list.Add(new Actividad
                 {
                     IdActividad = reader.GetInt32(reader.GetOrdinal("id_actividad")),
-                    Descripcion = reader.GetString(reader.GetOrdinal("tipo_actividad")),
+                    Descripcion = reader.GetString(reader.GetOrdinal("descripcion")),
                 });
             }
             return list;
