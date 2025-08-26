@@ -283,6 +283,7 @@ function openModalNewTask(nombreEmpleado) {
     // Cerrar modal
     if (closeNewTaskModalBtn) {
         closeNewTaskModalBtn.addEventListener('click', () => {
+            empleadosSeleccionados= [];
             document.getElementById('modal-NewTask').style.display = "none";
         });
     }
