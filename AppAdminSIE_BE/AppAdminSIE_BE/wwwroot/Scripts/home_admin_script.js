@@ -144,25 +144,53 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Carga las actividades en el dropdown
         cargarActividades();
     }
+    function llenarDropdownActividades(actividades) {
+    const dropdown = document.getElementById('actividadDropdown'); // ID de tu dropdown
+    
+    // Limpiar opciones
+    dropdown.innerHTML = '';
+    
+    // Opción por defecto
+    const defaultOption = document.createElement('button');
+    defaultOption.className = 'dropdown-item';
+    defaultOption.textContent = 'Seleccione una actividad';
+    defaultOption.setAttribute('data-value', '');
+    dropdown.appendChild(defaultOption);
+    
+    // Agregar actividades
+    actividades.forEach(actividad => {
+        const item = document.createElement('button');
+        item.className = 'dropdown-item';
+        item.textContent = actividad.descripcion;
+        item.setAttribute('data-value', actividad.id);
+        item.onclick = () => seleccionarActividad(actividad.id, actividad.descripcion);
+        dropdown.appendChild(item);
+    });
+}
+
+function seleccionarActividad(id, descripcion) {
+    const botonDropdown = document.querySelector('.dropdown-toggle');
+    botonDropdown.textContent = descripcion;
+    botonDropdown.setAttribute('data-selected', id);
+}
 
     // Obtén una referencia al menú desplegable
     const dropdownMenu = document.querySelector('.dropdown-menu');
 
-   async function cargarActividades() {
+  async function cargarActividades() {
     console.log('Cargando actividades desde la API...');
     try {
         const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
-        console.log('URL completa:', url); // Debug
+        console.log('URL completa:', url);
         
         const response = await fetch(url);
         
-        console.log('Response object:', response); // Debug
-        console.log('Response status:', response.status); // Debug
-        console.log('Response statusText:', response.statusText); // Debug
-        console.log('Response ok:', response.ok); // Debug
+        console.log('Response object:', response);
+        console.log('Response status:', response.status);
+        console.log('Response statusText:', response.statusText);
+        console.log('Response ok:', response.ok);
         
         if (!response.ok) {
-            // Intenta leer el body del error
             const errorText = await response.text();
             console.error('Error response body:', errorText);
             throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}, body: ${errorText}`);
@@ -171,7 +199,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         const actividades = await response.json();
         console.log('Actividades obtenidas:', actividades);
         
-        // ... resto del código igual
+        // ✅ AQUÍ ES DONDE FALTABA EL CÓDIGO
+        // Guardar las actividades
+        actividadesDisponibles = actividades;
+        
+        // Llenar el dropdown
+        llenarDropdownActividades(actividades);
         
     } catch (error) {
         console.error('Error completo:', error);
@@ -179,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 }
 
-
+    
     const closeNewTaskModalBtn = document.getElementById('closeNewTaskModalBtn');
     // Cerrar modal
     if (closeNewTaskModalBtn) {
