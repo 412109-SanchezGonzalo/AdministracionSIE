@@ -8,6 +8,9 @@ namespace JobOclock_BackEnd.Services
         IEnumerable<Actividad> GetAll();
         void AddActividad(string tipo);
 
+        // EDIFICIO
+        IEnumerable<Edificio> GetAllEdificios();
+
         // FOTO REGISTRO 
         IEnumerable<FotoRegistro> GetFotoRegistroByRegistro(int idRegistro);
         void AddFotoRegistro(FotoRegistro foto);
