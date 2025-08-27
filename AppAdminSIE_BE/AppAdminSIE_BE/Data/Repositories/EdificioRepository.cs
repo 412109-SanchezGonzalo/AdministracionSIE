@@ -26,11 +26,11 @@ namespace AppAdminSIE_BE.Data.Repositories
                     Id_Edificio = reader.GetInt32(reader.GetOrdinal("id_edificio")),
                     Nombre = reader.GetString(reader.GetOrdinal("nombre")),
                     Calle = reader.GetString(reader.GetOrdinal("calle")),
-                    Numeracion = reader.GetString(reader.GetOrdinal("numeracion")),
-                    Observaciones = reader.GetString(reader.GetOrdinal("observaciones"))
+                    Numeracion = reader.GetString(reader.GetOrdinal("numeracion"))
                 });
             }
             return list;
         }
     }
 }
+
