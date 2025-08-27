@@ -11,7 +11,8 @@ namespace JobOclock_BackEnd.Services
         private readonly IRegistroRepository _registroRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IUsuarioXActividadRepository _usuarioXActividadRepository;
-        public ServicesSIE(IActividadRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXActividadRepository usuarioXActividadRepository)
+        private readonly IEdificioRepository _edificioRepository;
+        public ServicesSIE(IActividadRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXActividadRepository usuarioXActividadRepository,IEdificioRepository edificioRepository)
         {
             _actividadRepository = actividadRepository;
             _fotoRegistroRepository = fotoRegistroRepository;
@@ -19,8 +20,9 @@ namespace JobOclock_BackEnd.Services
             _registroRepository = registroRepository;
             _usuarioRepository = ussuarioRepository;
             _usuarioXActividadRepository = usuarioXActividadRepository;
+            _edificioRepository = edificioRepository;
         }
-
+        
         // ACTIVIDAD
         public IEnumerable<Actividad> GetAll()
         {
@@ -29,6 +31,13 @@ namespace JobOclock_BackEnd.Services
         public void AddActividad(string tipo)
         {
             _actividadRepository.Add(tipo);
+        }
+        
+        
+        // EDIFICIO
+        public IEnumerable<Edificio> GetAllEdificios()
+        {
+            return _edificioRepository.GetAllEdificios();
         }
 
         // FOTO REGISTRO
