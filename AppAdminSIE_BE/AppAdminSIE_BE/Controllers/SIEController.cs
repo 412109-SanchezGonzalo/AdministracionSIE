@@ -37,7 +37,6 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest("Sin Actividades"); }
         }
 
-
         [HttpPost("Crear-actividad")]
         public ActionResult Post([FromQuery] string tipo)
         {
@@ -49,6 +48,20 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest("Ocurrio un error al crear una actividad: " + ex.Message); }
         }
 
+
+        // EDIFICIO
+
+         [HttpGet("Obtener-todos-los-edificios")]
+         public ActionResult<IEnumerable<string>> GetAllEdificios()
+         {
+             try
+             {
+                 return Ok(_service.GetAllEdificios());
+             }
+             catch (Exception ex) { return BadRequest("Sin Edificios"); }
+         }
+
+         
         // FOTO REGISTRO
 
         // POSICION USUARIO
