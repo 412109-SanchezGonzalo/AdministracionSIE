@@ -1,3 +1,5 @@
+using AppAdminSIE_BE.Data.Interfaces;
+using AppAdminSIE_BE.Data.Repositories;
 using JobOclock_BackEnd.Data.Interfaces;
 using JobOclock_BackEnd.Data.Repositories;
 using JobOclock_BackEnd.Services;
@@ -6,10 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Configura el servidor Kestrel para que escuche en el puerto de Render
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-builder.WebHost.UseUrls($"http://*:{port}");
 
 // 1️⃣ CORS
 builder.Services.AddCors(options =>
@@ -31,6 +29,7 @@ builder.Services.AddScoped<IPosicionUsuarioRepository>(_ => new PosicionUsuarioR
 builder.Services.AddScoped<IRegistroRepository>(_ => new RegistroRepository(connStr));
 builder.Services.AddScoped<IUsuarioRepository>(_ => new UsuarioRepository(connStr));
 builder.Services.AddScoped<IUsuarioXActividadRepository>(_ => new UsuarioXActividadRepository(connStr));
+builder.Services.AddScoped<IEdificioRepository>(_ => new EdificioRepository(connStr));
 
 // 3️⃣ Autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -62,22 +61,19 @@ builder.Services.AddDirectoryBrowser();
 var app = builder.Build();
 
 // 6️⃣ Pipeline
-// Mueve el middleware de Swagger fuera del bloque IsDevelopment
-app.UseSwagger();
-app.UseSwaggerUI();
-
-// Solo usa la redirección HTTPS en el entorno de desarrollo local
 if (app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 // 🌐 Servir archivos estáticos desde wwwroot
-app.UseDefaultFiles();    // sirve automáticamente index.html si está en wwwroot
+app.UseDefaultFiles();   // sirve automáticamente index.html si está en wwwroot
 app.UseStaticFiles();    // habilita wwwroot
 
 // 👉 Fallback: si no encuentra ruta, devuelve el index.html de Pages
