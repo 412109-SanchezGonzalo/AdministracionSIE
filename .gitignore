@@ -1,0 +1,41 @@
+# ---- .NET / Visual Studio ----
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+
+# Cache
+*.cache
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pdb
+
+# ---- Rider / JetBrains IDE ----
+.idea/
+*.iml
+.vcs/
+workspace.xml
+
+# ---- Frontend (si usás Node/NPM) ----
+node_modules/
+dist/
+build/
+
+# ---- Configs locales ----
+appsettings.Development.json
+*.local.json
+
+# ---- Sistema operativo ----
+.DS_Store
+Thumbs.db
+
+# ---- Archivos de Git ----
+*.orig
