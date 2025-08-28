@@ -16,8 +16,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 🔹 Array global para guardar seleccionados
     let empleadosSeleccionados = [];
-    // 🔹 Variable global para almacenar actividades
+    // 🔹 Array global para almacenar actividades
     let actividadesDisponibles = [];
+    // 🔹 Array global para almacenar edificios
+    let edificiosDisponibles = [];
 
     const navbarToggle = document.querySelector('.navbar-toggle');
     const navbarMenu = document.querySelector('.navbar-menu');
@@ -132,172 +134,291 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-   // 🔹 Función para llenar el dropdown de actividades
-function llenarDropdownActividades(actividades) {
-    console.log('🔄 Llenando dropdown con actividades:', actividades);
-    
-    // Buscar el dropdown menu (ul) dentro del modal
-    const dropdown = document.querySelector('#modal-NewTask .dropdown-menu');
-    
-    if (!dropdown) {
-        console.error('❌ No se encontró el dropdown de actividades');
-        console.log('🔍 Elementos disponibles:', {
-            modal: document.getElementById('modal-NewTask'),
-            dropdownMenu: document.querySelector('.dropdown-menu'),
-            allDropdowns: document.querySelectorAll('.dropdown-menu')
-        });
-        return;
-    }
-    
-    console.log('✅ Dropdown encontrado:', dropdown);
-    
-    // Limpiar opciones existentes
-    dropdown.innerHTML = '';
-    
-    // Agregar actividades como <li> con <button> dentro
-    actividades.forEach((actividad, index) => {
-        console.log(`➕ Agregando actividad ${index + 1}:`, actividad);
-        
-        // Crear li
-        const li = document.createElement('li');
-        
-        // Crear button dentro del li
-        const button = document.createElement('button');
-        button.className = 'dropdown-item';
-        button.type = 'button';
-        button.textContent = actividad.descripcion;
-        button.setAttribute('data-value', actividad.id);
-        
-        button.addEventListener('click', () => {
-            seleccionarActividad(actividad.id, actividad.descripcion);
-        });
-        
-        li.appendChild(button);
-        dropdown.appendChild(li);
-    });
-    
-    console.log('✅ Dropdown poblado exitosamente con', actividades.length, 'actividades');
-}
+    // 🔹 Función corregida para llenar el dropdown de actividades
+    function llenarDropdownActividades(actividades) {
+        console.log('🔄 Llenando dropdown con actividades:', actividades);
 
-// 🔹 Función para seleccionar una actividad
-function seleccionarActividad(id, descripcion) {
-    console.log('🎯 Actividad seleccionada:', { id, descripcion });
-    
-    // Buscar el botón del dropdown específico del modal
-    const botonDropdown = document.querySelector('#modal-NewTask .dropdown-toggle');
-    
-    if (botonDropdown) {
-        botonDropdown.textContent = descripcion;
-        botonDropdown.setAttribute('data-selected', id);
-        console.log('✅ Botón dropdown actualizado');
-        
-        // Cerrar el dropdown después de seleccionar
-        const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
-        if (dropdown) {
-            dropdown.hide();
-        }
-    } else {
-        console.error('❌ No se encontró el botón dropdown');
-        console.log('🔍 Botones disponibles:', {
-            allDropdownToggles: document.querySelectorAll('.dropdown-toggle'),
-            modalDropdownToggle: document.querySelector('#modal-NewTask .dropdown-toggle'),
-            activitySelected: document.getElementById('activitySelected')
-        });
-    }
-}
+        // CORREGIDO: Buscar específicamente el dropdown de actividades
+        const dropdown = document.querySelector('#menuActividades .dropdown-menu');
 
-// 🔹 Función para cargar actividades desde la API
-async function cargarActividades() {
-    console.log('🔄 Cargando actividades desde la API...');
-    
-    try {
-        const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
-        console.log('📡 URL completa:', url);
-        
-        const response = await fetch(url);
-        
-        console.log('📊 Response status:', response.status);
-        console.log('📊 Response ok:', response.ok);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Error response body:', errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!dropdown) {
+            console.error('❌ No se encontró el dropdown de actividades');
+            console.log('🔍 Elementos disponibles:', {
+                modal: document.getElementById('modal-NewTask'),
+                menuActividades: document.getElementById('menuActividades'),
+                dropdownMenu: document.querySelector('#menuActividades .dropdown-menu')
+            });
+            return;
         }
-        
-        const actividades = await response.json();
-        console.log('✅ Actividades obtenidas:', actividades);
-        
-        // Verificar que sea un array
-        if (!Array.isArray(actividades)) {
-            console.error('❌ Las actividades no son un array:', typeof actividades);
-            throw new Error('Formato de actividades inválido');
+
+        console.log('✅ Dropdown de actividades encontrado:', dropdown);
+
+        // Limpiar opciones existentes
+        dropdown.innerHTML = '';
+
+        // Agregar actividades como <li> con <button> dentro
+        actividades.forEach((actividad, index) => {
+            console.log(`➕ Agregando actividad ${index + 1}:`, actividad);
+
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.className = 'dropdown-item';
+            button.type = 'button';
+            button.textContent = actividad.descripcion;
+            button.setAttribute('data-value', actividad.id);
+
+            button.addEventListener('click', () => {
+                seleccionarActividad(actividad.id, actividad.descripcion);
+            });
+
+            li.appendChild(button);
+            dropdown.appendChild(li);
+        });
+
+        console.log('✅ Dropdown de actividades poblado exitosamente con', actividades.length, 'actividades');
+    }
+
+// 🔹 Función corregida para seleccionar una actividad
+    function seleccionarActividad(id, descripcion) {
+        console.log('🎯 Actividad seleccionada:', { id, descripcion });
+
+        // CORREGIDO: Buscar específicamente el botón de actividades
+        const botonDropdown = document.getElementById('activitySelected');
+
+        if (botonDropdown) {
+            botonDropdown.textContent = descripcion;
+            botonDropdown.setAttribute('data-selected', id);
+            console.log('✅ Botón dropdown de actividades actualizado');
+
+            // Cerrar el dropdown después de seleccionar
+            try {
+                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+                if (dropdown) {
+                    dropdown.hide();
+                }
+            } catch (e) {
+                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
+            }
+        } else {
+            console.error('❌ No se encontró el botón activitySelected');
         }
-        
-        // Guardar las actividades globalmente
-        actividadesDisponibles = actividades;
-        
-        // Esperar un poco para que el DOM esté listo
-        setTimeout(() => {
+    }
+
+    // 🔹 Función corregida para llenar el dropdown de edificios
+    function llenarDropdownEdificios(edificios) {
+        console.log('🔄 Llenando dropdown con edificios:', edificios);
+
+        // CORREGIDO: Buscar específicamente el dropdown de edificios
+        const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
+
+        if (!dropdown) {
+            console.error('❌ No se encontró el dropdown de edificios');
+            console.log('🔍 Elementos disponibles:', {
+                modal: document.getElementById('modal-NewTask'),
+                menuEdificios: document.getElementById('menuEdificios'),
+                dropdownMenu: document.querySelector('#menuEdificios .dropdown-menu')
+            });
+            return;
+        }
+
+        console.log('✅ Dropdown de edificios encontrado:', dropdown);
+
+        // Limpiar opciones existentes
+        dropdown.innerHTML = '';
+
+        // Agregar edificios como <li> con <button> dentro
+        edificios.forEach((edificio, index) => {
+            console.log(`➕ Agregando edificio ${index + 1}:`, edificio);
+
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.className = 'dropdown-item';
+            button.type = 'button';
+            button.textContent = edificio.nombre;
+            button.setAttribute('data-value', edificio.id);
+
+            button.addEventListener('click', () => {
+                seleccionarEdificio(edificio.id, edificio.nombre);
+            });
+
+            li.appendChild(button);
+            dropdown.appendChild(li);
+        });
+
+        console.log('✅ Dropdown de edificios poblado exitosamente con', edificios.length, 'edificios');
+    }
+
+// 🔹 Función corregida para seleccionar un edificio
+    function seleccionarEdificio(id, nombre) {
+        console.log('🎯 Edificio seleccionado:', { id, nombre });
+
+        // CORREGIDO: Buscar específicamente el botón de edificios
+        const botonDropdown = document.getElementById('edificioSelected');
+
+        if (botonDropdown) {
+            botonDropdown.textContent = nombre;
+            botonDropdown.setAttribute('data-selected', id);
+            console.log('✅ Botón dropdown de edificios actualizado');
+
+            // Cerrar el dropdown después de seleccionar
+            try {
+                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+                if (dropdown) {
+                    dropdown.hide();
+                }
+            } catch (e) {
+                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
+            }
+        } else {
+            console.error('❌ No se encontró el botón edificioSelected');
+        }
+    }
+
+    // 🔹 Función corregida para cargar actividades desde la API
+    async function cargarActividades() {
+        console.log('🔄 Cargando actividades desde la API...');
+
+        try {
+            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
+            console.log('📡 URL completa:', url);
+
+            const response = await fetch(url);
+
+            console.log('📊 Response status:', response.status);
+            console.log('📊 Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const actividades = await response.json();
+            console.log('✅ Actividades obtenidas:', actividades);
+
+            // Verificar que sea un array
+            if (!Array.isArray(actividades)) {
+                console.error('❌ Las actividades no son un array:', typeof actividades);
+                throw new Error('Formato de actividades inválido');
+            }
+
+            // Guardar las actividades globalmente
+            actividadesDisponibles = actividades;
+
+            // Llenar el dropdown inmediatamente
             llenarDropdownActividades(actividades);
-        }, 100);
-        
-    } catch (error) {
-        console.error('❌ Error al cargar actividades:', error);
-        alert('Error al cargar actividades: ' + error.message);
+
+        } catch (error) {
+            console.error('❌ Error al cargar actividades:', error);
+            alert('Error al cargar actividades: ' + error.message);
+        }
     }
-}
+
+// 🔹 Función corregida para cargar edificios desde la API
+    async function cargarEdificios() {
+        console.log('🔄 Cargando edificios desde la API...');
+
+        try {
+            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios';
+            console.log('📡 URL completa:', url);
+
+            const response = await fetch(url);
+
+            console.log('📊 Response status:', response.status);
+            console.log('📊 Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const edificios = await response.json();
+            console.log('✅ Edificios obtenidos:', edificios);
+
+            // Verificar que sea un array
+            if (!Array.isArray(edificios)) {
+                console.error('❌ Los edificios no son un array:', typeof edificios);
+                throw new Error('Formato de edificios inválido');
+            }
+
+            // Guardar los edificios globalmente
+            edificiosDisponibles = edificios;
+
+            // Llenar el dropdown inmediatamente
+            llenarDropdownEdificios(edificios);
+
+        } catch (error) {
+            console.error('❌ Error al cargar edificios:', error);
+            alert('Error al cargar edificios: ' + error.message);
+        }
+    }
 
 // 🔹 Función mejorada para abrir el modal
-function openModalNewTask(nombreEmpleado) {
-    console.log('🔓 Abriendo modal para:', nombreEmpleado);
-    
-    const modalNewTask = document.getElementById('modal-NewTask');
-    const inputUserName = document.getElementById('userName');
+    function openModalNewTask(nombreEmpleado) {
+        console.log('🔓 Abriendo modal para:', nombreEmpleado);
 
-    if (!modalNewTask) {
-        console.error('❌ Modal no encontrado');
-        return;
+        const modalNewTask = document.getElementById('modal-NewTask');
+        const inputUserName = document.getElementById('userName');
+
+        if (!modalNewTask) {
+            console.error('❌ Modal no encontrado');
+            return;
+        }
+
+        if (!inputUserName) {
+            console.error('❌ Input userName no encontrado');
+            return;
+        }
+
+        // Rellena el input con el nombre del empleado
+        inputUserName.value = Array.isArray(nombreEmpleado) ? nombreEmpleado.join(', ') : nombreEmpleado;
+        inputUserName.disabled = true;
+
+        // Resetear dropdowns al estado inicial
+        const activityButton = document.getElementById('activitySelected');
+        const edificioButton = document.getElementById('edificioSelected');
+
+        if (activityButton) {
+            activityButton.textContent = 'Seleccione una actividad';
+            activityButton.removeAttribute('data-selected');
+        }
+
+        if (edificioButton) {
+            edificioButton.textContent = 'Seleccione un edificio';
+            edificioButton.removeAttribute('data-selected');
+        }
+
+        // Muestra el modal
+        modalNewTask.style.display = 'flex';
+
+        // Carga las actividades Y edificios después de mostrar el modal
+        setTimeout(async () => {
+            await cargarActividades();
+            await cargarEdificios();
+        }, 200);
     }
 
-    if (!inputUserName) {
-        console.error('❌ Input userName no encontrado');
-        return;
-    }
 
-    // Rellena el input con el nombre del empleado
-    inputUserName.value = Array.isArray(nombreEmpleado) ? nombreEmpleado.join(', ') : nombreEmpleado;
-    inputUserName.disabled = true;
-    
-    // Muestra el modal
-    modalNewTask.style.display = 'flex';
-    
-    // Carga las actividades después de mostrar el modal
-    setTimeout(() => {
-        cargarActividades();
-    }, 200);
-}
-
-    
     const closeNewTaskModalBtn = document.getElementById('closeNewTaskModalBtn');
     // Cerrar modal
     if (closeNewTaskModalBtn) {
         closeNewTaskModalBtn.addEventListener('click', () => {
             console.log('🔄 Desmarcando todos los usuarios...');
-    
-        // Buscar todos los checkboxes en la tabla
-        const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
-        
-        // Desmarcar cada checkbox
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                checkbox.checked = false;
-                console.log('✅ Usuario desmarcado');
-            }
+
+            // Buscar todos los checkboxes en la tabla
+            const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
+
+            // Desmarcar cada checkbox
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checkbox.checked = false;
+                    console.log('✅ Usuario desmarcado');
+                }
+            });
+            empleadosSeleccionados= [];
+            document.getElementById('modal-NewTask').style.display = "none";
         });
-        empleadosSeleccionados= [];
-        document.getElementById('modal-NewTask').style.display = "none";
-    });
     }
 
     // Cerrar modal al hacer clic fuera del contenido
@@ -371,7 +492,7 @@ function openModalNewTask(nombreEmpleado) {
 
                     console.log("Seleccionados:", empleadosSeleccionados);
                 });
-                
+
                 cell.appendChild(check);
                 tableBody.appendChild(tr);
 
@@ -463,7 +584,7 @@ function openModalNewTask(nombreEmpleado) {
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
 
-     btnNewTask.addEventListener('click', async () => {
+    btnNewTask.addEventListener('click', async () => {
         if (empleadosSeleccionados.length === 0) {
             alert("Por favor selecciona al menos un empleado.");
             return;
