@@ -268,9 +268,9 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        // USUARIO X ACTIVIDAD
+        // USUARIO X SERVICIO
 
-        [HttpGet("Obtener-actividad-por-usuario")]
+        [HttpGet("Obtener-servicioXusuario-por-usuario")]
         public ActionResult<string> GetActividadXUsuario([FromQuery] int idUser)
         {
             try
@@ -280,13 +280,13 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        [HttpPost("Crear-actividad-por-usuario")]
-        public ActionResult CreatActivityByUser([FromQuery] UsuarioXActividad userXactivity)
+        [HttpPost("Crear-servicioXactividad-por-usuario")]
+        public ActionResult CreatActivityByUser([FromBody] UsuarioXServicio userXactivity)
         {
             try
             {
                 _service.AddUsuarioXActividad(userXactivity);
-                return Ok("Actividad Por Usuario Creado");
+                return Ok("Servicio Por Usuario Creado");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }

@@ -7,14 +7,14 @@ namespace JobOclock_BackEnd.Services
 {
     public class ServicesSIE : IServicesSIE
     {
-        private readonly IActividadRepository _actividadRepository;
+        private readonly IServicioRepository _actividadRepository;
         private readonly IFotoRegistroRepository _fotoRegistroRepository;
         private readonly IPosicionUsuarioRepository _posicionUsuarioRepository;
         private readonly IRegistroRepository _registroRepository;
         private readonly IUsuarioRepository _usuarioRepository;
-        private readonly IUsuarioXActividadRepository _usuarioXActividadRepository;
+        private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
         private readonly IEdificioRepository _edificioRepository;
-        public ServicesSIE(IActividadRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXActividadRepository usuarioXActividadRepository,IEdificioRepository edificioRepository)
+        public ServicesSIE(IServicioRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IEdificioRepository edificioRepository)
         {
             _actividadRepository = actividadRepository;
             _fotoRegistroRepository = fotoRegistroRepository;
@@ -26,7 +26,7 @@ namespace JobOclock_BackEnd.Services
         }
         
         // ACTIVIDAD
-        public IEnumerable<Actividad> GetAll()
+        public IEnumerable<Servicio> GetAll()
         {
             return _actividadRepository.GetAll();
         }
@@ -130,12 +130,12 @@ namespace JobOclock_BackEnd.Services
             _usuarioRepository.Delete(id);
         }
 
-        // USUARIO X ACTIVIDAD
-        public IEnumerable<UsuarioXActividad> GetByUsuarioXActividad(int idUsuario)
+        // USUARIO X SERVICIO
+        public IEnumerable<UsuarioXServicio> GetByUsuarioXActividad(int idUsuario)
         {
             return _usuarioXActividadRepository.GetByUsuario(idUsuario);
         }
-        public void AddUsuarioXActividad(UsuarioXActividad registro)
+        public void AddUsuarioXActividad(UsuarioXServicio registro)
         {
             _usuarioXActividadRepository.Add(registro);
         }

@@ -2,9 +2,9 @@
 
 namespace JobOclock_BackEnd.Data.Interfaces
 {
-    public interface IActividadRepository
+    public interface IServicioRepository
     {
-        IEnumerable<Actividad> GetAll();
+        IEnumerable<Servicio> GetAll();
         void Add(string tipo);
     }
 }

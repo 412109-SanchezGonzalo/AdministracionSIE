@@ -5,10 +5,10 @@ using System.Data.SqlClient;
 
 namespace JobOclock_BackEnd.Data.Repositories
 {
-    public class ActividadRepository : IActividadRepository
+    public class ServicioRepository : IServicioRepository
     {
         private readonly string _connectionString;
-        public ActividadRepository(string connectionString)
+        public ServicioRepository(string connectionString)
         {
             _connectionString = connectionString;
         }
@@ -16,24 +16,24 @@ namespace JobOclock_BackEnd.Data.Repositories
         public void Add(string tipo)
         {
             using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand("INSERT INTO Actividad (tipo_actividad) " +
-                                        "VALUES (@actividad)", conn);
-            cmd.Parameters.AddWithValue("@actividad",tipo);
+            using var cmd = new MySqlCommand("INSERT INTO Servicio (descripcion) " +
+                                        "VALUES (@servicio)", conn);
+            cmd.Parameters.AddWithValue("@servicio",tipo);
             conn.Open();
             cmd.ExecuteNonQuery();
         }
-        public IEnumerable<Actividad> GetAll()
+        public IEnumerable<Servicio> GetAll()
         {
-            var list = new List<Actividad>();
+            var list = new List<Servicio>();
             using var conn = new MySqlConnection(_connectionString);
             using var cmd = new MySqlCommand("SELECT * FROM Servicio", conn);
             conn.Open();
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                list.Add(new Actividad
+                list.Add(new Servicio
                 {
-                    IdActividad = reader.GetInt32(reader.GetOrdinal("id_servicio")),
+                    IdServicio = reader.GetInt32(reader.GetOrdinal("id_servicio")),
                     Descripcion = reader.GetString(reader.GetOrdinal("descripcion")),
                 });
             }

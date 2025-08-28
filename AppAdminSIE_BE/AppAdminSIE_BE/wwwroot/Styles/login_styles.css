@@ -1,19 +1,25 @@
 html {
     height: 100%;
 }
+
 body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
     background: linear-gradient(#141e30, #243b55);
+    min-height: 100vh;
 }
+
+/* Logo responsivo con mejor posicionamiento */
 img {
     position: absolute;
-    width: 155px;
-    height: 155px;
-    left: 880px;
-    top: 70px;
+    width: 8rem;
+    height: 8rem;
+    top: 2rem;
+    right: 2rem;
+    transition: all 0.3s ease;
 }
+
 .login-box {
     position: absolute;
     top: 50%;
@@ -49,9 +55,10 @@ img {
     outline: none;
     background: transparent;
 }
+
 .login-box .user-box label {
     position: absolute;
-    top:0;
+    top: 0;
     left: 0;
     padding: 10px 0;
     font-size: 16px;
@@ -67,14 +74,18 @@ img {
     color: #03e9f4;
     font-size: 12px;
 }
+
 .error_message {
     position: absolute;
     top: 63%;
-    left: 40%;
+    left: 50%;
     color: red;
     font-size: 14px;
     transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
 }
+
 .login-box form button {
     position: relative;
     display: inline-block;
@@ -88,6 +99,8 @@ img {
     transition: .5s;
     margin-top: 40px;
     letter-spacing: 4px;
+    border: none;
+    cursor: pointer;
 }
 
 .login-box button:hover {
@@ -100,107 +113,100 @@ img {
     0 0 100px #d3671f;
 }
 
-@media (max-width: 480px){
-    html {
-        height: 100%;
-    }
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        background: linear-gradient(#141e30, #243b55);
-    }
+/* Tablet - pantallas medianas */
+@media (max-width: 768px) {
     img {
-        position: absolute;
-        width: 85px;
-        height: 85px;
-        left: 160px;
-        top: 50px;
+        width: 6rem;
+        height: 6rem;
+        top: 1.5rem;
+        right: 1.5rem;
     }
+
     .login-box {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 400px;
-        padding: 40px;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,.5);
-        box-sizing: border-box;
-        box-shadow: 0 15px 25px rgba(0,0,0,.6);
-        border-radius: 10px;
-    }
-
-    .login-box h2 {
-        margin: 0 0 30px;
-        padding: 0;
-        color: #fff;
-        text-align: center;
-    }
-
-    .login-box .user-box {
-        position: relative;
-    }
-
-    .login-box .user-box input {
-        width: 100%;
-        padding: 10px 0;
-        font-size: 16px;
-        color: #fff;
-        margin-bottom: 30px;
-        border: none;
-        border-bottom: 1px solid #fff;
-        outline: none;
-        background: transparent;
-    }
-    .login-box .user-box label {
-        position: absolute;
-        top:0;
-        left: 0;
-        padding: 10px 0;
-        font-size: 16px;
-        color: #ffffff;
-        pointer-events: none;
-        transition: .5s;
-    }
-
-    .login-box .user-box input:focus ~ label,
-    .login-box .user-box input:valid ~ label {
-        top: -20px;
-        left: 0;
-        color: #03e9f4;
-        font-size: 12px;
-    }
-    .error_message {
-        position: absolute;
-        top: 63%;
-        left: 35%;
-        color: red;
-        font-size: 12px;
-        transform: translate(-50%, -50%);
-    }
-    .login-box form button {
-        position: relative;
-        display: inline-block;
-        padding: 10px 20px;
-        color: rgb(255, 255, 255);
-        background-color: #141e30;
-        font-size: 16px;
-        text-decoration: none;
-        text-transform: uppercase;
-        overflow: hidden;
-        transition: .5s;
-        margin-top: 40px;
-        letter-spacing: 4px;
-    }
-
-    .login-box button:hover {
-        background: #dc5d0f;
-        color: #ffffff;
-        border-radius: 5px;
-        box-shadow: 0 0 5px #c36521,
-        0 0 25px #d87c11,
-        0 0 50px #b36514,
-        0 0 100px #d3671f;
+        width: 350px;
+        padding: 35px;
     }
 }
 
+/* Móvil - pantallas pequeñas */
+@media (max-width: 480px) {
+    img {
+        width: 5rem;
+        height: 5rem;
+        top: 1rem;
+        right: 50%;
+        transform: translateX(50%);
+        /* O si prefieres centrado arriba */
+        /* right: 50%;
+        transform: translateX(50%); */
+    }
+
+    .login-box {
+        width: 90%;
+        max-width: 320px;
+        padding: 30px 20px;
+        top: 55%; /* Ajuste para dar espacio al logo */
+    }
+
+    .login-box h2 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+
+    .error_message {
+        font-size: 12px;
+        top: 65%;
+    }
+
+    .login-box form button {
+        width: 100%;
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 320px) {
+    img {
+        width: 4rem;
+        height: 4rem;
+    }
+
+    .login-box {
+        padding: 25px 15px;
+    }
+
+    .login-box .user-box input {
+        font-size: 14px;
+    }
+
+    .login-box .user-box label {
+        font-size: 14px;
+    }
+}
+
+/* Pantallas grandes - desktop */
+@media (min-width: 1200px) {
+    img {
+        width: 10rem;
+        height: 10rem;
+        top: 3rem;
+        right: 55rem;
+    }
+}
+
+/* Orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    img {
+        width: 4rem;
+        height: 4rem;
+        top: 0.5rem;
+        right: 1rem;
+    }
+
+    .login-box {
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+    }
+}

@@ -7,7 +7,7 @@ namespace JobOclock_BackEnd.Services
     public interface IServicesSIE
     {
         // ACTIVIDAD
-        IEnumerable<Actividad> GetAll();
+        IEnumerable<Servicio> GetAll();
         void AddActividad(string tipo);
 
         // EDIFICIO
@@ -41,9 +41,9 @@ namespace JobOclock_BackEnd.Services
         void UpdateStatus(int id, string status);
         void DeleteUsuario(int id);
 
-        // USUARIO X ACTIVIDAD
-        IEnumerable<UsuarioXActividad> GetByUsuarioXActividad(int idUsuario);
-        void AddUsuarioXActividad(UsuarioXActividad registro);
+        // USUARIO X Servicio
+        IEnumerable<UsuarioXServicio> GetByUsuarioXActividad(int idUsuario);
+        void AddUsuarioXActividad(UsuarioXServicio registro);
         void UpdateEstadoUsuarioXActividad(int idUsuario, int idActividad, string nuevoEstado);
 
     }

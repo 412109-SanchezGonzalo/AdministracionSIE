@@ -23,12 +23,12 @@ builder.Services.AddCors(options =>
 // 2️⃣ Inyección de dependencias para repositorios
 var connStr = builder.Configuration.GetConnectionString("JobOclockSIE");
 
-builder.Services.AddScoped<IActividadRepository>(_ => new ActividadRepository(connStr));
+builder.Services.AddScoped<IServicioRepository>(_ => new ServicioRepository(connStr));
 builder.Services.AddScoped<IFotoRegistroRepository>(_ => new FotoRegistroRepository(connStr));
 builder.Services.AddScoped<IPosicionUsuarioRepository>(_ => new PosicionUsuarioRepository(connStr));
 builder.Services.AddScoped<IRegistroRepository>(_ => new RegistroRepository(connStr));
 builder.Services.AddScoped<IUsuarioRepository>(_ => new UsuarioRepository(connStr));
-builder.Services.AddScoped<IUsuarioXActividadRepository>(_ => new UsuarioXActividadRepository(connStr));
+builder.Services.AddScoped<IUsuarioXServicioRepository>(_ => new UsuarioXServicioRepository(connStr));
 builder.Services.AddScoped<IEdificioRepository>(_ => new EdificioRepository(connStr));
 
 // 3️⃣ Autenticación JWT

@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnClear = document.getElementById('btnClear');
     const btnRetry = document.getElementById('btnRetry');
     const btnNewTask = document.getElementById('btnNewTask');
+    const btnConfirm = document.getElementById('btnConfirmar');
 
     btnNewTask.style.disabled = true;
 
@@ -139,14 +140,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('🔄 Llenando dropdown con actividades:', actividades);
 
         // CORREGIDO: Buscar específicamente el dropdown de actividades
-        const dropdown = document.querySelector('#menuActividades .dropdown-menu');
+        const dropdown = document.querySelector('#menuActivities .dropdown-menu');
 
         if (!dropdown) {
             console.error('❌ No se encontró el dropdown de actividades');
             console.log('🔍 Elementos disponibles:', {
                 modal: document.getElementById('modal-NewTask'),
                 menuActividades: document.getElementById('menuActividades'),
-                dropdownMenu: document.querySelector('#menuActividades .dropdown-menu')
+                dropdownMenu: document.querySelector('#menuActivities .dropdown-menu')
             });
             return;
         }
@@ -431,116 +432,168 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // 🔹 Buscar usuario por nombre
+    // Función para buscar usuario por nombre usando la API
     async function searchByName() {
         const nombre = searchNameInput.value.trim();
-        console.log('🔍 Buscando usuario por nombre:', nombre);
+        console.log('Buscando usuario por nombre:', nombre);
 
-        if (!nombre) return alert("Ingresa un nombre");
+        if (!nombre) {
+            alert("Ingresa un nombre");
+            return;
+        }
 
         showLoading();
+
         try {
-            const q = query(collection(db, "usuarios"), where("nombre", "==", nombre));
-            console.log('🔥 Query creada:', q);
-
-            const querySnapshot = await getDocs(q);
-            console.log('📄 Resultado query:', querySnapshot.size, 'documentos');
-
-            if (querySnapshot.empty) {
-                console.log('📭 No se encontraron usuarios con ese nombre');
-                showError("Usuario no encontrado");
-                return;
-            }
-
-            tableBody.innerHTML = '';
-
-            querySnapshot.forEach(docSnap => {
-                const usuario = docSnap.data();
-                const userId = docSnap.id;
-
-                console.log('👤 Usuario encontrado:', { userId, usuario });
-
-                const tr = document.createElement('tr');
-                tr.id = `row-${userId}`;
-                tr.innerHTML = `
-                    <td><span class="badge bg-secondary">${userId}</span></td>
-                    <td><strong>${formatFullName(usuario)}</strong></td>
-                    <td><code>${usuario.dni || 'Sin DNI'}</code></td>
-                    <td></td>
-                `;
-
-                const cell = tr.querySelector('td:last-child');
-
-                const check = document.createElement('input');
-                check.type = 'checkbox';
-                check.className = 'form-check-input';
-                check.title = 'Seleccionar empleado';
-
-                // ⚠️ Ahora el listener se ejecuta al marcar/desmarcar
-                check.addEventListener('change', () => {
-                    const nombreCompleto = formatFullName(usuario);
-
-                    if (check.checked) {
-                        // Agregar si está marcado
-                        empleadosSeleccionados.push(nombreCompleto);
-                    } else {
-                        // Quitar si se desmarca
-                        empleadosSeleccionados = empleadosSeleccionados.filter(
-                            emp => emp !== nombreCompleto
-                        );
-                    }
-
-                    console.log("Seleccionados:", empleadosSeleccionados);
-                });
-
-                cell.appendChild(check);
-                tableBody.appendChild(tr);
-
+            // Llamada a la API que recibe string y devuelve JSON
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-nombre', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'  // Cambiar a JSON
+                },
+                body: JSON.stringify(nombre)  // Envolver el string en JSON
             });
 
-            showTable(querySnapshot.size);
-        } catch (e) {
-            console.error("❌ Error en searchByName:", e);
-            showError(e.message);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // La API devuelve un objeto JSON
+            const usuario = await response.json();
+            console.log('Usuario encontrado:', usuario);
+
+            // Verificar que el objeto tiene los campos necesarios
+            if (!usuario || typeof usuario !== 'object') {
+                throw new Error('Respuesta de API inválida');
+            }
+
+            // Limpiar tabla antes de agregar el resultado
+            tableBody.innerHTML = '';
+
+            // Crear fila con los datos del usuario
+            const tr = document.createElement('tr');
+            tr.id = `row-${usuario.idUsuario || 'unknown'}`;
+            tr.innerHTML = `
+            <td><span class="badge bg-secondary">${usuario.idUsuario || 'N/A'}</span></td>
+            <td><strong>${usuario.nombre || 'Sin nombre'}</strong></td>
+            <td><code>${usuario.nicknameDni || 'Sin DNI'}</code></td>
+            <td></td>
+        `;
+
+            // Crear checkbox para las acciones
+            const cell = tr.querySelector('td:last-child');
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'form-check-input';
+            check.title = 'Seleccionar empleado';
+
+            // Event listener para manejar selección
+            check.addEventListener('change', () => {
+                const nombreCompleto = usuario.nombre || 'Sin nombre';
+
+                if (check.checked) {
+                    // Agregar si está marcado
+                    if (!empleadosSeleccionados.includes(nombreCompleto)) {
+                        empleadosSeleccionados.push(nombreCompleto);
+                    }
+                } else {
+                    // Quitar si se desmarca
+                    empleadosSeleccionados = empleadosSeleccionados.filter(
+                        emp => emp !== nombreCompleto
+                    );
+                }
+
+                console.log("Empleados seleccionados:", empleadosSeleccionados);
+            });
+
+            cell.appendChild(check);
+            tableBody.appendChild(tr);
+
+            // Mostrar tabla con 1 resultado
+            showTable(1);
+
+        } catch (error) {
+            console.error('Error en searchByName:', error);
+
+            // Manejar diferentes tipos de errores
+            if (error.message.includes('404')) {
+                showError('Usuario no encontrado');
+            } else if (error.message.includes('500')) {
+                showError('Error interno del servidor');
+            } else {
+                showError('Error al buscar usuario: ' + error.message);
+            }
         }
     }
 
-    // 🔹 Cargar todos los usuarios desde Firestore
+
+    // Cargar todos los usuarios desde la API
     async function loadAllUsers() {
-        console.log('📊 Cargando todos los usuarios...');
+        console.log('📊 Cargando todos los usuarios desde API...');
         showLoading();
 
         try {
-            console.log('🔥 Obteniendo colección "usuarios"...');
-            const querySnapshot = await getDocs(collection(db, "usuarios"));
+            console.log('🌐 Consultando API para obtener todos los usuarios...');
 
-            console.log('📊 Total documentos encontrados:', querySnapshot.size);
+            // Llamada a la API que devuelve todos los usuarios
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-usuarios', {
+                method: 'GET',  // O POST si tu API lo requiere
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (querySnapshot.empty) {
-                console.log('📭 La colección "usuarios" está vacía');
+            console.log('📊 Response status:', response.status);
+            console.log('📊 Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // La API devuelve un array de usuarios en formato JSON
+            const usuarios = await response.json();
+            console.log('✅ Usuarios obtenidos desde API:', usuarios);
+
+            // Verificar que sea un array
+            if (!Array.isArray(usuarios)) {
+                console.error('❌ La respuesta no es un array:', typeof usuarios);
+                throw new Error('Formato de respuesta inválido - se esperaba un array');
+            }
+
+            console.log('📊 Total usuarios encontrados:', usuarios.length);
+
+            if (usuarios.length === 0) {
+                console.log('📭 No hay usuarios disponibles');
                 showNoData();
                 return;
             }
 
+            // Limpiar tabla antes de llenarla
             tableBody.innerHTML = '';
             let userCount = 0;
 
-            querySnapshot.forEach(docSnap => {
-                const usuario = docSnap.data();
-                const userId = docSnap.id;
+            // Iterar sobre cada usuario de la API
+            usuarios.forEach(usuario => {
                 userCount++;
-
-                console.log(`👤 Usuario ${userCount}:`, { userId, usuario });
+                console.log(`👤 Usuario ${userCount}:`, usuario);
 
                 const tr = document.createElement('tr');
-                tr.id = `row-${userId}`;
+                tr.id = `row-${usuario.idUsuario || userCount}`;
                 tr.innerHTML = `
-                    <td><span class="badge bg-secondary">${userId}</span></td>
-                    <td><strong>${formatFullName(usuario)}</strong></td>
-                    <td><code>${usuario.dni || 'Sin DNI'}</code></td>
-                    <td></td>
-                `;
+                <td><span class="badge bg-secondary">${usuario.idUsuario || 'N/A'}</span></td>
+                <td><strong>${usuario.nombre || 'Sin nombre'}</strong></td>
+                <td><code>${usuario.nicknameDni || 'Sin DNI'}</code></td>
+                <td></td>
+            `;
 
+                // Crear celda para las acciones (checkbox)
                 const cell = tr.querySelector("td:last-child");
 
                 const check = document.createElement('input');
@@ -548,13 +601,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                 check.className = 'form-check-input';
                 check.title = 'Seleccionar empleado';
 
-                // ⚠️ Ahora el listener se ejecuta al marcar/desmarcar
+                // Event listener para manejar la selección
                 check.addEventListener('change', () => {
-                    const nombreCompleto = formatFullName(usuario);
+                    const nombreCompleto = usuario.nombre || 'Sin nombre';
 
                     if (check.checked) {
-                        // Agregar si está marcado
-                        empleadosSeleccionados.push(nombreCompleto);
+                        // Agregar si está marcado (evitar duplicados)
+                        if (!empleadosSeleccionados.includes(nombreCompleto)) {
+                            empleadosSeleccionados.push(nombreCompleto);
+                        }
                     } else {
                         // Quitar si se desmarca
                         empleadosSeleccionados = empleadosSeleccionados.filter(
@@ -562,21 +617,137 @@ document.addEventListener('DOMContentLoaded', async function () {
                         );
                     }
 
-                    console.log("Seleccionados:", empleadosSeleccionados);
+                    console.log("Empleados seleccionados:", empleadosSeleccionados);
                 });
 
                 cell.appendChild(check);
                 tableBody.appendChild(tr);
             });
 
-            showTable(querySnapshot.size);
+            // Mostrar tabla con la cantidad de usuarios cargados
+            showTable(usuarios.length);
 
+        } catch (error) {
+            console.error("❌ Error en loadAllUsers:", error);
 
-        } catch (e) {
-            console.error("❌ Error en loadAllUsers:", e);
-            showError('Error: ' + e.message);
+            // Manejo específico de errores
+            if (error.message.includes('404')) {
+                showError('Endpoint no encontrado - verificar URL de la API');
+            } else if (error.message.includes('500')) {
+                showError('Error interno del servidor');
+            } else if (error.message.includes('Failed to fetch')) {
+                showError('Error de conexión - verificar conectividad');
+            } else {
+                showError('Error al cargar usuarios: ' + error.message);
+            }
         }
     }
+
+
+    // Función para validar el formulario de nueva tarea
+    function validateNewTaskForm() {
+        console.log('Validando formulario de nueva tarea...');
+
+        const errores = [];
+
+        // 1. Validar que se haya seleccionado una actividad
+        const activityButton = document.getElementById('activitySelected');
+        const actividadSeleccionada = activityButton ? activityButton.getAttribute('data-selected') : null;
+
+        if (!actividadSeleccionada || activityButton.textContent.trim() === 'Seleccione una actividad') {
+            errores.push('Debe seleccionar una actividad');
+            console.log('Error: No se seleccionó actividad');
+        } else {
+            console.log('Actividad seleccionada:', actividadSeleccionada);
+        }
+
+        // 2. Validar que se haya seleccionado un edificio
+        const edificioButton = document.getElementById('edificioSelected');
+        const edificioSeleccionado = edificioButton ? edificioButton.getAttribute('data-selected') : null;
+
+        if (!edificioSeleccionado || edificioButton.textContent.trim() === 'Seleccione un edificio') {
+            errores.push('Debe seleccionar un edificio');
+            console.log('Error: No se seleccionó edificio');
+        } else {
+            console.log('Edificio seleccionado:', edificioSeleccionado);
+        }
+
+        // 3. Validar que la fecha no sea menor a la fecha actual
+        const fechaInput = document.getElementById('dateActivity');
+        const fechaSeleccionada = fechaInput ? fechaInput.value : '';
+
+        if (!fechaSeleccionada) {
+            errores.push('Debe seleccionar una fecha');
+            console.log('Error: No se seleccionó fecha');
+        } else {
+            // Obtener fecha actual sin hora (solo YYYY-MM-DD)
+            const fechaActual = new Date();
+            const fechaActualString = fechaActual.toISOString().split('T')[0];
+
+            // Comparar fechas
+            if (fechaSeleccionada < fechaActualString) {
+                errores.push('La fecha no puede ser anterior a la fecha actual');
+                console.log('Error: Fecha anterior a hoy. Seleccionada:', fechaSeleccionada, 'Actual:', fechaActualString);
+            } else {
+                console.log('Fecha válida:', fechaSeleccionada);
+            }
+        }
+
+        // Mostrar resultados
+        if (errores.length > 0) {
+            console.log('Errores encontrados:', errores);
+
+            // Mostrar alert con todos los errores
+            const mensajeError = 'Por favor corrija los siguientes errores:\n\n' +
+                errores.map((error, index) => `${index + 1}. ${error}`).join('\n');
+            alert(mensajeError);
+
+            return false; // Formulario inválido
+        }
+
+        console.log('Formulario válido - todos los campos están correctos');
+        return true; // Formulario válido
+    }
+
+    // Función para usar en el evento submit del formulario
+     function handleFormSubmit(event) {
+        event.preventDefault(); // Prevenir envío del formulario
+
+        console.log('Intentando enviar formulario...');
+
+        // Validar formulario
+        const isValid = validateNewTaskForm();
+
+        if (isValid) {
+            console.log('Formulario válido - procediendo con el envío...');
+
+            const response = fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario')
+            const datos = {
+                IdUsuario: data.IdUsuario,
+                IdServicio: data.IdServicio,
+                IdEdificio: data.IdEdificio,
+                Observaciones: data.Observaciones,
+                Fecha: data.Fecha
+            };
+
+
+            alert('Tarea asignada correctamente');
+
+            // Cerrar modal si todo está bien
+            document.getElementById('modal-NewTask').style.display = 'none';
+
+            // Limpiar selecciones si es necesario
+            empleadosSeleccionados = [];
+
+            // Desmarcar checkboxes
+            const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+
+        } else {
+            console.log('Formulario inválido - no se enviará');
+        }
+    }
+
 
     // 🎯 Eventos
     if (btnSearch) btnSearch.addEventListener('click', searchByName);
@@ -593,6 +764,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Pasar todos los seleccionados al modal
         openModalNewTask(empleadosSeleccionados);
     })
+
+    if (btnConfirm) {
+        btnConfirm.addEventListener('click', handleFormSubmit);
+    }
 
     if (searchNameInput) {
         searchNameInput.addEventListener('keypress', e => {

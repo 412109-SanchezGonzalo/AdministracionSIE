@@ -1,8 +1,8 @@
 ﻿namespace JobOclock_BackEnd.Models
 {
-    public class Actividad
+    public class Servicio
     {
-        public int IdActividad { get; set; }
+        public int IdServicio { get; set; }
         public string Descripcion { get; set; }
     }
 }
