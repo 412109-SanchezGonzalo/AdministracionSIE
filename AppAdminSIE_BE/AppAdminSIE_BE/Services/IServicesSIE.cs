@@ -1,5 +1,6 @@
 ﻿using JobOclock_BackEnd.Models;
 using JobOclock_BackEnd.Data.Interfaces;
+using AppAdminSIE_BE.Models;
 
 namespace JobOclock_BackEnd.Services
 {
