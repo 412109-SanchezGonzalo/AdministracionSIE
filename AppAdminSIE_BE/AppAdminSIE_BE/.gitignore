@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Archivos de configuración de IDE
 .vs/
 .idea/
@@ -46,3 +47,9 @@ publish/
 *.Publish.xml
 *.pubxml
 *.pubxml.user
+=======
+bin/
+obj/
+.vs/
+.idea/
+>>>>>>> ba2289b (Agregar modelo Edificio y actualizar .gitignore)
