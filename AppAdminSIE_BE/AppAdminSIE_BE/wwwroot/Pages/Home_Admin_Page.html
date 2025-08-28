@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../Images/logo_SIE.png">
+    <link rel="stylesheet" href="../Styles/home_admin_styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="../Scripts/home_admin_script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <title>SIE | Administrador</title>
+</head>
+<body>
+<!-- navbar -->
+<nav class="navbar">
+    <button class="navbar-toggle" aria-label="Toggle navigation">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
+    <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
+    <ul class="navbar-menu">
+        <li><a href="#">Inicio</a></li>
+        <li id="li-profile">Perfil</li>
+        <li id="li-history">Historial de Horarios</li>
+        <li><a href="#">Cerrar sesión</a></li>
+    </ul>
+</nav>
+
+
+<div class="right-panel">
+    <div class="compact-header">
+        <h4 style="color: white">📋 Asignación de Tareas</h4>
+    </div>
+
+    <div class="search-container">
+        <div class="row g-2 align-items-end">
+            <div class="col-6">
+                <label for="search-name" class="form-label small">Buscar:</label>
+                <input type="text" class="form-control form-control-sm" id="search-name" placeholder="Nombre...">
+            </div>
+            <div class="col-3">
+                <button class="btn btn-primary btn-sm w-100" id="btnSearch">🔍 Buscar</button>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-success btn-sm w-100" id="btnAll">👥 Todos</button>
+            </div>
+
+        </div>
+        <div class="row g-2 mt-1">
+            <div class="col-6">
+                <button class="btn btn-outline-secondary btn-sm w-100" id="btnClear">🗑️ Limpiar</button>
+            </div>
+
+            <div class="col-6">
+                <!-- Texto Usuarios en la primera fila -->
+                <div class="w-100">
+                    <small class="text-muted">Usuarios:
+                        <span id="user-count" class="badge bg-primary badge-xs">0</span>
+                    </small>
+                </div>
+                <!-- Botón en la segunda fila, alineado a la derecha -->
+                <div class="d-flex justify-content-center mt-1">
+                    <button class="btn-add-task ms-5" id="btnNewTask">
+                        Asignar Nueva Tarea
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="table-container">
+        <div id="loading" class="loading d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 small">Cargando...</p>
+        </div>
+        <div id="error-message" class="error-message d-none">
+            <h6>❌ Error</h6>
+            <p class="small" id="error-details"></p>
+            <button class="btn btn-outline-primary btn-sm" id="btnRetry">🔄 Reintentar</button>
+        </div>
+        <div id="no-data-message" class="text-center p-3 d-none">
+            <h6 class="text-muted">📭 Sin datos</h6>
+            <p class="small text-muted">No se encontraron usuarios.</p>
+        </div>
+        <div id="table-wrapper" class="d-none">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover compact-table">
+                    <thead class="table-dark">
+                    <tr>
+                        <th scope="col" style="width: 15%;">ID</th>
+                        <th scope="col" style="width: 40%;">Nombre</th>
+                        <th scope="col" style="width: 25%;">DNI</th>
+                        <th scope="col" style="width: 20%;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Nueva Tarea Asignada -->
+<div class="modal-overlay-newTask" id="modal-NewTask">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>📌 Asignar Nueva Tarea</h2>
+            <button type="button" class="btn-close" id="closeNewTaskModalBtn" aria-label="Close"></button>
+        </div>
+        <form>
+            <div class="mb-3">
+                <label for="userName" class="form-label">Empleado/s</label>
+                <input type="input" class="form-control" id="userName" aria-describedby="username">
+            </div>
+            <div class="mb-3">
+                <label for="menuActivities" class="form-label">Actividad</label>
+                <div class="input-group mb-3" id="menuActivities">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="activitySelected">Seleccione una actividad</button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="menuEdificios" class="form-label">Edificio</label>
+                <div class="input-group mb-3" id="menuEdificios">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelected">Seleccione un edificio</button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="dateActivity" class="form-label d-block">Fecha de Actividad</label>
+                <input type="date" class="form-control-sm" id="dateActivity">
+            </div>
+            <div class="mb-3">
+                <label for="comments" class="form-label">Observaciones</label>
+                <textarea class="form-control" id="comments" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="background-color: #2e7700">Confirmar</button>
+        </form>
+    </div>
+</div>
+
+
+</body>
+</html>
