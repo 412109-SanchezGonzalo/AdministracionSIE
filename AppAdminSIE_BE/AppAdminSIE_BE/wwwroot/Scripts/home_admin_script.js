@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const userCount = document.getElementById('user-count');
     const searchNameInput = document.getElementById('search-name');
 
+    searchNameInput.disabled = true;
+
     const btnSearch = document.getElementById('btnSearch');
     const btnAll = document.getElementById('btnAll');
     const btnClear = document.getElementById('btnClear');
@@ -41,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnNewTask = document.getElementById('btnNewTask');
     const btnConfirm = document.getElementById('btnConfirmar');
 
-    btnNewTask.style.disabled = true;
 
     // 🔍 VERIFICAR ELEMENTOS HTML
     console.log('📋 Elementos encontrados:', {
@@ -532,116 +533,82 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-    // Cargar todos los usuarios desde la API
+    let usuariosGlobal = []; // lista global de usuarios
+
+// ✅ Cargar todos los usuarios al inicio
     async function loadAllUsers() {
-        console.log('📊 Cargando todos los usuarios desde API...');
         showLoading();
-
         try {
-            console.log('🌐 Consultando API para obtener todos los usuarios...');
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-usuarios');
+            const usuarios = await response.json();
 
-            // Llamada a la API que devuelve todos los usuarios
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-usuarios', {
-                method: 'GET',  // O POST si tu API lo requiere
-                headers: {
-                    'Content-Type': 'application/json'
+            if (!Array.isArray(usuarios)) throw new Error('Formato inválido');
+
+            searchNameInput.disabled = false;
+
+            usuariosGlobal = usuarios; // guardamos todos
+            renderTable(usuariosGlobal); // mostramos todo
+        } catch (error) {
+            showError("Error al cargar usuarios: " + error.message);
+        }
+    }
+
+// 🔍 Filtrar usuarios por nombre, apellido o DNI
+    function filtrarUsuariosPorNombre(patron) {
+        if (!patron) {
+            renderTable(usuariosGlobal);
+            return;
+        }
+
+        const filtro = patron.toLowerCase();
+        const resultados = usuariosGlobal.filter(u =>
+            (u.nombre && u.nombre.toLowerCase().includes(filtro)) ||
+            (u.apellido && u.apellido.toLowerCase().includes(filtro)) ||
+            (u.nicknameDni && u.nicknameDni.toLowerCase().includes(filtro))
+        );
+
+        renderTable(resultados);
+    }
+
+// 🔹 Renderizar tabla con resultados
+    function renderTable(usuarios) {
+        tableBody.innerHTML = '';
+
+        if (usuarios.length === 0) {
+            showNoData();
+            return;
+        }
+
+        usuarios.forEach(usuario => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td><span class="badge bg-secondary">${usuario.idUsuario || 'N/A'}</span></td>
+            <td><strong>${usuario.nombre || 'Sin nombre'}</strong></td>
+            <td><code>${usuario.nicknameDni || 'Sin DNI'}</code></td>
+            <td></td>
+        `;
+
+            const cell = tr.querySelector("td:last-child");
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'form-check-input';
+
+            check.addEventListener('change', () => {
+                const nombre = usuario.nombre || 'Sin nombre';
+                if (check.checked) {
+                    if (!empleadosSeleccionados.includes(nombre)) empleadosSeleccionados.push(nombre);
+                } else {
+                    empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp !== nombre);
                 }
             });
 
-            console.log('📊 Response status:', response.status);
-            console.log('📊 Response ok:', response.ok);
+            cell.appendChild(check);
+            tableBody.appendChild(tr);
+        });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Error response body:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            // La API devuelve un array de usuarios en formato JSON
-            const usuarios = await response.json();
-            console.log('✅ Usuarios obtenidos desde API:', usuarios);
-
-            // Verificar que sea un array
-            if (!Array.isArray(usuarios)) {
-                console.error('❌ La respuesta no es un array:', typeof usuarios);
-                throw new Error('Formato de respuesta inválido - se esperaba un array');
-            }
-
-            console.log('📊 Total usuarios encontrados:', usuarios.length);
-
-            if (usuarios.length === 0) {
-                console.log('📭 No hay usuarios disponibles');
-                showNoData();
-                return;
-            }
-
-            // Limpiar tabla antes de llenarla
-            tableBody.innerHTML = '';
-            let userCount = 0;
-
-            // Iterar sobre cada usuario de la API
-            usuarios.forEach(usuario => {
-                userCount++;
-                console.log(`👤 Usuario ${userCount}:`, usuario);
-
-                const tr = document.createElement('tr');
-                tr.id = `row-${usuario.idUsuario || userCount}`;
-                tr.innerHTML = `
-                <td><span class="badge bg-secondary">${usuario.idUsuario || 'N/A'}</span></td>
-                <td><strong>${usuario.nombre || 'Sin nombre'}</strong></td>
-                <td><code>${usuario.nicknameDni || 'Sin DNI'}</code></td>
-                <td></td>
-            `;
-
-                // Crear celda para las acciones (checkbox)
-                const cell = tr.querySelector("td:last-child");
-
-                const check = document.createElement('input');
-                check.type = 'checkbox';
-                check.className = 'form-check-input';
-                check.title = 'Seleccionar empleado';
-
-                // Event listener para manejar la selección
-                check.addEventListener('change', () => {
-                    const nombreCompleto = usuario.nombre || 'Sin nombre';
-
-                    if (check.checked) {
-                        // Agregar si está marcado (evitar duplicados)
-                        if (!empleadosSeleccionados.includes(nombreCompleto)) {
-                            empleadosSeleccionados.push(nombreCompleto);
-                        }
-                    } else {
-                        // Quitar si se desmarca
-                        empleadosSeleccionados = empleadosSeleccionados.filter(
-                            emp => emp !== nombreCompleto
-                        );
-                    }
-
-                    console.log("Empleados seleccionados:", empleadosSeleccionados);
-                });
-
-                cell.appendChild(check);
-                tableBody.appendChild(tr);
-            });
-
-            // Mostrar tabla con la cantidad de usuarios cargados
-            showTable(usuarios.length);
-
-        } catch (error) {
-            console.error("❌ Error en loadAllUsers:", error);
-
-            // Manejo específico de errores
-            if (error.message.includes('404')) {
-                showError('Endpoint no encontrado - verificar URL de la API');
-            } else if (error.message.includes('500')) {
-                showError('Error interno del servidor');
-            } else if (error.message.includes('Failed to fetch')) {
-                showError('Error de conexión - verificar conectividad');
-            } else {
-                showError('Error al cargar usuarios: ' + error.message);
-            }
-        }
+        showTable(usuarios.length);
     }
+
 
 
     // Función para validar el formulario de nueva tarea
@@ -723,7 +690,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const response = fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario')
             const datos = {
-                IdUsuario: data.IdUsuario,
+                IdUsuario: data.IdUsuario
+                ,
                 IdServicio: data.IdServicio,
                 IdEdificio: data.IdEdificio,
                 Observaciones: data.Observaciones,
@@ -750,7 +718,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // 🎯 Eventos
-    if (btnSearch) btnSearch.addEventListener('click', searchByName);
+    if (btnSearch) btnSearch.addEventListener('click', loadAllUsers);
     if (btnAll) btnAll.addEventListener('click', loadAllUsers);
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
@@ -770,8 +738,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     if (searchNameInput) {
-        searchNameInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') searchByName();
+        searchNameInput.addEventListener('input', e => {
+            filtrarUsuariosPorNombre(e.target.value);
         });
     }
 });
