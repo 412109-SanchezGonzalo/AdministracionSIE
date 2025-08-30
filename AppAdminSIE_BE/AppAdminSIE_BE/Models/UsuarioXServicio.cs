@@ -2,7 +2,7 @@
 {
     public class UsuarioXServicio
     {
-        public int IdUsuarioXActividad { get; set; }
+        public long IdUsuarioXActividad { get; set; }
         public int IdUsuario { get; set; }
         public int IdServicio { get; set; }
         public string NombreServicio { get; set; }
