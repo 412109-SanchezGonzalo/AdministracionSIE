@@ -12,7 +12,7 @@ namespace JobOclock_BackEnd.Data.Repositories
         {
             _connectionString = connectionString;
         }
-        public int Add(UsuarioXServicio registro)
+        public long Add(UsuarioXServicio registro)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
@@ -28,8 +28,8 @@ namespace JobOclock_BackEnd.Data.Repositories
 
                 conn.Open();
                 // Usamos ExecuteScalar() para obtener el ID
-                int id = (int)cmd.ExecuteScalar();
-                return (int)id;
+                long id = (long)cmd.ExecuteScalar();
+                return (long)id;
             }
         }
 
