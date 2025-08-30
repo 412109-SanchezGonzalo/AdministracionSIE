@@ -423,16 +423,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // Cerrar modal al hacer clic fuera del contenido
-    const modal = document.getElementById('locationModal');
-    if (modal) {
-        modal.addEventListener('click', e => {
-            if (e.target.id === 'locationModal') {
-                e.target.style.display = "none";
-            }
-        });
-    }
-
     // Función para buscar usuario por nombre usando la API
     async function searchByName() {
         const nombre = searchNameInput.value.trim();
@@ -487,11 +477,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         `;
 
             // Crear checkbox para las acciones
-            const cell = tr.querySelector('td:last-child');
             const check = document.createElement('input');
             check.type = 'checkbox';
             check.className = 'form-check-input';
             check.title = 'Seleccionar empleado';
+
+            // Verificar si el empleado ya está en empleadosSeleccionados
+            if (empleadosSeleccionados.includes(usuario.nombre)) {
+                check.checked = true;
+            }
 
             // Event listener para manejar selección
             check.addEventListener('change', () => {
@@ -511,12 +505,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 console.log("Empleados seleccionados:", empleadosSeleccionados);
             });
-
+            const cell = tr.querySelector('td:last-child');
             cell.appendChild(check);
             tableBody.appendChild(tr);
-
-            // Mostrar tabla con 1 resultado
             showTable(1);
+
 
         } catch (error) {
             console.error('Error en searchByName:', error);
@@ -588,10 +581,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td></td>
         `;
 
-            const cell = tr.querySelector("td:last-child");
             const check = document.createElement('input');
             check.type = 'checkbox';
             check.className = 'form-check-input';
+
+            // Si el nombre del empleado está en empleadosSeleccionados, marcar el checkbox
+            if (empleadosSeleccionados.includes(usuario.nombre)) {
+                check.checked = true;
+            }
 
             check.addEventListener('change', () => {
                 const nombre = usuario.nombre || 'Sin nombre';
@@ -601,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp !== nombre);
                 }
             });
-
+            const cell = tr.querySelector("td:last-child"); 
             cell.appendChild(check);
             tableBody.appendChild(tr);
         });
@@ -688,10 +685,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (isValid) {
             console.log('Formulario válido - procediendo con el envío...');
 
+
             const response = fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario')
             const datos = {
-                IdUsuario: data.IdUsuario
-                ,
+                IdUsuario: data.IdUsuario,
                 IdServicio: data.IdServicio,
                 IdEdificio: data.IdEdificio,
                 Observaciones: data.Observaciones,
