@@ -44,7 +44,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                                         e.nombre,
                                         CONCAT(e.calle, ' ', e.numeracion) as Direccion,
                                         uax.fecha as Fecha_de_Inicio 
-                                    FROM UsuarioXActividad uax 
+                                    FROM ServicioXUsuario uax 
                                     JOIN Servicio s ON s.id_servicio = uax.id_servicio 
                                     JOIN Edificio e ON e.id_edificio = uax.id_edificio 
                                     WHERE uax.id_usuario = @idUsuario", conn))
@@ -55,7 +55,9 @@ namespace JobOclock_BackEnd.Data.Repositories
                 {
                     var ordIdUsuario = reader.GetOrdinal("id_usuario");
                     var ordIdServicio = reader.GetOrdinal("id_servicio");
+                    var ordNameServicio = reader.GetOrdinal("Servicio");
                     var ordIdEdificio = reader.GetOrdinal("id_edificio");
+                    var ordNameEdificio = reader.GetOrdinal("Edificio");
                     var ordObservaciones = reader.GetOrdinal("Observaciones");
                     var ordFecha = reader.GetOrdinal("Fecha_de_Inicio");
 
@@ -65,7 +67,9 @@ namespace JobOclock_BackEnd.Data.Repositories
                         {
                             IdUsuario = reader.GetInt32(ordIdUsuario),
                             IdServicio = reader.GetInt32(ordIdServicio),
+                            NombreServicio = reader.GetString(ordNameServicio),
                             IdEdificio = reader.GetInt32(ordIdEdificio),
+                            NombreEdificio = reader.GetString(ordNameEdificio),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             Fecha = reader.GetDateTime(ordFecha)
                         });

@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnClear = document.getElementById('btnClear');
     const btnRetry = document.getElementById('btnRetry');
     const btnNewTask = document.getElementById('btnNewTask');
+    const btnVerTask = document.getElementById('btnVerTask');
     const btnConfirm = document.getElementById('btnConfirmar');
 
 
@@ -356,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-// 🔹 Función mejorada para abrir el modal
+    // 🔹 Función mejorada para abrir el modal de Asignar Nueva Tarea
     function openModalNewTask(nombreEmpleado) {
         console.log('🔓 Abriendo modal para:', nombreEmpleado);
 
@@ -402,6 +403,117 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
+    const closeVerTaskModalBtn = document.getElementById('closeVerTaskModalBtn');
+    // Cerrar modal
+    if (closeVerTaskModalBtn) {
+        closeVerTaskModalBtn.addEventListener('click', () => {
+            console.log('🔄 Desmarcando todos los usuarios...');
+
+            // Buscar todos los checkboxes en la tabla
+            const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
+
+            // Desmarcar cada checkbox
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checkbox.checked = false;
+                    console.log('✅ Usuario desmarcado');
+                }
+            });
+            empleadosSeleccionados= [];
+            document.getElementById('modal-NewTask').style.display = "none";
+        });
+    }
+
+
+
+    // 🔹 Función para manejar el botón "Ver Tareas"
+    function verTareas() {
+        // Buscar el checkbox seleccionado
+        const selectedCheckbox = document.querySelector('.selectEmployee:checked');
+
+        if (!selectedCheckbox) {
+            console.error('❌ No se ha seleccionado ningún empleado');
+            return;
+        }
+
+        // Obtener la fila que contiene el checkbox seleccionado
+        const selectedRow = selectedCheckbox.closest('tr');
+
+        // Obtener el valor de la columna Id (primera columna de la fila)
+        const employeeId = selectedRow.cells[0].textContent; // Asumiendo que Id está en la primera columna
+
+        // Obtener el nombre del empleado (segunda columna, por ejemplo)
+        const employeeName = selectedRow.cells[1].textContent;
+
+        // Llamar a la función que abre el modal, pasando el id del empleado
+        openModalVerTask(employeeId, employeeName);
+    }
+
+
+    // 🔹 Función mejorada para abrir el modal de Ver Tareas Asignadas
+    async function openModalVerTask(employeeId, nameEmpleado) {
+
+        if(empleadosSeleccionados.length == null || empleadosSeleccionados >1)
+        {
+            alert("Seleccione un solo empleado");
+        }
+        else {
+            try {
+                // Realizar la consulta pasando el Id del empleado
+                const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
+                const data = await response.json(); // Suponiendo que la API devuelve un JSON
+
+                console.log('🔓 Abriendo modal para:', nameEmpleado);
+
+                const modalVerTask = document.getElementById('modal-VerTask');
+                const inputUser = document.getElementById('verTareaByUser');
+
+                if (!modalVerTask) {
+                    console.error('❌ Modal no encontrado');
+                    return;
+                }
+
+                if (!inputUser) {
+                    console.error('❌ Input User no encontrado');
+                    return;
+                }
+
+                // Rellena el input con el nombre del empleado
+                inputUser.value = empleadosSeleccionados[0];
+                inputUser.disabled = true;
+
+                // Rellenar datos del modal con la información obtenida de la API
+                // Supongo que la respuesta de la API tiene datos como "actividad" y "edificio"
+                const activityButton = document.getElementById('activitySelectedByUser');
+                const edificioButton = document.getElementById('edificioSelectedByUser');
+
+                if (activityButton && data.actividad) {
+                    activityButton.textContent = data.actividad;
+                    activityButton.setAttribute('data-selected', data.actividad);
+                }
+
+                if (edificioButton && data.edificio) {
+                    edificioButton.textContent = data.edificio;
+                    edificioButton.setAttribute('data-selected', data.edificio);
+                }
+
+                // Muestra el modal
+                modalVerTask.style.display = 'flex';
+
+                // Carga las actividades Y edificios después de mostrar el modal
+                setTimeout(async () => {
+                    await cargarActividades();
+                    await cargarEdificios();
+                }, 200);
+            } catch (error) {
+                console.error('❌ Error al obtener datos de la API:', error);
+            }
+        }
+
+    }
+
+
+
     const closeNewTaskModalBtn = document.getElementById('closeNewTaskModalBtn');
     // Cerrar modal
     if (closeNewTaskModalBtn) {
@@ -422,6 +534,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('modal-NewTask').style.display = "none";
         });
     }
+
+
 
     // Función para buscar usuario por nombre usando la API
     async function searchByName() {
@@ -563,12 +677,38 @@ document.addEventListener('DOMContentLoaded', async function () {
         renderTable(resultados);
     }
 
-// 🔹 Renderizar tabla con resultados
+    // Esta función se utiliza para crear y agregar un checkbox a cada fila
+    function createCheckboxForUser(usuario) {
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.className = 'form-check-input';
+
+        // Si el nombre del empleado está en empleadosSeleccionados, marcar el checkbox
+        if (empleadosSeleccionados.includes(usuario.nombre)) {
+            check.checked = true;
+        }
+
+        // Evento para manejar el cambio de estado del checkbox
+        check.addEventListener('change', () => {
+            const nombre = usuario.nombre || 'Sin nombre';
+            if (check.checked) {
+                if (!empleadosSeleccionados.includes(nombre)) {
+                    empleadosSeleccionados.push(nombre);
+                }
+            } else {
+                empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp !== nombre);
+            }
+        });
+
+        return check;
+    }
+
+    // Función que renderiza la tabla con la lista de empleados y checkboxes
     function renderTable(usuarios) {
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Limpiar la tabla antes de agregar filas
 
         if (usuarios.length === 0) {
-            showNoData();
+            showNoData(); // Mostrar mensaje si no hay usuarios
             return;
         }
 
@@ -578,32 +718,21 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td><span class="badge bg-secondary">${usuario.idUsuario || 'N/A'}</span></td>
             <td><strong>${usuario.nombre || 'Sin nombre'}</strong></td>
             <td><code>${usuario.nicknameDni || 'Sin DNI'}</code></td>
-            <td></td>
+            <td></td> <!-- Aquí se agregará el checkbox -->
         `;
 
-            const check = document.createElement('input');
-            check.type = 'checkbox';
-            check.className = 'form-check-input';
+            // Crear el checkbox para este usuario
+            const check = createCheckboxForUser(usuario);
 
-            // Si el nombre del empleado está en empleadosSeleccionados, marcar el checkbox
-            if (empleadosSeleccionados.includes(usuario.nombre)) {
-                check.checked = true;
-            }
-
-            check.addEventListener('change', () => {
-                const nombre = usuario.nombre || 'Sin nombre';
-                if (check.checked) {
-                    if (!empleadosSeleccionados.includes(nombre)) empleadosSeleccionados.push(nombre);
-                } else {
-                    empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp !== nombre);
-                }
-            });
-            const cell = tr.querySelector("td:last-child"); 
+            // Añadir el checkbox a la última columna de la fila
+            const cell = tr.querySelector('td:last-child');
             cell.appendChild(check);
+
+            // Agregar la fila a la tabla
             tableBody.appendChild(tr);
         });
 
-        showTable(usuarios.length);
+        showTable(usuarios.length); // Mostrar la tabla
     }
 
 
@@ -728,6 +857,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Pasar todos los seleccionados al modal
         openModalNewTask(empleadosSeleccionados);
+    })
+
+    btnVerTask.addEventListener('click', async () => {
+
+            verTareas();
     })
 
     if (btnConfirm) {

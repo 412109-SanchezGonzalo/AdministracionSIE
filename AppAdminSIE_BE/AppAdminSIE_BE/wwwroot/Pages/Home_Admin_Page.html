@@ -41,16 +41,21 @@
                 <input type="text" class="form-control form-control-sm" id="search-name" placeholder="Nombre...">
             </div>
             <div class="col-3">
-                <button class="btn btn-primary btn-sm w-100" id="btnSearch">🔍 Todos</button>
+                <button class="btn btn-primary btn-sm w-100" id="btnSearch">Todos los Empleados</button>
             </div>
             <div class="col-3">
                 <button class="btn btn-success btn-sm w-100" id="btnNewTask" style="background-color: #dc6900">Asignar Tarea</button>
             </div>
 
+
         </div>
         <div class="row g-2 mt-1">
             <div class="col-6">
                 <button class="btn btn-outline-secondary btn-sm w-100" id="btnClear">🗑️ Limpiar</button>
+            </div>
+
+            <div class="col-3">
+                <button class="btn btn-success btn-sm w-100" id="btnVerTask" style="background-color: #78b638">Ver Tareas Asignadas</button>
             </div>
 
             <div class="col-6">
@@ -60,7 +65,9 @@
                         <span id="user-count" class="badge bg-primary badge-xs">0</span>
                     </small>
                 </div>
+
             </div>
+
         </div>
 
 
@@ -137,6 +144,48 @@
                 <textarea class="form-control" id="comments" rows="3"></textarea>
             </div>
             <button type="submit" class="btn btn-primary" style="background-color: #2e7700" id="btnConfirmar">Confirmar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Ver Tarea Asignada -->
+    <div class="modal-overlay-newTask" id="modal-VerTask">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>📝 Tarea asignada</h2>
+            <button type="button" class="btn-close" id="closeVerTaskModalBtn" aria-label="Close"></button>
+        </div>
+        <form>
+            <div class="mb-3">
+                <label for="verTareaByUser" class="form-label">Empleado</label>
+                <input type="input" class="form-control" id="verTareaByUser" aria-describedby="username">
+            </div>
+            <div class="mb-3">
+                <label for="VerMenuActivities" class="form-label">Actividad</label>
+                <div class="input-group mb-3" id="VerMenuActivities">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="activitySelectedByUser"></button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="VerMenuEdificios" class="form-label">Edificio</label>
+                <div class="input-group mb-3" id="VerMenuEdificios">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelectedByUser"></button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="VerDateActivityByUser" class="form-label d-block">Fecha de Actividad</label>
+                <input type="date" class="form-control-sm" id="verDateActivityByUser">
+            </div>
+            <div class="mb-3">
+                <label for="VerCommentsByUser" class="form-label">Observaciones</label>
+                <textarea class="form-control" id="VerCommentsByUser" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="background-color: #2e7700" id="btnEditar">✏️ Editar</button>
+            <button type="submit" class="btn btn-primary" style="background-color: #2e7700" id="btnEliminar">Eliminar Tarea</button>
         </form>
     </div>
 </div>
