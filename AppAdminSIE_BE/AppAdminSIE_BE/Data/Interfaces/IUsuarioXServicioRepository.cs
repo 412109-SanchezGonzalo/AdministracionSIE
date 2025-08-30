@@ -5,7 +5,7 @@ namespace JobOclock_BackEnd.Data.Interfaces
     public interface IUsuarioXServicioRepository
     {
         IEnumerable<UsuarioXServicio> GetByUsuario(int idUsuario);
-        int Add(UsuarioXServicio registro);
+        long Add(UsuarioXServicio registro);
         void UpdateEstado(int idUsuario, int idActividad, string nuevoEstado);
     }
 }
