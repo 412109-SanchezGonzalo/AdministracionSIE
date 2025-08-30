@@ -44,7 +44,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                                         s.descripcion as Servicio,
                                         uax.observaciones as Observaciones,
                                         e.id_edificio,
-                                        e.nombre,
+                                        e.nombre as Edificio,
                                         CONCAT(e.calle, ' ', e.numeracion) as Direccion,
                                         uax.fecha as Fecha_de_Inicio 
                                     FROM ServicioXUsuario uax 

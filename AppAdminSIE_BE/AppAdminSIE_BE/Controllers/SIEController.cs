@@ -271,11 +271,11 @@ namespace JobOclock_BackEnd.Controllers
         // USUARIO X SERVICIO
 
         [HttpGet("Obtener-servicioXusuario-por-usuario")]
-        public ActionResult<string> GetActividadXUsuario([FromQuery] int idUser)
+        public ActionResult<string> GetActividadXUsuario([FromQuery] int userId)
         {
             try
             {
-                return Ok(_service.GetByUsuarioXActividad(idUser));
+                return Ok(_service.GetByUsuarioXActividad(userId));
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
