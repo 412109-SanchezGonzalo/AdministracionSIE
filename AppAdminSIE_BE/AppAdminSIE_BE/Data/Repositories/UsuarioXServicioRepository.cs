@@ -28,7 +28,7 @@ namespace JobOclock_BackEnd.Data.Repositories
 
                 conn.Open();
                 // Usamos ExecuteScalar() para obtener el ID
-                long id = (int)cmd.ExecuteScalar();
+                int id = (int)cmd.ExecuteScalar();
                 return (int)id;
             }
         }
