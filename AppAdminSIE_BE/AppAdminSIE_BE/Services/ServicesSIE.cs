@@ -135,9 +135,9 @@ namespace JobOclock_BackEnd.Services
         {
             return _usuarioXActividadRepository.GetByUsuario(idUsuario);
         }
-        public void AddUsuarioXActividad(UsuarioXServicio registro)
+        public int AddUsuarioXActividad(UsuarioXServicio registro)
         {
-            _usuarioXActividadRepository.Add(registro);
+            return _usuarioXActividadRepository.Add(registro);
         }
         public void UpdateEstadoUsuarioXActividad(int idUsuario, int idActividad, string nuevoEstado)
         {

@@ -18,8 +18,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     let empleadosSeleccionados = [];
     // 🔹 Array global para almacenar actividades
     let actividadesDisponibles = [];
+    let servicioSeleccionadoId = null;
     // 🔹 Array global para almacenar edificios
     let edificiosDisponibles = [];
+    let edificioSeleccionadoId = null;
 
     const navbarToggle = document.querySelector('.navbar-toggle');
     const navbarMenu = document.querySelector('.navbar-menu');
@@ -168,10 +170,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             button.className = 'dropdown-item';
             button.type = 'button';
             button.textContent = actividad.descripcion;
-            button.setAttribute('data-value', actividad.id);
+            button.setAttribute('data-value', actividad.idServicio);
 
             button.addEventListener('click', () => {
-                seleccionarActividad(actividad.id, actividad.descripcion);
+                seleccionarActividad(actividad.idServicio, actividad.descripcion);
             });
 
             li.appendChild(button);
@@ -185,13 +187,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     function seleccionarActividad(id, descripcion) {
         console.log('🎯 Actividad seleccionada:', { id, descripcion });
 
-        // CORREGIDO: Buscar específicamente el botón de actividades
+        // Guardar el ID en variable global
+        servicioSeleccionadoId = id;
+
         const botonDropdown = document.getElementById('activitySelected');
 
         if (botonDropdown) {
             botonDropdown.textContent = descripcion;
             botonDropdown.setAttribute('data-selected', id);
-            console.log('✅ Botón dropdown de actividades actualizado');
+            console.log('✅ Botón dropdown de actividades actualizado y ID guardado:', id);
 
             // Cerrar el dropdown después de seleccionar
             try {
@@ -207,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 🔹 Función corregida para llenar el dropdown de edificios
+    // 🔹 Función para llenar el dropdown de edificios
     function llenarDropdownEdificios(edificios) {
         console.log('🔄 Llenando dropdown con edificios:', edificios);
 
@@ -238,10 +242,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             button.className = 'dropdown-item';
             button.type = 'button';
             button.textContent = edificio.nombre;
-            button.setAttribute('data-value', edificio.id);
+            button.setAttribute('data-value', edificio.id_Edificio);
 
             button.addEventListener('click', () => {
-                seleccionarEdificio(edificio.id, edificio.nombre);
+                seleccionarEdificio(edificio.id_Edificio, edificio.nombre);
             });
 
             li.appendChild(button);
@@ -251,17 +255,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('✅ Dropdown de edificios poblado exitosamente con', edificios.length, 'edificios');
     }
 
-// 🔹 Función corregida para seleccionar un edificio
+    // Funcion para seleccionar un Edificio del Dropdown
     function seleccionarEdificio(id, nombre) {
         console.log('🎯 Edificio seleccionado:', { id, nombre });
 
-        // CORREGIDO: Buscar específicamente el botón de edificios
+        // Guardar el ID en variable global
+        edificioSeleccionadoId = id;
+
         const botonDropdown = document.getElementById('edificioSelected');
 
         if (botonDropdown) {
             botonDropdown.textContent = nombre;
             botonDropdown.setAttribute('data-selected', id);
-            console.log('✅ Botón dropdown de edificios actualizado');
+            console.log('✅ Botón dropdown de edificios actualizado y ID guardado:', id);
 
             // Cerrar el dropdown después de seleccionar
             try {
@@ -275,6 +281,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         } else {
             console.error('❌ No se encontró el botón edificioSelected');
         }
+    }
+
+    // Función para obtener el ID (usa la variable global)
+    function obtenerIdEdificio() {
+        console.log('🏢 ID Edificio obtenido:', edificioSeleccionadoId);
+        return edificioSeleccionadoId;
     }
 
     // 🔹 Función corregida para cargar actividades desde la API
@@ -317,7 +329,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-// 🔹 Función corregida para cargar edificios desde la API
+    // 🔹 Función para obtener el ID del servicio seleccionado
+    function obtenerIdServicio() {
+        console.log('🔧 ID Servicio obtenido:', servicioSeleccionadoId);
+        return servicioSeleccionadoId;
+    }
+
+
+
+    // 🔹 Función corregida para cargar edificios desde la API
     async function cargarEdificios() {
         console.log('🔄 Cargando edificios desde la API...');
 
@@ -357,9 +377,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 🔹 Función mejorada para abrir el modal de Asignar Nueva Tarea
-    function openModalNewTask(nombreEmpleado) {
-        console.log('🔓 Abriendo modal para:', nombreEmpleado);
+    // 🔹 Función CORREGIDA para abrir el modal de Asignar Nueva Tarea
+    function openModalNewTask(empleadosSeleccionados) {
+        console.log('🔓 Abriendo modal Nueva Tarea para empleados:', empleadosSeleccionados);
 
         const modalNewTask = document.getElementById('modal-NewTask');
         const inputUserName = document.getElementById('userName');
@@ -374,8 +394,25 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        // Rellena el input con el nombre del empleado
-        inputUserName.value = Array.isArray(nombreEmpleado) ? nombreEmpleado.join(', ') : nombreEmpleado;
+        // ✅ CORRECCIÓN: Extraer solo los nombres de los objetos
+        let nombresEmpleados;
+
+        if (Array.isArray(empleadosSeleccionados) && empleadosSeleccionados.length > 0) {
+            // Si el primer elemento es un objeto, extraer los nombres
+            if (typeof empleadosSeleccionados[0] === 'object' && empleadosSeleccionados[0].nombre) {
+                nombresEmpleados = empleadosSeleccionados.map(emp => emp.nombre).join(', ');
+            } else {
+                // Si ya son strings, usar directamente
+                nombresEmpleados = empleadosSeleccionados.join(', ');
+            }
+        } else {
+            nombresEmpleados = 'Sin empleados seleccionados';
+        }
+
+        console.log('📝 Nombres a mostrar:', nombresEmpleados);
+
+        // Rellenar el input con los nombres de los empleados
+        inputUserName.value = nombresEmpleados;
         inputUserName.disabled = true;
 
         // Resetear dropdowns al estado inicial
@@ -392,10 +429,22 @@ document.addEventListener('DOMContentLoaded', async function () {
             edificioButton.removeAttribute('data-selected');
         }
 
-        // Muestra el modal
+        // Limpiar fecha
+        const fechaInput = document.getElementById('dateActivity');
+        if (fechaInput) {
+            fechaInput.value = '';
+        }
+
+        // Limpiar observaciones
+        const observacionesTextarea = document.querySelector('#modal-NewTask textarea');
+        if (observacionesTextarea) {
+            observacionesTextarea.value = '';
+        }
+
+        // Mostrar el modal
         modalNewTask.style.display = 'flex';
 
-        // Carga las actividades Y edificios después de mostrar el modal
+        // Cargar las actividades Y edificios después de mostrar el modal
         setTimeout(async () => {
             await cargarActividades();
             await cargarEdificios();
@@ -403,114 +452,169 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
+    // 🔹 Event listeners para los botones de cerrar modales (CORREGIDOS)
     const closeVerTaskModalBtn = document.getElementById('closeVerTaskModalBtn');
-    // Cerrar modal
     if (closeVerTaskModalBtn) {
         closeVerTaskModalBtn.addEventListener('click', () => {
-            console.log('🔄 Desmarcando todos los usuarios...');
+            console.log('🔄 Cerrando modal Ver Tareas y desmarcando usuarios...');
 
-            // Buscar todos los checkboxes en la tabla
+            // Desmarcar todos los checkboxes
             const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
-
-            // Desmarcar cada checkbox
             checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
                     checkbox.checked = false;
-                    console.log('✅ Usuario desmarcado');
                 }
             });
-            empleadosSeleccionados= [];
-            document.getElementById('modal-NewTask').style.display = "none";
+
+            // Limpiar empleados seleccionados
+            empleadosSeleccionados = [];
+
+            // Cerrar modal
+            document.getElementById('modal-VerTask').style.display = "none";
         });
     }
 
 
 
-    // 🔹 Función para manejar el botón "Ver Tareas"
+    // 🔹 Función CORREGIDA para manejar el botón "Ver Tareas"
     function verTareas() {
-        // Buscar el checkbox seleccionado
-        const selectedCheckbox = document.querySelector('.selectEmployee:checked');
+        console.log('🔍 Verificando empleados seleccionados...');
+        console.log('Empleados seleccionados:', empleadosSeleccionados);
 
-        if (!selectedCheckbox) {
-            console.error('❌ No se ha seleccionado ningún empleado');
+        // Verificar que haya exactamente un empleado seleccionado
+        if (empleadosSeleccionados.length === 0) {
+            alert('❌ No se ha seleccionado ningún empleado');
             return;
         }
 
-        // Obtener la fila que contiene el checkbox seleccionado
-        const selectedRow = selectedCheckbox.closest('tr');
+        if (empleadosSeleccionados.length > 1) {
+            alert('❌ Por favor seleccione solo un empleado para ver sus tareas');
+            return;
+        }
 
-        // Obtener el valor de la columna Id (primera columna de la fila)
-        const employeeId = selectedRow.cells[0].textContent; // Asumiendo que Id está en la primera columna
+        // Obtener el empleado seleccionado
+        const empleadoSeleccionado = empleadosSeleccionados[0];
+        console.log('👤 Empleado seleccionado:', empleadoSeleccionado);
 
-        // Obtener el nombre del empleado (segunda columna, por ejemplo)
-        const employeeName = selectedRow.cells[1].textContent;
-
-        // Llamar a la función que abre el modal, pasando el id del empleado
-        openModalVerTask(employeeId, employeeName);
+        // Llamar a la función que abre el modal
+        openModalVerTask(empleadoSeleccionado.id, empleadoSeleccionado.nombre);
     }
 
 
-    // 🔹 Función mejorada para abrir el modal de Ver Tareas Asignadas
-    async function openModalVerTask(employeeId, nameEmpleado) {
+    // Función CORREGIDA para abrir el modal de Ver Tareas Asignadas
+    async function openModalVerTask(employeeId, nombreEmpleado) {
+        console.log('Abriendo modal Ver Tareas para:', { employeeId, nombreEmpleado });
 
-        if(empleadosSeleccionados.length == null || empleadosSeleccionados >1)
-        {
-            alert("Seleccione un solo empleado");
-        }
-        else {
-            try {
-                // Realizar la consulta pasando el Id del empleado
-                const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
-                const data = await response.json(); // Suponiendo que la API devuelve un JSON
+        try {
+            console.log('Realizando consulta para empleado ID:', employeeId);
 
-                console.log('🔓 Abriendo modal para:', nameEmpleado);
+            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
 
-                const modalVerTask = document.getElementById('modal-VerTask');
-                const inputUser = document.getElementById('verTareaByUser');
-
-                if (!modalVerTask) {
-                    console.error('❌ Modal no encontrado');
-                    return;
-                }
-
-                if (!inputUser) {
-                    console.error('❌ Input User no encontrado');
-                    return;
-                }
-
-                // Rellena el input con el nombre del empleado
-                inputUser.value = empleadosSeleccionados[0];
-                inputUser.disabled = true;
-
-                // Rellenar datos del modal con la información obtenida de la API
-                // Supongo que la respuesta de la API tiene datos como "actividad" y "edificio"
-                const activityButton = document.getElementById('activitySelectedByUser');
-                const edificioButton = document.getElementById('edificioSelectedByUser');
-
-                if (activityButton && data.actividad) {
-                    activityButton.textContent = data.actividad;
-                    activityButton.setAttribute('data-selected', data.actividad);
-                }
-
-                if (edificioButton && data.edificio) {
-                    edificioButton.textContent = data.edificio;
-                    edificioButton.setAttribute('data-selected', data.edificio);
-                }
-
-                // Muestra el modal
-                modalVerTask.style.display = 'flex';
-
-                // Carga las actividades Y edificios después de mostrar el modal
-                setTimeout(async () => {
-                    await cargarActividades();
-                    await cargarEdificios();
-                }, 200);
-            } catch (error) {
-                console.error('❌ Error al obtener datos de la API:', error);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }
 
+            const data = await response.json();
+            console.log('Datos obtenidos de la API:', data);
+            console.log('Tipo de respuesta:', typeof data);
+            console.log('Es array:', Array.isArray(data));
+
+            const modalVerTask = document.getElementById('modal-VerTask');
+            const inputUser = document.getElementById('verTareaByUser');
+
+            if (!modalVerTask) {
+                console.error('Modal modal-VerTask no encontrado');
+                return;
+            }
+
+            if (!inputUser) {
+                console.error('Input verTareaByUser no encontrado');
+                return;
+            }
+
+            // Rellenar el input con el nombre del empleado
+            inputUser.value = nombreEmpleado;
+            inputUser.disabled = true;
+
+            // Obtener los elementos del dropdown
+            const activityButton = document.getElementById('activitySelectedByUser');
+            const edificioButton = document.getElementById('edificioSelectedByUser');
+
+            // Procesar los datos de la API
+            if (Array.isArray(data) && data.length > 0) {
+                // Si hay datos, tomar el primer registro (o podrías mostrar múltiples)
+                const primerRegistro = data[0];
+                console.log('Primer registro:', primerRegistro);
+
+                // Llenar dropdown de actividad/servicio
+                if (activityButton) {
+                    if (primerRegistro.nombreServicio) {
+                        activityButton.textContent = primerRegistro.nombreServicio;
+                        activityButton.setAttribute('data-selected', primerRegistro.idServicio || primerRegistro.nombreServicio);
+                        console.log('Actividad asignada:', primerRegistro.nombreServicio);
+                        activityButton.disabled = true;
+                    } else {
+                        activityButton.textContent = 'Sin actividad asignada';
+                        activityButton.removeAttribute('data-selected');
+                    }
+                }
+
+                // Llenar dropdown de edificio
+                if (edificioButton) {
+                    if (primerRegistro.nombreEdificio) {
+                        edificioButton.textContent = primerRegistro.nombreEdificio;
+                        edificioButton.setAttribute('data-selected', primerRegistro.idEdificio || primerRegistro.nombreEdificio);
+                        console.log('Edificio asignado:', primerRegistro.nombreEdificio);
+                        edificioButton.disabled = true;
+                    } else {
+                        edificioButton.textContent = 'Sin edificio asignado';
+                        edificioButton.removeAttribute('data-selected');
+                        edificioButton.disabled = true;
+                    }
+                }
+
+                // Si quieres mostrar también la fecha y observaciones
+                const fechaInput = document.getElementById('verDateActivityByUser');
+                if (fechaInput && primerRegistro.fecha) {
+                    // Convertir la fecha al formato YYYY-MM-DD si es necesario
+                    const fecha = new Date(primerRegistro.fecha);
+                    if (!isNaN(fecha.getTime())) {
+                        fechaInput.value = fecha.toISOString().split('T')[0];
+                    }
+                }
+                fechaInput.disabled = true;
+
+                const observacionesInput = document.getElementById('VerCommentsByUser');
+                if (observacionesInput) {
+                    observacionesInput.value = primerRegistro.observaciones || '';
+                }
+                observacionesInput.disabled = true;
+
+            } else {
+                // No hay datos asignados
+                console.log('No se encontraron tareas asignadas para este empleado');
+
+                if (activityButton) {
+                    activityButton.textContent = 'Sin actividad asignada';
+                    activityButton.removeAttribute('data-selected');
+                }
+
+                if (edificioButton) {
+                    edificioButton.textContent = 'Sin edificio asignado';
+                    edificioButton.removeAttribute('data-selected');
+                }
+            }
+
+            // Mostrar el modal
+            modalVerTask.style.display = 'flex';
+            console.log('Modal Ver Tareas abierto correctamente');
+
+        } catch (error) {
+            console.error('Error al obtener datos de la API:', error);
+            alert('Error al cargar las tareas del empleado: ' + error.message);
+        }
     }
+
 
 
 
@@ -537,10 +641,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
-    // Función para buscar usuario por nombre usando la API
+    // 🔹 Función CORREGIDA para buscar usuario por nombre
     async function searchByName() {
         const nombre = searchNameInput.value.trim();
-        console.log('Buscando usuario por nombre:', nombre);
+        console.log('🔍 Buscando usuario por nombre:', nombre);
 
         if (!nombre) {
             alert("Ingresa un nombre");
@@ -550,35 +654,24 @@ document.addEventListener('DOMContentLoaded', async function () {
         showLoading();
 
         try {
-            // Llamada a la API que recibe string y devuelve JSON
             const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-nombre', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'  // Cambiar a JSON
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(nombre)  // Envolver el string en JSON
+                body: JSON.stringify(nombre)
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response body:', errorText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // La API devuelve un objeto JSON
             const usuario = await response.json();
-            console.log('Usuario encontrado:', usuario);
+            console.log('✅ Usuario encontrado:', usuario);
 
-            // Verificar que el objeto tiene los campos necesarios
-            if (!usuario || typeof usuario !== 'object') {
-                throw new Error('Respuesta de API inválida');
-            }
-
-            // Limpiar tabla antes de agregar el resultado
+            // Limpiar tabla y empleados seleccionados
             tableBody.innerHTML = '';
+            empleadosSeleccionados = []; // ✅ Limpiar selecciones anteriores
 
             // Crear fila con los datos del usuario
             const tr = document.createElement('tr');
@@ -591,44 +684,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         `;
 
             // Crear checkbox para las acciones
-            const check = document.createElement('input');
-            check.type = 'checkbox';
-            check.className = 'form-check-input';
-            check.title = 'Seleccionar empleado';
+            const check = createCheckboxForUser(usuario);
 
-            // Verificar si el empleado ya está en empleadosSeleccionados
-            if (empleadosSeleccionados.includes(usuario.nombre)) {
-                check.checked = true;
-            }
-
-            // Event listener para manejar selección
-            check.addEventListener('change', () => {
-                const nombreCompleto = usuario.nombre || 'Sin nombre';
-
-                if (check.checked) {
-                    // Agregar si está marcado
-                    if (!empleadosSeleccionados.includes(nombreCompleto)) {
-                        empleadosSeleccionados.push(nombreCompleto);
-                    }
-                } else {
-                    // Quitar si se desmarca
-                    empleadosSeleccionados = empleadosSeleccionados.filter(
-                        emp => emp !== nombreCompleto
-                    );
-                }
-
-                console.log("Empleados seleccionados:", empleadosSeleccionados);
-            });
             const cell = tr.querySelector('td:last-child');
             cell.appendChild(check);
             tableBody.appendChild(tr);
+
             showTable(1);
 
-
         } catch (error) {
-            console.error('Error en searchByName:', error);
+            console.error('❌ Error en searchByName:', error);
 
-            // Manejar diferentes tipos de errores
             if (error.message.includes('404')) {
                 showError('Usuario no encontrado');
             } else if (error.message.includes('500')) {
@@ -638,7 +704,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         }
     }
-
 
     let usuariosGlobal = []; // lista global de usuarios
 
@@ -677,27 +742,38 @@ document.addEventListener('DOMContentLoaded', async function () {
         renderTable(resultados);
     }
 
-    // Esta función se utiliza para crear y agregar un checkbox a cada fila
+    // Esta función se utiliza para crear y agregar un checkbox a cada fila (CORREGIDA)
     function createCheckboxForUser(usuario) {
         const check = document.createElement('input');
         check.type = 'checkbox';
-        check.className = 'form-check-input';
+        check.className = 'form-check-input selectEmployee'; // ✅ Agregar clase selectEmployee
+        check.title = 'Seleccionar empleado';
 
-        // Si el nombre del empleado está en empleadosSeleccionados, marcar el checkbox
-        if (empleadosSeleccionados.includes(usuario.nombre)) {
+        // Si el empleado está en empleadosSeleccionados, marcar el checkbox
+        const empleadoExistente = empleadosSeleccionados.find(emp => emp.id === usuario.idUsuario);
+        if (empleadoExistente) {
             check.checked = true;
         }
 
         // Evento para manejar el cambio de estado del checkbox
         check.addEventListener('change', () => {
-            const nombre = usuario.nombre || 'Sin nombre';
+            const empleadoInfo = {
+                id: usuario.idUsuario || 'N/A',
+                nombre: usuario.nombre || 'Sin nombre',
+                dni: usuario.nicknameDni || 'Sin DNI'
+            };
+
             if (check.checked) {
-                if (!empleadosSeleccionados.includes(nombre)) {
-                    empleadosSeleccionados.push(nombre);
+                // Agregar si no existe
+                if (!empleadosSeleccionados.find(emp => emp.id === empleadoInfo.id)) {
+                    empleadosSeleccionados.push(empleadoInfo);
                 }
             } else {
-                empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp !== nombre);
+                // Quitar si se desmarca
+                empleadosSeleccionados = empleadosSeleccionados.filter(emp => emp.id !== empleadoInfo.id);
             }
+
+            console.log("Empleados seleccionados:", empleadosSeleccionados);
         });
 
         return check;
@@ -802,40 +878,99 @@ document.addEventListener('DOMContentLoaded', async function () {
         return true; // Formulario válido
     }
 
-    // Función para usar en el evento submit del formulario
-     function handleFormSubmit(event) {
-        event.preventDefault(); // Prevenir envío del formulario
+    // Agregar estas funciones para obtener los nombres
+    function obtenerNombreServicio() {
+        const botonDropdown = document.getElementById('activitySelected');
+        if (botonDropdown && botonDropdown.getAttribute('data-selected')) {
+            return botonDropdown.textContent.trim();
+        }
+        return null;
+    }
+
+    function obtenerNombreEdificio() {
+        const botonDropdown = document.getElementById('edificioSelected');
+        if (botonDropdown && botonDropdown.getAttribute('data-selected')) {
+            return botonDropdown.textContent.trim();
+        }
+        return null;
+    }
+
+    async function handleFormSubmit(event) {
+        event.preventDefault();
 
         console.log('Intentando enviar formulario...');
 
-        // Validar formulario
         const isValid = validateNewTaskForm();
 
         if (isValid) {
             console.log('Formulario válido - procediendo con el envío...');
 
+            try {
+                // CORREGIR EL FOR
+                for (let i = 0; i < empleadosSeleccionados.length; i++) {
 
-            const response = fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario')
-            const datos = {
-                IdUsuario: data.IdUsuario,
-                IdServicio: data.IdServicio,
-                IdEdificio: data.IdEdificio,
-                Observaciones: data.Observaciones,
-                Fecha: data.Fecha
-            };
+                    // Obtener el ID del empleado actual
+                    const idEmpleado = empleadosSeleccionados[i].id;
+                    const observacionesNuevaTarea = document.getElementById('comments');
+                    const fechaNuevaTarea = document.getElementById('dateActivity');
 
+                    // CORREGIR CONVERSIÓN DE FECHA
+                    const datos = {
+                        idUsuario: idEmpleado,
+                        idServicio: obtenerIdServicio(),
+                        nombreServicio: obtenerNombreServicio(),
+                        idEdificio: obtenerIdEdificio(),
+                        nombreEdificio: obtenerNombreEdificio(),
+                        observaciones: observacionesNuevaTarea.value.trim(),
+                        fecha: fechaNuevaTarea.value // Ya está en formato YYYY-MM-DD si es input type="date"
+                    };
 
-            alert('Tarea asignada correctamente');
+                    console.log(`📤 Datos para empleado ${i + 1}:`, datos);
 
-            // Cerrar modal si todo está bien
-            document.getElementById('modal-NewTask').style.display = 'none';
+                    // Validar que no haya valores null
+                    if (!datos.idUsuario || !datos.idServicio || !datos.idEdificio || !datos.fecha) {
+                        console.error('❌ Datos faltantes:', datos);
+                        alert(`Error: Datos faltantes para empleado ${empleadosSeleccionados[i].nombre}`);
+                        continue;
+                    }
 
-            // Limpiar selecciones si es necesario
-            empleadosSeleccionados = [];
+                    // Enviar petición HTTP
+                    const response = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(datos)
+                    });
 
-            // Desmarcar checkboxes
-            const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
-            checkboxes.forEach(checkbox => checkbox.checked = false);
+                    console.log(`📊 Response status para empleado ${i + 1}:`, response.status);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`❌ Error del servidor para empleado ${i + 1}:`, errorText);
+                        throw new Error(`Error ${response.status} para ${empleadosSeleccionados[i].nombre}: ${errorText}`);
+                    }
+
+                    const resultado = await response.json();
+                    console.log(`✅ Tarea asignada exitosamente al empleado ${i + 1}:`, resultado);
+                }
+
+                alert(`Tareas asignadas correctamente a ${empleadosSeleccionados.length} empleados`);
+
+                // Cerrar modal y limpiar
+                document.getElementById('modal-NewTask').style.display = 'none';
+                empleadosSeleccionados = [];
+                servicioSeleccionadoId = null;
+                edificioSeleccionadoId = null;
+
+                // Desmarcar checkboxes
+                const checkboxes = document.querySelectorAll('#table-body input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+
+            } catch (error) {
+                console.error('❌ Error al enviar formulario:', error);
+                alert('Error al asignar tareas: ' + error.message);
+            }
 
         } else {
             console.log('Formulario inválido - no se enviará');

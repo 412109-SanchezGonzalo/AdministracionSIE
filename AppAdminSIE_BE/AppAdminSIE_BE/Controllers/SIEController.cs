@@ -285,8 +285,11 @@ namespace JobOclock_BackEnd.Controllers
         {
             try
             {
-                _service.AddUsuarioXActividad(userXactivity);
-                return Ok("Servicio Por Usuario Creado");
+                int newID = _service.AddUsuarioXActividad(userXactivity);
+                return Ok(new{
+                    message = "Servicio Por Usuario Creado",
+                    idUsuarioXActividad = newID
+                });
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }

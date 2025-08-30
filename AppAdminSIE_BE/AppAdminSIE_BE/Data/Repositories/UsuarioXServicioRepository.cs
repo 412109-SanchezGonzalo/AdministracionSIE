@@ -12,21 +12,24 @@ namespace JobOclock_BackEnd.Data.Repositories
         {
             _connectionString = connectionString;
         }
-        public void Add(UsuarioXServicio registro)
+        public int Add(UsuarioXServicio registro)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "INSERT INTO ServicioXUsuario (id_usuario, id_servicio, id_edificio, observaciones,fecha) " +
-                "VALUES (@idUsuario, @idServicio, @idEdificio, @observaciones, @fecha)", conn))
+                "INSERT INTO ServicioXUsuario (id_usuario, id_servicio, id_edificio, observaciones, fecha) " +
+                "VALUES (@idUsuario, @idServicio, @idEdificio, @observaciones, @fecha); " +
+                "SELECT LAST_INSERT_ID();", conn))
             {
                 cmd.Parameters.AddWithValue("@idUsuario", registro.IdUsuario);
                 cmd.Parameters.AddWithValue("@idServicio", registro.IdServicio);
-                cmd.Parameters.AddWithValue("@idEdificio",registro.IdEdificio);
+                cmd.Parameters.AddWithValue("@idEdificio", registro.IdEdificio);
                 cmd.Parameters.AddWithValue("@observaciones", registro.Observaciones);
                 cmd.Parameters.AddWithValue("@fecha", registro.Fecha);
 
                 conn.Open();
-                cmd.ExecuteNonQuery();
+                // Usamos ExecuteScalar() para obtener el ID
+                long id = (long)cmd.ExecuteScalar();
+                return (int)id;
             }
         }
 
