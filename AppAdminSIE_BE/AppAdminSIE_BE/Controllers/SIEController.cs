@@ -285,6 +285,8 @@ namespace JobOclock_BackEnd.Controllers
         {
             try
             {
+                // Asegurar que siempre sea ignorado lo que venga del cliente
+                userXactivity.IdUsuarioXActividad = 0;
                 int newID = _service.AddUsuarioXActividad(userXactivity);
                 return Ok(new{
                     message = "Servicio Por Usuario Creado",
