@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (!response.ok) {
+                // Si la respuesta no es exitosa (ej. 400, 401), el backend envía un JSON con un mensaje de error.
                 const errorData = await response.json();
                 errorMessage.textContent = errorData.message || '* Usuario y/o contraseña incorrectos.';
                 return;
@@ -41,21 +42,21 @@ document.addEventListener("DOMContentLoaded", function () {
             const userRole = decodedToken.role;
 
             if (userRole === 'Administrador') {
-                // Guardar claves separadas para admin
+                // Guardar datos específicos para el administrador
                 localStorage.setItem('admin_username', username);
                 localStorage.setItem('admin_password', password);
                 localStorage.setItem('admin_token', data.token);
 
                 window.location.href = 'https://administracionsie.onrender.com/Pages/Home_Admin_Page.html';
-            } 
+            }
             else if (userRole === 'Usuario') {
-                // Guardar claves separadas para usuario
+                // Guardar datos específicos para el usuario
                 localStorage.setItem('user_username', username);
+                localStorage.setItem('user_password', password);
                 localStorage.setItem('user_token', data.token);
-                localStorage.setItem('user_password', password); // 👈 cambie "password" por "user_password" para no mezclar
 
                 window.location.href = 'https://administracionsie.onrender.com/Pages/Home_User_Page.html';
-            } 
+            }
             else {
                 errorMessage.textContent = 'Rol desconocido. Contacte al administrador.';
             }
