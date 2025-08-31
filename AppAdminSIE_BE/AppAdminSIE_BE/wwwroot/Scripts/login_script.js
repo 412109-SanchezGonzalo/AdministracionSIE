@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('loginForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
+        console.log('Submit detectado');
+
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
         const errorMessage = document.getElementById('error-message');
@@ -38,8 +40,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // Decodificar el token JWT para obtener el rol
+            console.log('Token recibido:', data.token);
             const decodedToken = parseJwt(data.token);
+            console.log('Token decodificado:', decodedToken);
             const userRole = decodedToken.role;
+            console.log('Rol del usuario:', userRole);
+
+
 
             if (userRole === 'Administrador') {
                 // Guardar datos específicos para el administrador
