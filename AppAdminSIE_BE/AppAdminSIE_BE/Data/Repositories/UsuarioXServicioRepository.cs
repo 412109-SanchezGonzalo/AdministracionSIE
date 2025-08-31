@@ -25,11 +25,17 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.Parameters.AddWithValue("@idEdificio", registro.IdEdificio);
                 cmd.Parameters.AddWithValue("@observaciones", registro.Observaciones);
                 cmd.Parameters.AddWithValue("@fecha", registro.Fecha);
-
+                
                 conn.Open();
-                // Usamos ExecuteScalar() para obtener el ID
-                int id = Convert.ToInt32(cmd.ExecuteScalar());
-
+                
+                // ✅ AGREGAR ESTOS LOGS PARA DEBUG:
+                var result = cmd.ExecuteScalar();
+                Console.WriteLine($"Resultado de ExecuteScalar: {result}");
+                Console.WriteLine($"Tipo de resultado: {result?.GetType()}");
+                
+                int id = Convert.ToInt32(result);
+                Console.WriteLine($"ID convertido: {id}");
+                
                 return id;
             }
         }
