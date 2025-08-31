@@ -78,7 +78,7 @@ namespace JobOclock_BackEnd.Data.Repositories
             int idxIdUsuario = reader.GetOrdinal("id_usuario");
             int idxNickname = reader.GetOrdinal("Nickname_dni");
             int idxContrasena = reader.GetOrdinal("Contrasena");
-            int idxRol = reader.GetOrdinal("Rol");
+            int idxTipo = reader.GetOrdinal("tipo");
             int idxTelefono = reader.GetOrdinal("telefono");
             int idxEmail = reader.GetOrdinal("email");
             int idxNombre = reader.GetOrdinal("nombre");
@@ -91,7 +91,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                     IdUsuario = reader.GetInt32(idxIdUsuario),
                     NicknameDni = reader.GetString(idxNickname),
                     Contraseña = reader.GetString(idxContrasena),
-                    Rol = reader.IsDBNull(idxRol) ? null : reader.GetString(idxRol),
+                    Rol = reader.IsDBNull(idxTipo) ? null : reader.GetString(idxTipo),
                     Telefono = reader.GetString(idxTelefono),
                     Email = reader.GetString(idxEmail),
                     Nombre = reader.GetString(idxNombre),
