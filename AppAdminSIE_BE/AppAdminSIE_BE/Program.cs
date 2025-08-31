@@ -60,12 +60,10 @@ builder.Services.AddDirectoryBrowser();
 
 var app = builder.Build();
 
-// 6️⃣ Pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
