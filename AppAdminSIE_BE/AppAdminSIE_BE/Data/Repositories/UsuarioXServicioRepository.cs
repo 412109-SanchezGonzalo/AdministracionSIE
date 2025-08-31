@@ -25,11 +25,18 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.Parameters.AddWithValue("@idEdificio", registro.IdEdificio);
                 cmd.Parameters.AddWithValue("@observaciones", registro.Observaciones);
                 cmd.Parameters.AddWithValue("@fecha", registro.Fecha);
-
+                
                 conn.Open();
-                // Usamos ExecuteScalar() para obtener el ID
-                long id = (long)cmd.ExecuteScalar();
-                return (int)id;
+                
+                // ✅ AGREGAR ESTOS LOGS PARA DEBUG:
+                var result = cmd.ExecuteScalar();
+                Console.WriteLine($"Resultado de ExecuteScalar: {result}");
+                Console.WriteLine($"Tipo de resultado: {result?.GetType()}");
+                
+                int id = Convert.ToInt32(result);
+                Console.WriteLine($"ID convertido: {id}");
+                
+                return id;
             }
         }
 
@@ -39,6 +46,7 @@ namespace JobOclock_BackEnd.Data.Repositories
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(@"
                                     SELECT 
+                                        uax.id_servicioxactividad,
                                         uax.id_usuario,
                                         s.id_servicio,
                                         s.descripcion as Servicio,
@@ -56,6 +64,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                 conn.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
+                    var ordIdUsuarioXActividad = reader.GetOrdinal("id_servicioxactividad");
                     var ordIdUsuario = reader.GetOrdinal("id_usuario");
                     var ordIdServicio = reader.GetOrdinal("id_servicio");
                     var ordNameServicio = reader.GetOrdinal("Servicio");
@@ -68,6 +77,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                     {
                         actividades.Add(new UsuarioXServicio
                         {
+                            IdUsuarioXActividad = reader.GetInt32(ordIdUsuarioXActividad),
                             IdUsuario = reader.GetInt32(ordIdUsuario),
                             IdServicio = reader.GetInt32(ordIdServicio),
                             NombreServicio = reader.GetString(ordNameServicio),
