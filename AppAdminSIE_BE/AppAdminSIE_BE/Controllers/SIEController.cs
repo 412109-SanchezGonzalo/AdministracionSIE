@@ -1,4 +1,5 @@
-﻿using JobOclock_BackEnd.Data.Repositories;
+﻿using AppAdminSIE_BE.Models;
+using JobOclock_BackEnd.Data.Repositories;
 using JobOclock_BackEnd.Models;
 using JobOclock_BackEnd.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -296,6 +297,19 @@ namespace JobOclock_BackEnd.Controllers
                 return Ok(userXactivity);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPut("Editar-servicioxusuario")]
+
+        public ActionResult UpdateServicioXUsuario([FromBody] UpdateServicioxusuario servixusu)
+        {
+            try
+            {
+                _service.UpdateUsuarioXActividad(servixusu.Id, servixusu.IdServicio, servixusu.IdEdificio, servixusu.Fecha, servixusu.Observaciones);
+                return Ok("Tarea Editada con exito !");
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+            
         }
     }
 }

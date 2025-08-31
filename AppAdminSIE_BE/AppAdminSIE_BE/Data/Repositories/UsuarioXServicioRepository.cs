@@ -92,15 +92,19 @@ namespace JobOclock_BackEnd.Data.Repositories
             return actividades;
         }
 
-        public void UpdateEstado(int idUsuario, int idActividad, string nuevoEstado)
+        public void Update(int idUsuario, int idServicio,int idEdificio, DateTime fecha, string? observaciones)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "UPDATE UsuarioXActividad SET estado_actividad = @estado WHERE id_usuario = @idUsuario AND id_actividad = @idActividad", conn))
+                "UPDATE ServicioXUsuario SET id_servicio = @idServicio, id_edificio= @idEdificio, " +
+                "fecha = @fecha, observaciones = @observaciones " +
+                "WHERE id_usuario = @idUsuario", conn))
             {
-                cmd.Parameters.AddWithValue("@estado", nuevoEstado);
+                cmd.Parameters.AddWithValue("@idServicio", idServicio);
+                cmd.Parameters.AddWithValue("@idEdificio", idEdificio);
+                cmd.Parameters.AddWithValue("@fecha",fecha);
+                cmd.Parameters.AddWithValue("@observaciones",observaciones);
                 cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
-                cmd.Parameters.AddWithValue("@idActividad", idActividad);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

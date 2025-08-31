@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnNewTask = document.getElementById('btnNewTask');
     const btnVerTask = document.getElementById('btnVerTask');
     const btnConfirm = document.getElementById('btnConfirmar');
+    const btnEditar = document.getElementById('btnEditar');
+    const btnEliminar = document.getElementById('btnEliminar');
 
 
     // 🔍 VERIFICAR ELEMENTOS HTML
@@ -183,7 +185,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('✅ Dropdown de actividades poblado exitosamente con', actividades.length, 'actividades');
     }
 
-// 🔹 Función corregida para seleccionar una actividad
+
+    // 🔹 Función corregida para seleccionar una actividad
     function seleccionarActividad(id, descripcion) {
         console.log('🎯 Actividad seleccionada:', { id, descripcion });
 
@@ -532,6 +535,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
+
+
             // Rellenar el input con el nombre del empleado
             inputUser.value = nombreEmpleado;
             inputUser.disabled = true;
@@ -590,24 +595,23 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 observacionesInput.disabled = true;
 
+                // Mostrar el modal
+                modalVerTask.style.display = 'flex';
+                console.log('Modal Ver Tareas abierto correctamente');
+
             } else {
                 // No hay datos asignados
                 console.log('No se encontraron tareas asignadas para este empleado');
 
-                if (activityButton) {
-                    activityButton.textContent = 'Sin actividad asignada';
-                    activityButton.removeAttribute('data-selected');
+                if(confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. Desea asignarle una ?`))
+                {
+                    openModalNewTask(empleadosSeleccionados);
                 }
 
-                if (edificioButton) {
-                    edificioButton.textContent = 'Sin edificio asignado';
-                    edificioButton.removeAttribute('data-selected');
-                }
+
             }
 
-            // Mostrar el modal
-            modalVerTask.style.display = 'flex';
-            console.log('Modal Ver Tareas abierto correctamente');
+
 
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
@@ -977,6 +981,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+
+
+    // Funcion para editar una tarea asignada
+    async function UpdateTask(idUser){
+
+        
+
+    }
 
     // 🎯 Eventos
     if (btnSearch) btnSearch.addEventListener('click', loadAllUsers);

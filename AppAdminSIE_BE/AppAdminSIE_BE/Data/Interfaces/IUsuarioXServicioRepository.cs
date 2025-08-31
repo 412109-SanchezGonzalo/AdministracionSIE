@@ -6,6 +6,6 @@ namespace JobOclock_BackEnd.Data.Interfaces
     {
         IEnumerable<UsuarioXServicio> GetByUsuario(int idUsuario);
         int Add(UsuarioXServicio registro);
-        void UpdateEstado(int idUsuario, int idActividad, string nuevoEstado);
+        void Update(int idUsuario,int idServicio, int idEdificio, DateTime fecha, string? observaciones);
     }
 }
