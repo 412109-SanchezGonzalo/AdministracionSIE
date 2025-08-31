@@ -288,10 +288,12 @@ namespace JobOclock_BackEnd.Controllers
                 
             
                 int newID = _service.AddUsuarioXActividad(userXactivity);
-                return Ok(new{
-                    message = "Servicio Por Usuario Creado",
-                    idUsuarioXActividad = newID
-                });
+        
+                // Actualizar el objeto con el ID generado
+                userXactivity.IdUsuarioXActividad = newID;
+                
+                // Retornar solo el objeto actualizado
+                return Ok(userXactivity);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
