@@ -300,16 +300,27 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         [HttpPut("Editar-servicioxusuario")]
-
         public ActionResult UpdateServicioXUsuario([FromBody] UpdateServicioxusuario servixusu)
         {
             try
             {
                 _service.UpdateUsuarioXActividad(servixusu.Id, servixusu.IdServicio, servixusu.IdEdificio, servixusu.Fecha, servixusu.Observaciones);
-                return Ok("Tarea Editada con exito !");
+        
+                // Devolver un objeto JSON en lugar de string plano
+                return Ok(new
+                {
+                    success = true,
+                    message = "Tarea Editada con exito!"
+                });
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
-            
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
     }
 }
