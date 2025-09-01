@@ -143,6 +143,9 @@ namespace JobOclock_BackEnd.Services
         {
             _usuarioXActividadRepository.Update(idUsuario,idServicio,idEdificio,fecha,observaciones);
         }
-
+        public void DeleteServicioXUsuario(int idUsuario)
+        {
+            _usuarioXActividadRepository.Delete(idUsuario);
+        }
     }
 }
