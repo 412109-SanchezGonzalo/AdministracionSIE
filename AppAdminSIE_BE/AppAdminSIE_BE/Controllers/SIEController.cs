@@ -305,13 +305,7 @@ namespace JobOclock_BackEnd.Controllers
             try
             {
                 _service.UpdateUsuarioXActividad(servixusu.Id, servixusu.IdServicio, servixusu.IdEdificio, servixusu.Fecha, servixusu.Observaciones);
-
-                // Devolver un objeto JSON en lugar de string plano
-                return Ok(new
-                {
-                    success = true,
-                    message = "Tarea Editada con exito!"
-                });
+                return Ok("Tarea Editada con exito !");
             }
             catch (Exception ex)
             {
