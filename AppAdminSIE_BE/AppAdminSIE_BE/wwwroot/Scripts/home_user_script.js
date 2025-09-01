@@ -1,17 +1,3 @@
-import { db } from "./firebase.js";
-import {
-    doc,
-    setDoc,
-    getDoc,
-    updateDoc,
-    collection,
-    addDoc,
-    query,
-    where,
-    getDocs,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
 
 document.addEventListener('DOMContentLoaded', async function () {
 
@@ -123,5 +109,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     btnPendingTasks.addEventListener('click', openModalPendingTasks);
+    btnPendingTasks.addEventListener('touchstart', openModalPendingTasks);
 
 });
