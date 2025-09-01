@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-    // Función CORREGIDA para abrir el modal de Ver Tareas Asignadas
+    // Función ACTUALIZADA para abrir el modal de Ver Tareas con List Group
     async function openModalVerTask(employeeId, nombreEmpleado) {
         console.log('Abriendo modal Ver Tareas para:', { employeeId, nombreEmpleado });
 
@@ -520,84 +520,30 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const data = await response.json();
             console.log('Datos obtenidos de la API:', data);
-            console.log('Tipo de respuesta:', typeof data);
-            console.log('Es array:', Array.isArray(data));
 
             const modalVerTask = document.getElementById('modal-VerTask');
             const inputUser = document.getElementById('verTareaByUser');
 
-            if (!modalVerTask) {
-                console.error('Modal modal-VerTask no encontrado');
+            if (!modalVerTask || !inputUser) {
+                console.error('Modal o input no encontrado');
                 return;
             }
-
-            if (!inputUser) {
-                console.error('Input verTareaByUser no encontrado');
-                return;
-            }
-
-
 
             // Rellenar el input con el nombre del empleado
             inputUser.value = nombreEmpleado;
             inputUser.disabled = true;
 
-            // Obtener los elementos del dropdown
-            const activityButton = document.getElementById('activitySelectedByUser');
-            const edificioButton = document.getElementById('edificioSelectedByUser');
-
             // Procesar los datos de la API
             if (Array.isArray(data) && data.length > 0) {
-                // Si hay datos, tomar el primer registro (o podrías mostrar múltiples)
-                const primerRegistro = data[0];
-                console.log('Primer registro:', primerRegistro);
+                console.log(`Empleado tiene ${data.length} tarea(s) asignada(s)`);
 
-                // Llenar dropdown de actividad/servicio
-                if (activityButton) {
-                    if (primerRegistro.nombreServicio) {
-                        activityButton.textContent = primerRegistro.nombreServicio;
-                        activityButton.setAttribute('data-selected', primerRegistro.idServicio);
-                        activityButton.setAttribute('data-nombre', primerRegistro.nombreServicio);
-                        activityButton.disabled = true;
-                    } else {
-                        activityButton.textContent = 'Sin actividad asignada';
-                        activityButton.removeAttribute('data-selected');
-                        activityButton.removeAttribute('data-nombre');
-                        activityButton.disabled = true;
-                    }
+                if (data.length === 1) {
+                    // Una sola tarea - mostrar directamente en el modal (comportamiento actual)
+                    mostrarTareaEnModal(data[0]);
+                } else {
+                    // Múltiples tareas - mostrar list group
+                    mostrarListGroupTareas(data, nombreEmpleado);
                 }
-
-                // Llenar dropdown de edificio
-                if (edificioButton) {
-                    if (primerRegistro.nombreEdificio) {
-                        edificioButton.textContent = primerRegistro.nombreEdificio;
-                        edificioButton.setAttribute('data-selected', primerRegistro.idEdificio);
-                        edificioButton.setAttribute('data-nombre', primerRegistro.nombreEdificio);
-                        edificioButton.disabled = true;
-                    } else {
-                        edificioButton.textContent = 'Sin edificio asignado';
-                        edificioButton.removeAttribute('data-selected');
-                        edificioButton.removeAttribute('data-nombre');
-                        edificioButton.disabled = true;
-                    }
-                }
-
-                // Si quieres mostrar también la fecha y observaciones
-                const fechaInput = document.getElementById('verDateActivityByUser');
-                if (fechaInput && primerRegistro.fecha) {
-                    // Convertir la fecha al formato YYYY-MM-DD si es necesario
-                    const fecha = new Date(primerRegistro.fecha);
-                    if (!isNaN(fecha.getTime())) {
-                        fechaInput.value = fecha.toISOString().split('T')[0];
-                    }
-                }
-                fechaInput.disabled = true;
-
-                const observacionesInput = document.getElementById('VerCommentsByUser');
-                if (observacionesInput) {
-                    observacionesInput.value = primerRegistro.observaciones || '';
-                }
-                observacionesInput.disabled = true;
 
                 // Mostrar el modal
                 modalVerTask.style.display = 'flex';
@@ -607,19 +553,231 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // No hay datos asignados
                 console.log('No se encontraron tareas asignadas para este empleado');
 
-                if(confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿ Desea asignarle una ?`))
-                {
+                if (confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿Desea asignarle una?`)) {
                     openModalNewTask(empleadosSeleccionados);
                 }
-
-
             }
-
-
 
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
             alert('Error al cargar las tareas del empleado: ' + error.message);
+        }
+    }
+
+// Función para mostrar una tarea individual en el modal
+    function mostrarTareaEnModal(tarea) {
+        console.log('Mostrando tarea individual:', tarea);
+
+        // Limpiar el container del list group (si existe)
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (listGroupContainer) {
+            listGroupContainer.style.display = 'none';
+        }
+
+        // Mostrar los campos del formulario original
+        const formContainer = document.getElementById('formContainer');
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+
+        const activityButton = document.getElementById('activitySelectedByUser');
+        const edificioButton = document.getElementById('edificioSelectedByUser');
+        const fechaInput = document.getElementById('verDateActivityByUser');
+        const observacionesInput = document.getElementById('VerCommentsByUser');
+
+        // Llenar campos con datos de la tarea
+        if (activityButton) {
+            activityButton.textContent = tarea.nombreServicio || 'Sin actividad asignada';
+            activityButton.setAttribute('data-selected', tarea.idServicio || '');
+            activityButton.disabled = true;
+        }
+
+        if (edificioButton) {
+            edificioButton.textContent = tarea.nombreEdificio || 'Sin edificio asignado';
+            edificioButton.setAttribute('data-selected', tarea.idEdificio || '');
+            edificioButton.disabled = true;
+        }
+
+        if (fechaInput && tarea.fecha) {
+            const fecha = new Date(tarea.fecha);
+            if (!isNaN(fecha.getTime())) {
+                fechaInput.value = fecha.toISOString().split('T')[0];
+            }
+            fechaInput.disabled = true;
+        }
+
+        if (observacionesInput) {
+            observacionesInput.value = tarea.observaciones || '';
+            observacionesInput.disabled = true;
+        }
+
+        // Mostrar botones de acción
+        document.getElementById('btnEditar').style.display = 'inline-block';
+        document.getElementById('btnEliminar').style.display = 'inline-block';
+    }
+
+// Función para mostrar el list group con múltiples tareas
+    function mostrarListGroupTareas(tareas, nombreEmpleado) {
+        console.log('Mostrando list group con', tareas.length, 'tareas');
+
+        // Ocultar el formulario original
+        const formContainer = document.getElementById('formContainer');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+
+        // Ocultar botones de acción
+        const btnEditar = document.getElementById('btnEditar');
+        const btnEliminar = document.getElementById('btnEliminar');
+        if (btnEditar) btnEditar.style.display = 'none';
+        if (btnEliminar) btnEliminar.style.display = 'none';
+
+        // Buscar o crear el contenedor del list group
+        let listGroupContainer = document.getElementById('listGroupContainer');
+
+        if (!listGroupContainer) {
+            console.log('Creando contenedor de list group...');
+
+            // Crear el contenedor
+            listGroupContainer = document.createElement('div');
+            listGroupContainer.id = 'listGroupContainer';
+            listGroupContainer.className = 'mb-3';
+
+            // Buscar dónde insertarlo (después del input del usuario)
+            const userInputDiv = document.getElementById('verTareaByUser').parentNode;
+            const modalContent = userInputDiv.parentNode;
+
+            // Insertar después del div del input del usuario
+            modalContent.insertBefore(listGroupContainer, userInputDiv.nextSibling);
+
+            console.log('Contenedor creado e insertado');
+        }
+
+        // Crear el HTML del list group
+        listGroupContainer.innerHTML = `
+        <label class="form-label"><strong>Tareas Asignadas (${tareas.length})</strong></label>
+        <div class="list-group" id="tareasListGroup"></div>
+    `;
+
+        listGroupContainer.style.display = 'block';
+
+        // Ahora sí buscar el list group (que acabamos de crear)
+        const listGroup = document.getElementById('tareasListGroup');
+
+        if (!listGroup) {
+            console.error('Error: No se pudo crear el elemento tareasListGroup');
+            return;
+        }
+
+        console.log('List group encontrado, agregando tareas...');
+
+        // Crear elementos del list group
+        tareas.forEach((tarea, index) => {
+            const listItem = document.createElement('a');
+            listItem.href = '#';
+            listItem.className = 'list-group-item list-group-item-action';
+
+            // Formatear fecha
+            let fechaFormateada = 'Sin fecha';
+            if (tarea.fecha) {
+                const fecha = new Date(tarea.fecha);
+                if (!isNaN(fecha.getTime())) {
+                    fechaFormateada = fecha.toLocaleDateString('es-ES');
+                }
+            }
+
+            listItem.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${tarea.nombreServicio || 'Actividad sin nombre'}</h6>
+                <small class="text-muted">${fechaFormateada}</small>
+            </div>
+            <p class="mb-1"><strong>Edificio:</strong> ${tarea.nombreEdificio || 'Sin edificio'}</p>
+            <small class="text-muted">${tarea.observaciones || 'Sin observaciones'}</small>
+        `;
+
+            // Agregar event listener para abrir el detalle de la tarea
+            listItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                abrirDetalleTarea(tarea, index, nombreEmpleado);
+            });
+
+            listGroup.appendChild(listItem);
+        });
+    }
+
+// Función para abrir el detalle de una tarea específica
+    function abrirDetalleTarea(tarea, index, nombreEmpleado) {
+        console.log('Abriendo detalle de tarea:', tarea);
+
+        // Ocultar el list group
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (listGroupContainer) {
+            listGroupContainer.style.display = 'none';
+        }
+
+        // Mostrar el formulario
+        const formContainer = document.getElementById('formContainer');
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+
+        // Llenar los campos con los datos de la tarea seleccionada
+        mostrarTareaEnModal(tarea);
+
+        // Agregar botón para volver a la lista (si hay múltiples tareas)
+        let btnVolver = document.getElementById('btnVolverLista');
+        if (!btnVolver) {
+            btnVolver = document.createElement('button');
+            btnVolver.id = 'btnVolverLista';
+            btnVolver.type = 'button';
+            btnVolver.className = 'btn btn-secondary';
+            btnVolver.innerHTML = '← Volver a la Lista';
+            btnVolver.style.marginRight = '10px';
+
+            // Insertar antes del primer botón de acción
+            const btnEditar = document.getElementById('btnEditar');
+            btnEditar.parentNode.insertBefore(btnVolver, btnEditar);
+
+            btnVolver.addEventListener('click', () => {
+                volverAListaTareas(nombreEmpleado);
+            });
+        }
+
+        btnVolver.style.display = 'inline-block';
+
+        // Actualizar el título del modal para indicar qué tarea se está viendo
+        const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
+        if (modalTitle) {
+            modalTitle.innerHTML = `📝 Tarea ${index + 1}: ${tarea.nombreServicio || 'Sin nombre'}`;
+        }
+    }
+
+// Función para volver a mostrar la lista de tareas
+    function volverAListaTareas(nombreEmpleado) {
+        console.log('Volviendo a la lista de tareas');
+
+        // Ocultar formulario
+        const formContainer = document.getElementById('formContainer');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+
+        // Mostrar list group
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (listGroupContainer) {
+            listGroupContainer.style.display = 'block';
+        }
+
+        // Ocultar botón volver
+        const btnVolver = document.getElementById('btnVolverLista');
+        if (btnVolver) {
+            btnVolver.style.display = 'none';
+        }
+
+        // Restaurar título del modal
+        const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
+        if (modalTitle) {
+            modalTitle.innerHTML = '📝 Tareas Asignadas';
         }
     }
 
@@ -1168,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         llenarDropdownActividadesEdicion(actividadesDisponibles);
         llenarDropdownEdificiosEdicion(edificiosDisponibles);
 
-        btnConfirmEdit.style.display = 'block';
+        btnConfirmEdit.style.visibility = 'visible';
 
 
     });

@@ -94,33 +94,33 @@ namespace JobOclock_BackEnd.Data.Repositories
             return actividades;
         }
 
-        public void Update(int idUsuario, int idServicio,int idEdificio, DateTime fecha, string? observaciones)
+        public void Update(int idServicioXUsuario, int idServicio,int idEdificio, DateTime fecha, string? observaciones)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
                 "UPDATE ServicioXUsuario SET id_servicio = @idServicio, id_edificio= @idEdificio, " +
                 "fecha = @fecha, observaciones = @observaciones " +
-                "WHERE id_usuario = @idUsuario", conn))
+                "WHERE id_servicioxactividad = @idServicioXUsuario", conn))
             {
                 cmd.Parameters.AddWithValue("@idServicio", idServicio);
                 cmd.Parameters.AddWithValue("@idEdificio", idEdificio);
                 cmd.Parameters.AddWithValue("@fecha",fecha);
                 cmd.Parameters.AddWithValue("@observaciones",observaciones);
-                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+                cmd.Parameters.AddWithValue("@idServicioXUsuario", idServicioXUsuario);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
             }
         }
 
-        public void Delete(int idUsuario)
+        public void Delete(int idServicioXUsuario)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
                 "DELETE FROM ServicioXUsuario " +
-                "WHERE id_usuario = @idUsuario", conn))
+                "WHERE id_servicioxactividad = @idServicioXUsuario", conn))
             {
-                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+                cmd.Parameters.AddWithValue("@idServicioXUsuario", idServicioXUsuario);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

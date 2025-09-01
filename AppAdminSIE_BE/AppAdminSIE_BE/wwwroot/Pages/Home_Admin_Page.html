@@ -148,18 +148,24 @@
     </div>
 </div>
 
-<!-- Modal de Ver Tarea Asignada -->
-    <div class="modal-overlay-newTask" id="modal-VerTask">
+<!-- Modal de Ver Tarea Asignada - ACTUALIZADO -->
+<div class="modal-overlay-newTask" id="modal-VerTask">
     <div class="modal-content-location">
         <div class="modal-header-container">
             <h2>📝 Tarea asignada</h2>
             <button type="button" class="btn-close" id="closeVerTaskModalBtn" aria-label="Close"></button>
         </div>
-        <form>
-            <div class="mb-3">
-                <label for="verTareaByUser" class="form-label">Empleado</label>
-                <input type="input" class="form-control" id="verTareaByUser" aria-describedby="username">
-            </div>
+
+        <!-- Input del empleado (siempre visible) -->
+        <div class="mb-3">
+            <label for="verTareaByUser" class="form-label">Empleado</label>
+            <input type="input" class="form-control" id="verTareaByUser" aria-describedby="username">
+        </div>
+
+        <!-- El contenedor para List Group se creará dinámicamente aquí -->
+
+        <!-- Formulario original (se muestra para tarea individual o detalle) -->
+        <div id="formContainer">
             <div class="mb-3">
                 <label for="VerMenuActivities" class="form-label">Actividad</label>
                 <div class="input-group mb-3" id="VerMenuActivities">
@@ -184,10 +190,12 @@
                 <label for="VerCommentsByUser" class="form-label">Observaciones</label>
                 <textarea class="form-control" id="VerCommentsByUser" rows="3"></textarea>
             </div>
+
+            <!-- Botones de acción -->
             <button type="button" class="btn btn-primary" style="background-color: #005288" id="btnEditar">✏️ Editar</button>
             <button type="button" class="btn btn-primary" style="background-color: #88131e" id="btnEliminar">Eliminar Tarea</button>
-            <button type="button" class="btn btn-primary" style="background-color: #007825; display: none;" id="btnConfirmEdit">Confirmar Cambios</button>
-        </form>
+            <button type="button" class="btn btn-primary" style="background-color: #007825; visibility: hidden;" id="btnConfirmEdit">Confirmar Cambios</button>
+        </div>
     </div>
 </div>
 
