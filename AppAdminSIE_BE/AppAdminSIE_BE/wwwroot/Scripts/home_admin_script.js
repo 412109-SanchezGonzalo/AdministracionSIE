@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 🔹 Array global para guardar seleccionados
     let empleadosSeleccionados = [];
+    // 🔹 Array global para guardar Tarea seleccionado
+    let tareaSeleccionada = [];
     // 🔹 Array global para almacenar actividades
     let actividadesDisponibles = [];
     let servicioSeleccionadoId = null;
@@ -383,7 +385,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 🔹 Función CORREGIDA para abrir el modal de Asignar Nueva Tarea
     function openModalNewTask(empleadosSeleccionados) {
-        console.log('🔓 Abriendo modal Nueva Tarea para empleados:', empleadosSeleccionados);
+        console.table('🔓 Abriendo modal Nueva Tarea para empleados:', empleadosSeleccionados);
 
         const modalNewTask = document.getElementById('modal-NewTask');
         const inputUserName = document.getElementById('userName');
@@ -497,6 +499,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         // Obtener el empleado seleccionado
+        console.table(empleadosSeleccionados);
         const empleadoSeleccionado = empleadosSeleccionados[0];
         console.log('👤 Empleado seleccionado:', empleadoSeleccionado);
 
@@ -566,6 +569,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // Función para mostrar una tarea individual en el modal
     function mostrarTareaEnModal(tarea) {
+        console.table(tarea);
+        tareaSeleccionada.push(tarea);
         console.log('Mostrando tarea individual:', tarea);
 
         // Limpiar el container del list group (si existe)
@@ -1145,6 +1150,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function UpdateTask() {
         try {
+            const idServicioXUsuario = tareaSeleccionada['idUsuarioXActividad'].Value;
             const idEmpleado = empleadosSeleccionados[0].id;
             const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
             const fechaEditarTarea = document.getElementById('verDateActivityByUser');
@@ -1152,6 +1158,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const edificioDropdown = document.getElementById('edificioSelectedByUser');
 
             const datos = {
+                idUsuarioX
                 id: idEmpleado,
                 idServicio: actividadDropdown.getAttribute('data-selected'),
                 idEdificio: edificioDropdown.getAttribute('data-selected'),
