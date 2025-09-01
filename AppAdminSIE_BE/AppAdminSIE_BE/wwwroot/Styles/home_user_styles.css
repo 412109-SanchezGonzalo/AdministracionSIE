@@ -16,6 +16,7 @@ body {
 .modal-overlay,
 .modal-overlay-profile,
 .modal-overlay-history,
+.modal-overlay-pendingTasks,
 .modal-overlay-newTask {
     position: fixed;
     top: 0;

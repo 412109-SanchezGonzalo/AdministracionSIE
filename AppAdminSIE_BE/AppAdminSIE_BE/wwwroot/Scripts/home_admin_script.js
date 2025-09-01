@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // No hay datos asignados
                 console.log('No se encontraron tareas asignadas para este empleado');
 
-                if(confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. Desea asignarle una ?`))
+                if(confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿ Desea asignarle una ?`))
                 {
                     openModalNewTask(empleadosSeleccionados);
                 }
@@ -1011,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             if (!response.ok) throw new Error(`Error: ${response.status}`);
 
-            const result = await response.json();
+            const result = await response.text();
             console.log("✅ Edición exitosa:", result);
 
             alert("Tarea actualizada correctamente ✅");
@@ -1175,19 +1175,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function DeleteTask(){
 
-        const nombreEmpleado = empleadosSeleccionados.nombre;
-        if(confirm(`¿ Esta seguro que desea eliminar la tarea asignada al empleado ${nombreEmpleado}`))
+        const nombreEmpleado = empleadosSeleccionados[0].nombre;
+        if(confirm(`¿ Esta seguro que desea eliminar la tarea asignada al empleado ${nombreEmpleado} ?`))
         {
             try
             {
                 const idEmpleado = empleadosSeleccionados[0].id;
-                const dato ={
-                    idUsuario:idEmpleado
-                };
+
                 const response = await fetch('https://administracionsie.onrender.com/api/SIE/Eliminar-servicioxusuario',{
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dato)
+                    body: JSON.stringify(idEmpleado)
                 });
                 if (!response.ok) {
                     const errorText = await response.text();
