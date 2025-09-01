@@ -112,10 +112,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
-<<<<<<< HEAD
 
-=======
->>>>>>> ce03cc7accb8cd7789b471f52b82e31071d73986
         public void Delete(int idUsuario)
         {
             using (var conn = new MySqlConnection(_connectionString))
@@ -124,11 +121,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                 "WHERE id_usuario = @idUsuario", conn))
             {
                 cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> ce03cc7accb8cd7789b471f52b82e31071d73986
                 conn.Open();
                 cmd.ExecuteNonQuery();
             }
