@@ -1140,6 +1140,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (btnAll) btnAll.addEventListener('click', loadAllUsers);
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
+    if(btnEliminar) btnEliminar.addEventListener('click', await DeleteTask);
 
     btnEditar.addEventListener('click', async () => {
         console.log("✏️ Editar tarea habilitado");
@@ -1171,6 +1172,38 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     });
+
+    async function DeleteTask(){
+
+        const nombreEmpleado = empleadosSeleccionados.nombre;
+        if(confirm(`¿ Esta seguro que desea eliminar la tarea asignada al empleado ${nombreEmpleado}`))
+        {
+            try
+            {
+                const idEmpleado = empleadosSeleccionados[0].id;
+                const dato ={
+                    idUsuario:idEmpleado
+                };
+                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Eliminar-servicioxusuario',{
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dato)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("❌ Error del servidor para empleado ${nombreEmpleado}");
+                }
+
+                const resultado = await response.json();
+                alert(`✅ La Tarea asignada al empleado ${nombreEmpleado} fué eliminada con éxito`);
+
+            } catch(error)
+            {
+                alert("Error al eliminar la tarea: " + error.message);
+            }
+        }
+
+    }
 
     // Agregar FUERA del evento btnEditar, junto con los otros event listeners
     if (btnConfirmEdit) {
