@@ -462,6 +462,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const closeVerTaskModalBtn = document.getElementById('closeVerTaskModalBtn');
     if (closeVerTaskModalBtn) {
         closeVerTaskModalBtn.addEventListener('click', () => {
+            tareaSeleccionada = [];
             console.log('🔄 Cerrando modal Ver Tareas y desmarcando usuarios...');
 
             // Desmarcar todos los checkboxes
@@ -570,7 +571,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Función para mostrar una tarea individual en el modal
     function mostrarTareaEnModal(tarea) {
         console.table(tarea);
+
+        // ✅ NUEVO: Limpiar array antes de agregar nueva tarea
+        tareaSeleccionada = [];
         tareaSeleccionada.push(tarea);
+
         console.log('Mostrando tarea individual:', tarea);
 
         // Limpiar el container del list group (si existe)
@@ -619,6 +624,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Mostrar botones de acción
         document.getElementById('btnEditar').style.display = 'inline-block';
         document.getElementById('btnEliminar').style.display = 'inline-block';
+
+        // ✅ NUEVO: Asegurar que el botón de confirmación esté oculto inicialmente
+        const btnConfirmEdit = document.getElementById('btnConfirmEdit');
+        if (btnConfirmEdit) {
+            btnConfirmEdit.style.visibility = 'hidden';
+        }
     }
 
 // Función para mostrar el list group con múltiples tareas
@@ -744,10 +755,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             btnEditar.parentNode.insertBefore(btnVolver, btnEditar);
 
             btnVolver.addEventListener('click', () => {
+                tareaSeleccionada = [];
                 volverAListaTareas(nombreEmpleado);
             });
         }
-
         btnVolver.style.display = 'inline-block';
 
         // Actualizar el título del modal para indicar qué tarea se está viendo
@@ -1148,18 +1159,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // 1. CORREGIR la función UpdateTask para recargar datos después de editar
     async function UpdateTask() {
         try {
-            const idServicioXUsuario = tareaSeleccionada['idUsuarioXActividad'].Value;
-            const idEmpleado = empleadosSeleccionados[0].id;
+            console.log("🔍 Debug - tareaSeleccionada completa:", tareaSeleccionada);
+
+            if (!tareaSeleccionada[0]) {
+                throw new Error("No hay tarea seleccionada");
+            }
+
+            const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
             const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
             const fechaEditarTarea = document.getElementById('verDateActivityByUser');
             const actividadDropdown = document.getElementById('activitySelectedByUser');
             const edificioDropdown = document.getElementById('edificioSelectedByUser');
 
             const datos = {
-                idUsuarioX
-                id: idEmpleado,
+                idServicioXActividad: idServicioXUsuario,
                 idServicio: actividadDropdown.getAttribute('data-selected'),
                 idEdificio: edificioDropdown.getAttribute('data-selected'),
                 fecha: fechaEditarTarea.value,
@@ -1180,9 +1196,48 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log("✅ Edición exitosa:", result);
 
             alert("Tarea actualizada correctamente ✅");
+
+            // ✅ NUEVO: Recargar datos actualizados desde la API
+            await recargarTareaDespuesDeEditar(empleadosSeleccionados[0].id);
+
+            tareaSeleccionada = [];
         } catch (error) {
             console.error("❌ Error en UpdateTask:", error);
             alert("Error al actualizar tarea: " + error.message);
+            tareaSeleccionada = [];
+        }
+    }
+
+// ✅ NUEVA función para recargar datos después de editar
+    async function recargarTareaDespuesDeEditar(employeeId) {
+        try {
+            console.log('🔄 Recargando datos actualizados...');
+
+            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const datosActualizados = await response.json();
+            console.log('✅ Datos actualizados obtenidos:', datosActualizados);
+
+            // Actualizar la tarea en el array tareaSeleccionada
+            if (Array.isArray(datosActualizados) && datosActualizados.length > 0) {
+                // Buscar la tarea que acabamos de editar
+                const tareaEditada = datosActualizados.find(t =>
+                    t.idUsuarioXActividad === tareaSeleccionada[0]?.idUsuarioXActividad
+                );
+
+                if (tareaEditada) {
+                    // Actualizar la interfaz con los datos frescos
+                    mostrarTareaEnModal(tareaEditada);
+                    console.log('🔄 Interfaz actualizada con datos frescos');
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Error al recargar datos:', error);
         }
     }
 
@@ -1333,10 +1388,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         llenarDropdownActividadesEdicion(actividadesDisponibles);
         llenarDropdownEdificiosEdicion(edificiosDisponibles);
 
+        // ✅ CORREGIDO: resetear el botón correctamente
         btnConfirmEdit.style.visibility = 'visible';
-
-
+        btnConfirmEdit.style.display = 'inline-block'; // Asegurarse de que esté visible
     });
+
+    // 4. OPCIONAL: Función para limpiar estado cuando se cierra/abre modal
+    function limpiarEstadoModal() {
+        const btnConfirmEdit = document.getElementById('btnConfirmEdit');
+        if (btnConfirmEdit) {
+            btnConfirmEdit.style.visibility = 'hidden';
+            btnConfirmEdit.style.display = 'inline-block';
+        }
+
+        // Limpiar arrays de estado
+        tareaSeleccionada = [];
+    }
 
     async function DeleteTask(){
 
@@ -1345,24 +1412,27 @@ document.addEventListener('DOMContentLoaded', async function () {
         {
             try
             {
-                const idEmpleado = empleadosSeleccionados[0].id;
+                const idServicioXActividad = tareaSeleccionada[0].idUsuarioXActividad;
 
                 const response = await fetch('https://administracionsie.onrender.com/api/SIE/Eliminar-servicioxusuario',{
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(idEmpleado)
+                    body: JSON.stringify(idServicioXActividad)
                 });
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("❌ Error del servidor para empleado ${nombreEmpleado}");
+                    tareaSeleccionada = [];
                 }
 
                 const resultado = await response.json();
                 alert(`✅ La Tarea asignada al empleado ${nombreEmpleado} fué eliminada con éxito`);
+                tareaSeleccionada = [];
 
             } catch(error)
             {
                 alert("Error al eliminar la tarea: " + error.message);
+                tareaSeleccionada = [];
             }
         }
 
@@ -1383,7 +1453,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             edificioDropdown.disabled = true;
             fechaEditarTarea.disabled = true;
             observacionesEditarTarea.disabled = true;
-            btnConfirmEdit.style.display = 'none';
+
+            // ✅ CORREGIDO: usar visibility en lugar de display
+            btnConfirmEdit.style.visibility = 'hidden';
         });
     }
 

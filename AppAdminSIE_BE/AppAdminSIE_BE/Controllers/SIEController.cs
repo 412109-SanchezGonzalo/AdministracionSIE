@@ -304,7 +304,7 @@ namespace JobOclock_BackEnd.Controllers
         {
             try
             {
-                _service.UpdateUsuarioXActividad(servixusu.Id, servixusu.IdServicio, servixusu.IdEdificio, servixusu.Fecha, servixusu.Observaciones);
+                _service.UpdateUsuarioXActividad(servixusu.IdServicioXActividad, servixusu.IdServicio, servixusu.IdEdificio, servixusu.Fecha, servixusu.Observaciones);
                 return Ok("Tarea Editada con exito !");
             }
             catch (Exception ex)
