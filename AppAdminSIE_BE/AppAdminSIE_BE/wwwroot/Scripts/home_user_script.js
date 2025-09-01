@@ -54,26 +54,22 @@ document.addEventListener('DOMContentLoaded', async function () {
             const data = await response2.json();
             console.log('Datos obtenidos de la API:', data);
 
-            // Obtener los elementos donde mostrar los datos
-            const activityDisplay = document.getElementById('task-activity-display');
-            const buildingDisplay = document.getElementById('task-building-display');
-            const startDateDisplay = document.getElementById('task-start-date-display');
-            const observationsDisplay = document.getElementById('task-observations-display');
-
-            // Procesar los datos de la API
             if (Array.isArray(data) && data.length > 0) {
                 const primerRegistro = data[0];
                 console.log('Primer registro:', primerRegistro);
 
-                // Llenar los campos de visualización
+                // Llenar los campos
+                const activityDisplay = document.getElementById('task-activity-display');
+                const buildingDisplay = document.getElementById('task-building-display');
+                const startDateDisplay = document.getElementById('task-start-date-display');
+                const observationsDisplay = document.getElementById('task-observations-display');
+
                 if (activityDisplay) {
                     activityDisplay.textContent = primerRegistro.nombreServicio || 'Sin actividad asignada';
                 }
-
                 if (buildingDisplay) {
                     buildingDisplay.textContent = primerRegistro.nombreEdificio || 'Sin edificio asignado';
                 }
-
                 if (startDateDisplay) {
                     if (primerRegistro.fecha) {
                         const fecha = new Date(primerRegistro.fecha);
@@ -86,14 +82,27 @@ document.addEventListener('DOMContentLoaded', async function () {
                         startDateDisplay.textContent = 'Sin fecha asignada';
                     }
                 }
-
                 if (observationsDisplay) {
                     observationsDisplay.textContent = primerRegistro.observaciones || 'Sin observaciones';
                 }
 
-                // Mostrar el modal usando Bootstrap
-                const modal = new bootstrap.Modal(document.getElementById('modal-pending-tasks'));
+                // Crear y mostrar el modal
+                const modalElement = document.getElementById('modal-pending-tasks');
+                const modal = new bootstrap.Modal(modalElement, {
+                    backdrop: true,  // Permite cerrar clickeando fuera
+                    keyboard: true   // Permite cerrar con ESC
+                });
+
                 modal.show();
+
+                // Event listeners para cerrar el modal
+                const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        modal.hide();
+                    });
+                });
+
                 console.log('Modal Tareas Pendientes abierto correctamente');
 
             } else {
