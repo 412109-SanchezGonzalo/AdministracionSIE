@@ -322,5 +322,29 @@ namespace JobOclock_BackEnd.Controllers
                 });
             }
         }
+
+        [HttpDelete("Eliminar-servicioxusuario")]
+        public ActionResult DeleteServicioXUsuario([FromBody] int idUsuario)
+        {
+            try
+            {
+                _service.DeleteServicioXUsuario(idUsuario);
+        
+                // Devolver un objeto JSON en lugar de string plano
+                return Ok(new
+                {
+                    success = true,
+                    message = "Tarea Eliminada con exito!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }
