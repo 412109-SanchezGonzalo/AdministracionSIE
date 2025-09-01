@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnConfirm = document.getElementById('btnConfirmar');
     const btnEditar = document.getElementById('btnEditar');
     const btnEliminar = document.getElementById('btnEliminar');
+    const btnConfirmEdit = document.getElementById('btnConfirmEdit');
 
 
     // 🔍 VERIFICAR ELEMENTOS HTML
@@ -555,12 +556,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (activityButton) {
                     if (primerRegistro.nombreServicio) {
                         activityButton.textContent = primerRegistro.nombreServicio;
-                        activityButton.setAttribute('data-selected', primerRegistro.idServicio || primerRegistro.nombreServicio);
-                        console.log('Actividad asignada:', primerRegistro.nombreServicio);
+                        activityButton.setAttribute('data-selected', primerRegistro.idServicio);
+                        activityButton.setAttribute('data-nombre', primerRegistro.nombreServicio);
                         activityButton.disabled = true;
                     } else {
                         activityButton.textContent = 'Sin actividad asignada';
                         activityButton.removeAttribute('data-selected');
+                        activityButton.removeAttribute('data-nombre');
+                        activityButton.disabled = true;
                     }
                 }
 
@@ -568,12 +571,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (edificioButton) {
                     if (primerRegistro.nombreEdificio) {
                         edificioButton.textContent = primerRegistro.nombreEdificio;
-                        edificioButton.setAttribute('data-selected', primerRegistro.idEdificio || primerRegistro.nombreEdificio);
-                        console.log('Edificio asignado:', primerRegistro.nombreEdificio);
+                        edificioButton.setAttribute('data-selected', primerRegistro.idEdificio);
+                        edificioButton.setAttribute('data-nombre', primerRegistro.nombreEdificio);
                         edificioButton.disabled = true;
                     } else {
                         edificioButton.textContent = 'Sin edificio asignado';
                         edificioButton.removeAttribute('data-selected');
+                        edificioButton.removeAttribute('data-nombre');
                         edificioButton.disabled = true;
                     }
                 }
@@ -981,20 +985,212 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    async function UpdateTask() {
+        try {
+            const idEmpleado = empleadosSeleccionados[0].id;
+            const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
+            const fechaEditarTarea = document.getElementById('verDateActivityByUser');
+            const actividadDropdown = document.getElementById('activitySelectedByUser');
+            const edificioDropdown = document.getElementById('edificioSelectedByUser');
 
+            const datos = {
+                id: idEmpleado,
+                idServicio: actividadDropdown.getAttribute('data-selected'),
+                idEdificio: edificioDropdown.getAttribute('data-selected'),
+                fecha: fechaEditarTarea.value,
+                observaciones: observacionesEditarTarea.value
+            };
 
-    // Funcion para editar una tarea asignada
-    async function UpdateTask(idUser){
+            console.log("📤 Enviando datos de edición:", datos);
 
-        
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
 
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+            const result = await response.json();
+            console.log("✅ Edición exitosa:", result);
+
+            alert("Tarea actualizada correctamente ✅");
+        } catch (error) {
+            console.error("❌ Error en UpdateTask:", error);
+            alert("Error al actualizar tarea: " + error.message);
+        }
     }
+
+
+
+
+    // Función para llenar dropdown de actividades en modal "Ver Tareas"
+    function llenarDropdownActividadesEdicion(actividades) {
+        const dropdown = document.querySelector('#VerMenuActivities .dropdown-menu');
+
+        if (!dropdown) {
+            console.error('❌ No se encontró dropdown de actividades en modal Ver Tareas');
+            return;
+        }
+
+        dropdown.innerHTML = '';
+
+        actividades.forEach((actividad) => {
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.className = 'dropdown-item';
+            button.type = 'button';
+            button.textContent = actividad.descripcion;
+            button.setAttribute('data-value', actividad.idServicio);
+
+            button.addEventListener('click', () => {
+                seleccionarActividadEdicion(actividad.idServicio, actividad.descripcion);
+            });
+
+            li.appendChild(button);
+            dropdown.appendChild(li);
+        });
+    }
+
+// Función para seleccionar actividad en modal "Ver Tareas"
+    function seleccionarActividadEdicion(id, descripcion) {
+        const botonDropdown = document.getElementById('activitySelectedByUser');
+        if (botonDropdown) {
+            botonDropdown.textContent = descripcion;
+            botonDropdown.setAttribute('data-selected', id);
+            botonDropdown.setAttribute('data-nombre', descripcion); // Guardar también el nombre
+        }
+    }
+
+// Función similar para edificios
+    function llenarDropdownEdificiosEdicion(edificios) {
+        const dropdown = document.querySelector('#VerMenuEdificios .dropdown-menu');
+
+        if (!dropdown) {
+            console.error('❌ No se encontró dropdown de edificios en modal Ver Tareas');
+            return;
+        }
+
+        dropdown.innerHTML = '';
+
+        edificios.forEach((edificio) => {
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.className = 'dropdown-item';
+            button.type = 'button';
+            button.textContent = edificio.nombre;
+            button.setAttribute('data-value', edificio.id_Edificio);
+
+            button.addEventListener('click', () => {
+                seleccionarEdificioEdicion(edificio.id_Edificio, edificio.nombre);
+            });
+
+            li.appendChild(button);
+            dropdown.appendChild(li);
+        });
+    }
+
+    function seleccionarEdificioEdicion(id, nombre) {
+        const botonDropdown = document.getElementById('edificioSelectedByUser');
+        if (botonDropdown) {
+            botonDropdown.textContent = nombre;
+            botonDropdown.setAttribute('data-selected', id);
+            botonDropdown.setAttribute('data-nombre', nombre); // Guardar también el nombre
+        }
+    }
+
+
+    async function cargarActividadesParaEdicion() {
+        if (actividadesDisponibles.length > 0) return;
+
+        try {
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const actividades = await response.json();
+            if (!Array.isArray(actividades)) throw new Error('Formato de actividades inválido');
+
+            actividadesDisponibles = actividades;
+            console.log('✅ Actividades cargadas para edición:', actividades.length);
+        } catch (error) {
+            console.error('❌ Error al cargar actividades para edición:', error);
+        }
+    }
+
+    async function cargarEdificiosParaEdicion() {
+        if (edificiosDisponibles.length > 0) return;
+
+        try {
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const edificios = await response.json();
+            if (!Array.isArray(edificios)) throw new Error('Formato de edificios inválido');
+
+            edificiosDisponibles = edificios;
+            console.log('✅ Edificios cargados para edición:', edificios.length);
+        } catch (error) {
+            console.error('❌ Error al cargar edificios para edición:', error);
+        }
+    }
+
 
     // 🎯 Eventos
     if (btnSearch) btnSearch.addEventListener('click', loadAllUsers);
     if (btnAll) btnAll.addEventListener('click', loadAllUsers);
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
+
+    btnEditar.addEventListener('click', async () => {
+        console.log("✏️ Editar tarea habilitado");
+
+        // habilitar campos
+        const actividadDropdown = document.getElementById('activitySelectedByUser');
+        const edificioDropdown = document.getElementById('edificioSelectedByUser');
+        const fechaEditarTarea = document.getElementById('verDateActivityByUser');
+        const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
+
+        actividadDropdown.disabled = false;
+        edificioDropdown.disabled = false;
+        fechaEditarTarea.disabled = false;
+        observacionesEditarTarea.disabled = false;
+
+        // CARGAR DATOS ANTES DE LLENAR DROPDOWNS
+        if (actividadesDisponibles.length === 0) {
+            await cargarActividadesParaEdicion();
+        }
+        if (edificiosDisponibles.length === 0) {
+            await cargarEdificiosParaEdicion();
+        }
+
+        // Llenar dropdowns
+        llenarDropdownActividadesEdicion(actividadesDisponibles);
+        llenarDropdownEdificiosEdicion(edificiosDisponibles);
+
+        btnConfirmEdit.style.display = 'block';
+
+
+    });
+
+    // Agregar FUERA del evento btnEditar, junto con los otros event listeners
+    if (btnConfirmEdit) {
+        btnConfirmEdit.addEventListener('click', async () => {
+            await UpdateTask();
+
+            // bloquear nuevamente los campos
+            const actividadDropdown = document.getElementById('activitySelectedByUser');
+            const edificioDropdown = document.getElementById('edificioSelectedByUser');
+            const fechaEditarTarea = document.getElementById('verDateActivityByUser');
+            const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
+
+            actividadDropdown.disabled = true;
+            edificioDropdown.disabled = true;
+            fechaEditarTarea.disabled = true;
+            observacionesEditarTarea.disabled = true;
+            btnConfirmEdit.style.display = 'none';
+        });
+    }
+
 
     btnNewTask.addEventListener('click', async () => {
         if (empleadosSeleccionados.length === 0) {
