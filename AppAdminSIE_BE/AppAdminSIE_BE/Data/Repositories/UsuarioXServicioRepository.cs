@@ -1,6 +1,8 @@
-﻿using JobOclock_BackEnd.Data.Interfaces;
+﻿using AppAdminSIE_BE.Models;
+using JobOclock_BackEnd.Data.Interfaces;
 using JobOclock_BackEnd.Models;
 using MySql.Data.MySqlClient;
+using Mysqlx.Cursor;
 using System.Data.SqlClient;
 
 namespace JobOclock_BackEnd.Data.Repositories
@@ -104,6 +106,20 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.Parameters.AddWithValue("@idEdificio", idEdificio);
                 cmd.Parameters.AddWithValue("@fecha",fecha);
                 cmd.Parameters.AddWithValue("@observaciones",observaciones);
+                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Delete(int idUsuario)
+        {
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(
+                "DELETE FROM ServicioXUsuario " +
+                "WHERE id_usuario = @idUsuario", conn))
+            {
                 cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
 
                 conn.Open();
