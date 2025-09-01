@@ -110,5 +110,18 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+        public void Delete(int idUsuario)
+        {
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(
+                "DELETE FROM ServicioXUsuario " +
+                "WHERE id_usuario = @idUsuario", conn))
+            {
+                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+        
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }
