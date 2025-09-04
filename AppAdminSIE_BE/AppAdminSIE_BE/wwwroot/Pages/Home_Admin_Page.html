@@ -12,22 +12,27 @@
 </head>
 <body>
 <!-- navbar -->
-<nav class="navbar">
-    <button class="navbar-toggle" aria-label="Toggle navigation">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </button>
-    <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
-    <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
-    <ul class="navbar-menu">
-        <li><a href="#">Inicio</a></li>
-        <li id="li-profile">Perfil</li>
-        <li id="li-history">Historial de Horarios</li>
-        <li><a href="#">Cerrar sesión</a></li>
-    </ul>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
+        <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
+        <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Opciones
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Home_Admin_Page.html">Tareas</a></li>
+                        <li><a class="dropdown-item" href="#">Pedidos</a></li>
+                        <li><hr class="dropdown-divider" style="background-color: white"></li>
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com">Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
 </nav>
-
 
 <div class="right-panel">
     <div class="compact-header">

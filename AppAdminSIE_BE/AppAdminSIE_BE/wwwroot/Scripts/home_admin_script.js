@@ -80,11 +80,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         saludoSpan.textContent = 'Hola, Usuario !';
     }
 
-    // Menú hamburguesa
-    navbarToggle.addEventListener('click', () => {
-        window.location.href = "https://administracionsie.onrender.com/Pages/Login_page.html";
-    });
-
     // 📌 Funciones de UI
     function showLoading() {
         console.log('⏳ Mostrando loading...');
@@ -756,6 +751,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             btnVolver.addEventListener('click', () => {
                 tareaSeleccionada = [];
+                const modalVerTask = document.getElementById('modal-VerTask');
+                modalVerTask.style.display = 'none';
+                verTareas();
                 volverAListaTareas(nombreEmpleado);
             });
         }
@@ -781,6 +779,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Mostrar list group
         const listGroupContainer = document.getElementById('listGroupContainer');
         if (listGroupContainer) {
+
             listGroupContainer.style.display = 'block';
         }
 
