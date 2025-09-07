@@ -1,18 +1,6 @@
-import { db } from "./firebase.js";
-import {
-    doc,
-    setDoc,
-    serverTimestamp,
-    onSnapshot,
-    collection,
-    query,
-    where,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando admin_home.js...');
-    console.log('🔥 Firebase DB objeto:', db);
 
     // 🔹 Array global para guardar seleccionados
     let empleadosSeleccionados = [];
