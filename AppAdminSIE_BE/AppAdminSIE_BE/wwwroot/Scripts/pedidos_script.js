@@ -186,14 +186,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
             cantidadInput.value = 1;
-            cantidadInput.min = 1;
             cantidadInput.className = 'form-control form-control-sm d-inline-block';
             cantidadInput.style.width = '80px';
+            cantidadInput.step = "any";
+            cantidadInput.min = 0;
 
             // Guardar cantidad en el objeto producto
             cantidadInput.addEventListener('input', () => {
-                if (cantidadInput.value < 1) cantidadInput.value = 1;
-                producto.cantidad = parseInt(cantidadInput.value, 10);
+                producto.cantidad = parseFloat(cantidadInput.value);
 
                 // Si ya está seleccionado, actualizar la cantidad en productosSeleccionados
                 const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             check.addEventListener('change', () => {
                 if (check.checked) {
-                    producto.cantidad = parseInt(cantidadInput.value, 10);
+                    producto.cantidad = parseFloat(cantidadInput.value);
                     // Si no está, agregarlo
                     if (!productosSeleccionados.find(p => p.id === producto.id)) {
                         productosSeleccionados.push({ ...producto });
