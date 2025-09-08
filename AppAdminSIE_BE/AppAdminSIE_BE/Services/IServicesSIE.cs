@@ -13,14 +13,9 @@ namespace JobOclock_BackEnd.Services
         // EDIFICIO
         IEnumerable<Edificio> GetAllEdificios();
 
-        // FOTO REGISTRO 
-        IEnumerable<FotoRegistro> GetFotoRegistroByRegistro(int idRegistro);
-        void AddFotoRegistro(FotoRegistro foto);
+        // PRODUCTO
 
-        // POSICION USUARIO
-        IEnumerable<PosicionUsuario> GetPosicionByUsuario(int intUsuario);
-        PosicionUsuario GetUltimaPosicion(int idUsuario);
-        void Add(PosicionUsuario posicion);
+        IEnumerable<Producto> GetAllProductos();  
 
         // REGISTRO 
         IEnumerable<Registro> GetRegistroByUsuario(int idUsuario);

@@ -8,20 +8,18 @@ namespace JobOclock_BackEnd.Services
     public class ServicesSIE : IServicesSIE
     {
         private readonly IServicioRepository _actividadRepository;
-        private readonly IFotoRegistroRepository _fotoRegistroRepository;
-        private readonly IPosicionUsuarioRepository _posicionUsuarioRepository;
         private readonly IRegistroRepository _registroRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
+        private readonly IProductoRepository _productoRepository;
         private readonly IEdificioRepository _edificioRepository;
-        public ServicesSIE(IServicioRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IEdificioRepository edificioRepository)
+        public ServicesSIE(IServicioRepository actividadRepository,  IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository)
         {
             _actividadRepository = actividadRepository;
-            _fotoRegistroRepository = fotoRegistroRepository;
-            _posicionUsuarioRepository = posicionUsuarioRepository;
             _registroRepository = registroRepository;
             _usuarioRepository = ussuarioRepository;
             _usuarioXActividadRepository = usuarioXActividadRepository;
+            _productoRepository = productoRepository;
             _edificioRepository = edificioRepository;
         }
         
@@ -42,29 +40,14 @@ namespace JobOclock_BackEnd.Services
             return _edificioRepository.GetAllEdificios();
         }
 
-        // FOTO REGISTRO
-        public IEnumerable<FotoRegistro> GetFotoRegistroByRegistro(int idRegistro)
+
+        // PRODUCTO
+
+        public IEnumerable<Producto> GetAllProductos()
         {
-            return _fotoRegistroRepository.GetByRegistro(idRegistro);
-        }
-        public void AddFotoRegistro(FotoRegistro foto)
-        {
-            _fotoRegistroRepository.Add(foto);
+            return _productoRepository.GetAllProducto();
         }
 
-        // POSICION 
-        public IEnumerable<PosicionUsuario> GetPosicionByUsuario(int intUsuario)
-        {
-            return _posicionUsuarioRepository.GetByUsuario(intUsuario);
-        }
-        public PosicionUsuario GetUltimaPosicion(int idUsuario)
-        {
-            return _posicionUsuarioRepository.GetUltimaPosicion(idUsuario);
-        }
-        public void Add(PosicionUsuario posicion)
-        {
-            _posicionUsuarioRepository.Add(posicion);
-        }
 
         // REGISTRO
         public IEnumerable<Registro> GetRegistroByUsuario(int idUsuario)
