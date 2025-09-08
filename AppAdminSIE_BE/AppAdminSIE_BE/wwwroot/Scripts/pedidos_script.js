@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    
+
 
 
     // Esta función se utiliza para crear y agregar un checkbox a cada fila (CORREGIDA)

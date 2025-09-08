@@ -12,27 +12,48 @@
 </head>
 <body>
 <!-- navbar -->
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
-        <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
-        <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
-        <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+        <!-- Botón hamburguesa CORREGIDO -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú -->
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNavDropdown">
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Opciones
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Home_Admin_Page.html">Tareas</a></li>
-                        <li><a class="dropdown-item" href="#">Pedidos</a></li>
-                        <li><hr class="dropdown-divider" style="background-color: white"></li>
-                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com">Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Pedidos_Page.html">Pedidos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Login_page.html">Cerrar Sesión</a></li>
                     </ul>
+                </li>
+            </ul>
+
+            <!-- Logo centrado -->
+            <a class="navbar-brand d-none d-lg-block" href="#">
+                <img src="../Images/logo_SIE.png" alt="sie_logo">
+            </a>
+
+            <!-- Saludo a la derecha CORREGIDO -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <span class="nav-link navbar-saludo">Hola, Usuario!</span>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+
 
 <div class="right-panel">
     <div class="compact-header">
