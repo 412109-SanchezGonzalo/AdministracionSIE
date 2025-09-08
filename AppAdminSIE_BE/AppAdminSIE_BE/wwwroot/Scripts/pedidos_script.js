@@ -122,55 +122,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Función que renderiza la tabla con la lista de productos y checkboxes
-    function renderTable(productos) {
-        tableBody.innerHTML = ''; // Limpiar la tabla antes de agregar filas
-
-        if (productos.length === 0) {
-            showNoData();
-            return;
-        }
-
-        productos.forEach(producto => {
-            const tr = document.createElement('tr');
-
-            tr.innerHTML = `
-            <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-            <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-            <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-            <td class="cantidad-cell"></td> <!-- columna cantidad -->
-            <td class="acciones-cell"></td> <!-- columna acciones (checkbox) -->
-        `;
-
-            // ✅ Crear input de cantidad
-            const cantidadInput = document.createElement('input');
-            cantidadInput.type = 'number';
-            cantidadInput.value = 1;
-            cantidadInput.min = 1;
-            cantidadInput.className = 'form-control form-control-sm d-inline-block';
-            cantidadInput.style.width = '80px';
-
-            // ✅ Crear texto con la unidad de medida
-            const unidadSpan = document.createElement('span');
-            unidadSpan.textContent = ` ${producto.unidadMedida || ''}`;
-            unidadSpan.className = 'ms-2';
-
-            // Agregar input + unidad en la celda Cantidad
-            const cantidadCell = tr.querySelector('.cantidad-cell');
-            cantidadCell.appendChild(cantidadInput);
-            cantidadCell.appendChild(unidadSpan);
-
-            // ✅ Crear el checkbox (acciones)
-            const check = createCheckboxForProduct(producto);
-            const accionesCell = tr.querySelector('.acciones-cell');
-            accionesCell.appendChild(check);
-
-            // Agregar fila
-            tableBody.appendChild(tr);
-        });
-
-        showTable(productos.length);
-    }
+    
 
 
     // Esta función se utiliza para crear y agregar un checkbox a cada fila (CORREGIDA)
@@ -212,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     function renderTable(productos) {
-        tableBody.innerHTML = ''; // Limpiar la tabla antes de agregar filas
+        tableBody.innerHTML = '';
 
         if (productos.length === 0) {
             showNoData();
@@ -226,11 +178,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
             <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
             <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-            <td class="cantidad-cell"></td> <!-- columna cantidad -->
-            <td class="acciones-cell"></td> <!-- columna acciones (checkbox) -->
+            <td class="cantidad-cell"></td>
+            <td class="acciones-cell"></td>
         `;
 
-            // ✅ Crear input de cantidad
+            // ✅ Input de cantidad
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
             cantidadInput.value = 1;
@@ -238,27 +190,100 @@ document.addEventListener('DOMContentLoaded', async function () {
             cantidadInput.className = 'form-control form-control-sm d-inline-block';
             cantidadInput.style.width = '80px';
 
-            // ✅ Crear texto con la unidad de medida
+            // Guardar cantidad en el objeto producto
+            cantidadInput.addEventListener('input', () => {
+                if (cantidadInput.value < 1) cantidadInput.value = 1;
+                producto.cantidad = parseInt(cantidadInput.value, 10);
+
+                // Si ya está seleccionado, actualizar la cantidad en productosSeleccionados
+                const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
+                if (seleccionado) {
+                    seleccionado.cantidad = producto.cantidad;
+                }
+            });
+
             const unidadSpan = document.createElement('span');
             unidadSpan.textContent = ` ${producto.unidadMedida || ''}`;
             unidadSpan.className = 'ms-2';
 
-            // Agregar input + unidad en la celda Cantidad
             const cantidadCell = tr.querySelector('.cantidad-cell');
             cantidadCell.appendChild(cantidadInput);
             cantidadCell.appendChild(unidadSpan);
 
-            // ✅ Crear el checkbox (acciones)
-            const check = createCheckboxForProduct(producto);
+            // ✅ Checkbox
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'form-check-input';
+
+            // Marcar si ya estaba en la lista
+            const existente = productosSeleccionados.find(p => p.id === producto.id);
+            if (existente) {
+                check.checked = true;
+                cantidadInput.value = existente.cantidad;
+            }
+
+            check.addEventListener('change', () => {
+                if (check.checked) {
+                    producto.cantidad = parseInt(cantidadInput.value, 10);
+                    // Si no está, agregarlo
+                    if (!productosSeleccionados.find(p => p.id === producto.id)) {
+                        productosSeleccionados.push({ ...producto });
+                    }
+                } else {
+                    // Reiniciar cantidad a 1 y quitarlo de la lista
+                    cantidadInput.value = 1;
+                    producto.cantidad = 1;
+                    productosSeleccionados = productosSeleccionados.filter(p => p.id !== producto.id);
+                }
+                console.log("Productos seleccionados:", productosSeleccionados);
+            });
+
             const accionesCell = tr.querySelector('.acciones-cell');
             accionesCell.appendChild(check);
 
-            // Agregar fila
             tableBody.appendChild(tr);
         });
 
         showTable(productos.length);
     }
+
+
+
+    // 🔹 Función para buscar producto por nombre en memoria
+    function searchByName() {
+        const nombre = searchProductInput.value.trim().toLowerCase();
+        console.log('🔍 Buscando producto en memoria:', nombre);
+
+        if (!nombre) {
+            renderTable(productosGlobal); // ✅ Mostrar todos si no hay búsqueda
+            return;
+        }
+
+        // Filtrar productos que contengan el término en el nombre
+        const resultados = productosGlobal.filter(p =>
+            p.nombre.toLowerCase().includes(nombre)
+        );
+
+        if (resultados.length === 0) {
+            showError("Producto no encontrado");
+            tableBody.innerHTML = ''; // limpiar tabla
+            return;
+        }
+
+        renderTable(resultados);
+    }
+
+
+    // 🔹 Búsqueda en tiempo real con debounce
+    let debounceTimer;
+    searchProductInput.addEventListener("input", (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            searchByName();
+        }, 300); // espera 300ms entre teclas
+    });
+
+
 
 
     // Eventos
