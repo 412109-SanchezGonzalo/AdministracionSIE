@@ -48,6 +48,11 @@ namespace JobOclock_BackEnd.Services
             return _productoRepository.GetAllProducto();
         }
 
+        public Producto GetProductoByName(string name)
+        {
+            return _productoRepository.GetByName(name);
+        }
+
 
         // REGISTRO
         public IEnumerable<Registro> GetRegistroByUsuario(int idUsuario)

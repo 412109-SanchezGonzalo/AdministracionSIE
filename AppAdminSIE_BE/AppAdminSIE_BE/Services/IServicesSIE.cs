@@ -15,7 +15,8 @@ namespace JobOclock_BackEnd.Services
 
         // PRODUCTO
 
-        IEnumerable<Producto> GetAllProductos();  
+        IEnumerable<Producto> GetAllProductos();
+        Producto GetProductoByName(string name);
 
         // REGISTRO 
         IEnumerable<Registro> GetRegistroByUsuario(int idUsuario);

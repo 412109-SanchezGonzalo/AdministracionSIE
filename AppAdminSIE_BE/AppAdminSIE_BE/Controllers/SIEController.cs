@@ -81,6 +81,21 @@ namespace JobOclock_BackEnd.Controllers
         }
 
 
+        [HttpPost("Obtener-producto-por-nombre")]
+        public ActionResult GetProductoByName([FromBody] string name)
+        {
+            try
+            {
+                var producto = _service.GetProductoByName(name);
+                if (producto != null)
+                {
+                    return Ok(producto);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
 
         // REGISTRO
 

@@ -31,5 +31,32 @@ namespace AppAdminSIE_BE.Data.Repositories
             }
             return list;
         }
+
+        public Producto GetByName(string nombre)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            using var cmd = new MySqlCommand("SELECT * FROM Productos WHERE Nombre = @name", conn);
+            cmd.Parameters.AddWithValue("@name", nombre);
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+
+            int idxIdProducto = reader.GetOrdinal("id");
+            int idxNombre = reader.GetOrdinal("Nombre");
+            int idxIVA = reader.GetOrdinal("IVA");
+            int idxUnidadMedida = reader.GetOrdinal("UnidadMedida");
+
+            if (reader.Read())
+            {
+                return new Producto
+                {
+                    Id = reader.GetInt32(idxIdProducto),
+                    Nombre = reader.GetString(idxNombre),
+                    Iva = reader.GetInt32(idxIVA),
+                    UnidadMedida = reader.GetString(idxUnidadMedida)
+                };
+            }
+            return null;
+        }
     }
 }
