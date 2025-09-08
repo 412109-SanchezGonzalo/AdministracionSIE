@@ -5,6 +5,6 @@ namespace AppAdminSIE_BE.Data.Interfaces
     public interface IPedidoXProductoRepository
     {
         IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
-        void UpdateEstado(int idPedidoXProducto);
+        
     }
 }

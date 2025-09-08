@@ -96,6 +96,27 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
+        // PEDIDO
+        [HttpPost("Crear-pedido")]
+        public ActionResult<int> AddPedidos([FromBody] DateTime fechaPedido)
+        {
+            try
+            {
+                return Ok(_service.AddPedido(fechaPedido));
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPut("Editar-estado-pedido")]
+        public ActionResult UpdateEstadoPedido([FromBody] int idPedido)
+        {
+            try
+            {
+                _service.UpdateEstado(idPedido);
+                return Ok("Estado Actualizado !");
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
 
         // REGISTRO
 

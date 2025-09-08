@@ -18,6 +18,14 @@ namespace JobOclock_BackEnd.Services
         IEnumerable<Producto> GetAllProductos();
         Producto GetProductoByName(string name);
 
+        // PEDIDO
+        int AddPedido(DateTime fechaEntrega);
+        void UpdateEstado(int idPedido);
+
+        // PEDIDO X PRODUCTO
+
+        IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
+
         // REGISTRO 
         IEnumerable<Registro> GetRegistroByUsuario(int idUsuario);
         Registro GetRegistroById(int id);

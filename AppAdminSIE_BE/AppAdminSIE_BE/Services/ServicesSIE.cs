@@ -13,7 +13,9 @@ namespace JobOclock_BackEnd.Services
         private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
         private readonly IProductoRepository _productoRepository;
         private readonly IEdificioRepository _edificioRepository;
-        public ServicesSIE(IServicioRepository actividadRepository,  IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository)
+        private readonly IPedidoRepository _pedidoRepository;
+        private readonly IPedidoXProductoRepository _pedidoXProductoRepository;
+        public ServicesSIE(IServicioRepository actividadRepository,  IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
         {
             _actividadRepository = actividadRepository;
             _registroRepository = registroRepository;
@@ -21,6 +23,8 @@ namespace JobOclock_BackEnd.Services
             _usuarioXActividadRepository = usuarioXActividadRepository;
             _productoRepository = productoRepository;
             _edificioRepository = edificioRepository;
+            _pedidoRepository = pedidoRepository;
+            _pedidoXProductoRepository = pedidoXProductoRepository;
         }
         
         // ACTIVIDAD
@@ -51,6 +55,24 @@ namespace JobOclock_BackEnd.Services
         public Producto GetProductoByName(string name)
         {
             return _productoRepository.GetByName(name);
+        }
+
+
+        // PEDIDO
+        public int AddPedido(DateTime fechaEntrega)
+        {
+            return _pedidoRepository.AddPedido(fechaEntrega);
+        }
+        public void UpdateEstado(int idPedido)
+        {
+            _pedidoRepository.UpdateEstado(idPedido);
+        }
+
+        // PEDIDO X PRODUCTO
+
+        public IEnumerable<PedidoXProducto> GetAllPedidoXProductos()
+        {
+            return _pedidoXProductoRepository.GetAllPedidoXProductos();
         }
 
 
