@@ -1,17 +1,15 @@
 document.addEventListener('DOMContentLoaded', async function () {
-
     console.log('🚀 Iniciando pedidos_script.js...');
 
-    // 🔹 Array global para guardar seleccionados
+    // Arrays globales
     let productosSeleccionados = [];
+    let productosGlobal = [];
     // 🔹 Array global para almacenar edificios
     let edificiosDisponibles = [];
     let edificioSeleccionadoId = null;
 
-    const navbarToggle = document.querySelector('.navbar-toggle');
-    const navbarMenu = document.querySelector('.navbar-menu');
+    // Referencias HTML
     const saludoSpan = document.querySelector('.navbar-saludo');
-
     const loadingElement = document.getElementById('loading');
     const errorElement = document.getElementById('error-message');
     const noDataElement = document.getElementById('no-data-message');
@@ -20,48 +18,25 @@ document.addEventListener('DOMContentLoaded', async function () {
     const errorDetails = document.getElementById('error-details');
     const userCount = document.getElementById('products-count');
     const searchProductInput = document.getElementById('search-product');
+    const tabla = document.getElementById("tablaBody");
 
+    // Botones
+    const btnSearch = document.getElementById('btnSearch');
+    const btnRetry = document.getElementById('btnRetry');
+    const btnNewPedido = document.getElementById('btnNewPedido');
+    const btnVerPedidos = document.getElementById('btnVerPedidos');
+    const btnConfirmar = document.getElementById("btnConfirmar");
+    const btnConfirmarPedidos = document.getElementById('btnConfirmarPedidos');
+
+    // Modal
+    const formProducto = document.getElementById("formProducto");
+    const modalNewPedido = document.getElementById("miModal");
+
+    // 🔹 Estado inicial
     searchProductInput.disabled = true;
 
-    const btnSearch = document.getElementById('btnSearch');
-    const btnAll = document.getElementById('btnAll');
-    const btnClear = document.getElementById('btnClear');
-    const btnRetry = document.getElementById('btnRetry');
-    const btnNewTask = document.getElementById('btnNewPedido');
-    const btnVerTask = document.getElementById('btnVerPedidos');
-
-
-    // 🔍 VERIFICAR ELEMENTOS HTML
-    console.log('📋 Elementos encontrados:', {
-        loadingElement: !!loadingElement,
-        errorElement: !!errorElement,
-        noDataElement: !!noDataElement,
-        tableWrapper: !!tableWrapper,
-        tableBody: !!tableBody,
-        btnAll: !!btnAll
-    });
-
-    try {
-        const password = localStorage.getItem('admin_password');
-        console.log('🔐 Admin password:', password);
-
-        const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(password)
-        });
-
-        saludoSpan.textContent = response.ok
-            ? `Hola, ${await response.text()} !`
-            : 'Hola, Usuario !';
-    } catch (error) {
-        console.log('⚠️ Error en autenticación admin:', error);
-        saludoSpan.textContent = 'Hola, Usuario !';
-    }
-
-    // 📌 Funciones de UI
+    // 📌 Funciones UI
     function showLoading() {
-        console.log('⏳ Mostrando loading...');
         loadingElement.classList.remove('d-none');
         errorElement.classList.add('d-none');
         noDataElement.classList.add('d-none');
@@ -69,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function showError(msg) {
-        console.log('❌ Mostrando error:', msg);
         loadingElement.classList.add('d-none');
         errorElement.classList.remove('d-none');
         noDataElement.classList.add('d-none');
@@ -78,7 +52,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function showNoData() {
-        console.log('📭 No hay datos para mostrar');
         loadingElement.classList.add('d-none');
         errorElement.classList.add('d-none');
         noDataElement.classList.remove('d-none');
@@ -87,7 +60,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function showTable(count) {
-        console.log('📊 Mostrando tabla con', count, 'elementos');
         loadingElement.classList.add('d-none');
         errorElement.classList.add('d-none');
         noDataElement.classList.add('d-none');
@@ -95,16 +67,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         userCount.textContent = count;
     }
 
-    function clearTable() {
-        console.log('🧹 Limpiando tabla...');
-        tableBody.innerHTML = '';
-        searchProductInput.value = '';
-        showNoData();
-    }
-
-
-    let productosGlobal = [];
-    // ✅ Cargar todos los productos al inicio
+    // ✅ Cargar todos los productos desde API
     async function loadAllProducts() {
         showLoading();
         try {
@@ -114,55 +77,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (!Array.isArray(productos)) throw new Error('Formato inválido');
 
             searchProductInput.disabled = false;
-
-            productosGlobal = productos; // guardamos todos
-            renderTable(productosGlobal); // mostramos todo
+            productosGlobal = productos;
+            renderTable(productosGlobal);
         } catch (error) {
-            showError("Error al cargar usuarios: " + error.message);
+            showError("Error al cargar productos: " + error.message);
         }
     }
 
-
-
-
-    // Esta función se utiliza para crear y agregar un checkbox a cada fila (CORREGIDA)
-    function createCheckboxForProduct(producto) {
-        const check = document.createElement('input');
-        check.type = 'checkbox';
-        check.className = 'form-check-input selectEmployee'; // ✅ Agregar clase selectEmployee
-        check.title = 'Seleccionar producto';
-
-        // Si el producto está en productosSeleccionados, marcar el checkbox
-        const productoExistente = productosSeleccionados.find(pro => pro.id === producto.id);
-        if (productoExistente) {
-            check.checked = true;
-        }
-
-        // Evento para manejar el cambio de estado del checkbox
-        check.addEventListener('change', () => {
-            const productoInfo = {
-                id: producto.id || 'N/A',
-                nombre: producto.nombre || 'Sin nombre',
-                Iva: producto.IVA || 'Sin IVA'
-            };
-
-            if (check.checked) {
-                // Agregar si no existe
-                if (!productosSeleccionados.find(pro => pro.id === productoInfo.id)) {
-                    productosSeleccionados.push(productoInfo);
-                }
-            } else {
-                // Quitar si se desmarca
-                productosSeleccionados = productosSeleccionados.filter(pro => pro.id !== productosSeleccionados.id);
-            }
-
-            console.log("Productods seleccionados:", productosSeleccionados);
-        });
-
-        return check;
-    }
-
-
+    // ✅ Renderizar tabla de productos de la API
     function renderTable(productos) {
         tableBody.innerHTML = '';
 
@@ -182,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td class="acciones-cell"></td>
         `;
 
-            // ✅ Input de cantidad
+            // Input de cantidad
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
             cantidadInput.value = 1;
@@ -191,46 +113,36 @@ document.addEventListener('DOMContentLoaded', async function () {
             cantidadInput.step = "any";
             cantidadInput.min = 0;
 
-            // Guardar cantidad en el objeto producto
             cantidadInput.addEventListener('input', () => {
                 producto.cantidad = parseFloat(cantidadInput.value);
-
-                // Si ya está seleccionado, actualizar la cantidad en productosSeleccionados
                 const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
-                if (seleccionado) {
-                    seleccionado.cantidad = producto.cantidad;
-                }
+                if (seleccionado) seleccionado.cantidad = producto.cantidad;
             });
 
-            const unidadSpan = document.createElement('span');
-            unidadSpan.textContent = ` ${producto.unidadMedida || ''}`;
-            unidadSpan.className = 'ms-2';
-
+            // Agregar primero el input y después el texto de unidad de medida
             const cantidadCell = tr.querySelector('.cantidad-cell');
             cantidadCell.appendChild(cantidadInput);
+
+            // Agregar el texto de unidad de medida después del input
+            const unidadSpan = document.createElement('span');
+            unidadSpan.className = 'unidad-medida ms-2';
+            unidadSpan.textContent = producto.unidadMedida || 'Sin unidad';
             cantidadCell.appendChild(unidadSpan);
 
-            // ✅ Checkbox
+            // Checkbox
             const check = document.createElement('input');
             check.type = 'checkbox';
             check.className = 'form-check-input';
 
-            // Marcar si ya estaba en la lista
-            const existente = productosSeleccionados.find(p => p.id === producto.id);
-            if (existente) {
-                check.checked = true;
-                cantidadInput.value = existente.cantidad;
-            }
-
             check.addEventListener('change', () => {
                 if (check.checked) {
+                    // Producto seleccionado - tomar el valor actual del input
                     producto.cantidad = parseFloat(cantidadInput.value);
-                    // Si no está, agregarlo
                     if (!productosSeleccionados.find(p => p.id === producto.id)) {
                         productosSeleccionados.push({ ...producto });
                     }
                 } else {
-                    // Reiniciar cantidad a 1 y quitarlo de la lista
+                    // Producto deseleccionado - resetear input a 1 y remover de seleccionados
                     cantidadInput.value = 1;
                     producto.cantidad = 1;
                     productosSeleccionados = productosSeleccionados.filter(p => p.id !== producto.id);
@@ -247,26 +159,21 @@ document.addEventListener('DOMContentLoaded', async function () {
         showTable(productos.length);
     }
 
-
-
-    // 🔹 Función para buscar producto por nombre en memoria
+    // 🔍 Buscar producto en memoria
     function searchByName() {
         const nombre = searchProductInput.value.trim().toLowerCase();
-        console.log('🔍 Buscando producto en memoria:', nombre);
-
         if (!nombre) {
-            renderTable(productosGlobal); // ✅ Mostrar todos si no hay búsqueda
+            renderTable(productosGlobal);
             return;
         }
 
-        // Filtrar productos que contengan el término en el nombre
         const resultados = productosGlobal.filter(p =>
             p.nombre.toLowerCase().includes(nombre)
         );
 
         if (resultados.length === 0) {
             showError("Producto no encontrado");
-            tableBody.innerHTML = ''; // limpiar tabla
+            tableBody.innerHTML = '';
             return;
         }
 
@@ -274,20 +181,283 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-    // 🔹 Búsqueda en tiempo real con debounce
-    let debounceTimer;
-    searchProductInput.addEventListener("input", (e) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            searchByName();
-        }, 300); // espera 300ms entre teclas
+
+    // 🔹 Función para llenar el dropdown de edificios
+    function llenarDropdownEdificios(edificios) {
+        console.log('🔄 Llenando dropdown con edificios:', edificios);
+
+        // CORREGIDO: Buscar específicamente el dropdown de edificios
+        const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
+
+        if (!dropdown) {
+            console.error('❌ No se encontró el dropdown de edificios');
+            console.log('🔍 Elementos disponibles:', {
+                modal: document.getElementById('modal-NewTask'),
+                menuEdificios: document.getElementById('menuEdificios'),
+                dropdownMenu: document.querySelector('#menuEdificios .dropdown-menu')
+            });
+            return;
+        }
+
+        console.log('✅ Dropdown de edificios encontrado:', dropdown);
+
+        // Limpiar opciones existentes
+        dropdown.innerHTML = '';
+
+        // Agregar edificios como <li> con <button> dentro
+        edificios.forEach((edificio, index) => {
+            console.log(`➕ Agregando edificio ${index + 1}:`, edificio);
+
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.className = 'dropdown-item';
+            button.type = 'button';
+            button.textContent = edificio.nombre;
+            button.setAttribute('data-value', edificio.id_Edificio);
+
+            button.addEventListener('click', () => {
+                seleccionarEdificio(edificio.id_Edificio, edificio.nombre);
+            });
+
+            li.appendChild(button);
+            dropdown.appendChild(li);
+        });
+
+        console.log('✅ Dropdown de edificios poblado exitosamente con', edificios.length, 'edificios');
+    }
+
+    // Funcion para seleccionar un Edificio del Dropdown
+    function seleccionarEdificio(id, nombre) {
+        console.log('🎯 Edificio seleccionado:', { id, nombre });
+
+        // Guardar el ID en variable global
+        edificioSeleccionadoId = id;
+
+        const botonDropdown = document.getElementById('edificioSelected');
+
+        if (botonDropdown) {
+            botonDropdown.textContent = nombre;
+            botonDropdown.setAttribute('data-selected', id);
+            console.log('✅ Botón dropdown de edificios actualizado y ID guardado:', id);
+
+            // Cerrar el dropdown después de seleccionar
+            try {
+                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+                if (dropdown) {
+                    dropdown.hide();
+                }
+            } catch (e) {
+                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
+            }
+        } else {
+            console.error('❌ No se encontró el botón edificioSelected');
+        }
+    }
+
+    // Función para obtener el ID (usa la variable global)
+    function obtenerIdEdificio() {
+        console.log('🏢 ID Edificio obtenido:', edificioSeleccionadoId);
+        return edificioSeleccionadoId;
+    }
+
+    // 🔹 Función corregida para cargar edificios desde la API
+    async function cargarEdificios() {
+        console.log('🔄 Cargando edificios desde la API...');
+
+        try {
+            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios';
+            console.log('📡 URL completa:', url);
+
+            const response = await fetch(url);
+
+            console.log('📊 Response status:', response.status);
+            console.log('📊 Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const edificios = await response.json();
+            console.log('✅ Edificios obtenidos:', edificios);
+
+            // Verificar que sea un array
+            if (!Array.isArray(edificios)) {
+                console.error('❌ Los edificios no son un array:', typeof edificios);
+                throw new Error('Formato de edificios inválido');
+            }
+
+            // Guardar los edificios globalmente
+            edificiosDisponibles = edificios;
+
+            // Llenar el dropdown inmediatamente
+            llenarDropdownEdificios(edificios);
+
+        } catch (error) {
+            console.error('❌ Error al cargar edificios:', error);
+            alert('Error al cargar edificios: ' + error.message);
+        }
+    }
+
+
+
+    async function ConfirmarPedido(){
+        try {
+            const fechaEntrega = document.getElementById('fechaEntrega').value;
+            const observaciones = document.getElementById('observaciones').value;
+
+            // Validar que haya fecha
+            if (!fechaEntrega) {
+                alert("Por favor seleccione una fecha de entrega");
+                return;
+            }
+
+            // 1. Crear el pedido principal (solo fecha)
+            const bodyPedido = {
+                fechaEntrega: fechaEntrega
+            };
+
+            const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyPedido)
+            });
+
+            if (!responsePedido.ok) {
+                throw new Error(`Error al crear pedido: ${responsePedido.status}`);
+            }
+
+            const pedidoId = await responsePedido.json();
+
+            // 2. Crear los PedidoXProducto para cada producto seleccionado
+            for (const producto of productosSeleccionados) {
+                const bodyPedidoProducto = {
+                    idPedido: pedidoId,
+                    idProducto: producto.id,
+                    idEdificio: obtenerIdEdificio(),
+                    cantidad: productosSeleccionados.cantidad,
+                    estadoPedido: 'No Entregado',
+                    nombreProducto: productosSeleccionados.nombre,
+                    unidadMedidaProducto: productosSeleccionados.unidadMedidaProducto,
+                    observaciones: observaciones || ""
+                };
+
+                const responsePedidoProducto = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedidoxproducto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bodyPedidoProducto)
+                });
+
+                if (!responsePedidoProducto.ok) {
+                    console.error(`Error al asociar producto ${producto.id} al pedido`);
+                }
+            }
+
+            alert("Pedido creado exitosamente");
+
+            // Cerrar modal y limpiar datos
+            const modal = bootstrap.Modal.getInstance(document.getElementById("miModal"));
+            modal.hide();
+
+            // Limpiar formulario
+            document.getElementById('fechaEntrega').value = '';
+            document.getElementById('observaciones').value = '';
+            productosSeleccionados = [];
+
+            // Resetear tabla
+            renderTable(productosGlobal);
+
+        } catch (error) {
+            console.error('Error al crear pedido:', error);
+            alert("Error al crear el pedido: " + error.message);
+        }
+    }
+
+
+    // ✅ Eventos
+    if (btnSearch) btnSearch.addEventListener('click', loadAllProducts);
+    btnNewPedido.addEventListener("click", function () {
+        const tablaBody = document.getElementById("tablaProductosBody");
+        tablaBody.innerHTML = ""; // limpiar antes de cargar
+
+        if (productosSeleccionados.length === 0) {
+            alert("⚠️ No hay productos seleccionados.");
+            return;
+        }
+
+        productosSeleccionados.forEach(prod => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+            <td>${prod.id}</td>
+            <td>${prod.nombre}</td>
+            <td>${prod.cantidad ?? 1}</td>
+            <td>${prod.unidadMedida ?? "-"}</td>
+            <td>-</td>
+        `;
+
+            tablaBody.appendChild(tr);
+        });
+
+        const edificioButton = document.getElementById('edificioSelected');
+        if (edificioButton) {
+            edificioButton.textContent = 'Seleccione un edificio';
+            edificioButton.removeAttribute('data-selected');
+        }
+        // Limpiar fecha
+        const fechaInput = document.getElementById('fechaEntrega');
+        if (fechaInput) {
+            fechaInput.value = '';
+        }
+
+        // Limpiar observaciones
+        const observacionesTextPedido = document.getElementById('observaciones');
+        if (observacionesTextPedido) {
+            observacionesTextPedido.value = '';
+        }
+
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById("miModal"));
+        modal.show();
+        // Cargar las actividades Y edificios después de mostrar el modal
+        setTimeout(async () => {
+            await cargarEdificios();
+        },100);
     });
 
+    searchProductInput.addEventListener("input", () => {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(searchByName, 300);
+    });
 
+    // Modal → Confirmar
+    btnConfirmar.addEventListener("click", function () {
+        const id = document.getElementById("idProducto").value;
+        const producto = document.getElementById("nombreProducto").value;
+        const cantidad = document.getElementById("cantidadProducto").value;
+        const unidad = document.getElementById("unidadMedida").value;
+        const entregado = document.getElementById("entregado").checked ? "✅" : "❌";
 
+        if (id && producto && cantidad && unidad) {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td>${id}</td>
+                <td>${producto}</td>
+                <td>${cantidad}</td>
+                <td>${unidad}</td>
+                <td>${entregado}</td>
+            `;
+            tabla.appendChild(fila);
 
-    // Eventos
-    if(btnSearch) btnSearch.addEventListener('click',loadAllProducts);
-
-
-})
+            bootstrap.Modal.getInstance(modalElement).hide();
+            formProducto.reset();
+        } else {
+            alert("⚠️ Complete todos los campos antes de confirmar.");
+        }
+    });
+});

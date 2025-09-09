@@ -135,6 +135,18 @@
     overflow-x: auto;
 }
 
+
+/* === DROPDOWN === */
+#menuEdificios .dropdown-menu {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.form-control-sm {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+}
+
 /* === TABLAS === */
 .table {
     width: 100%;
@@ -185,6 +197,32 @@
     margin-bottom: 0;
     text-align: center;
 }
+
+
+/* === MODAL REGISTRAR PEDIDO === */
+.modal-dialog-centered {
+    display: flex !important;
+    align-items: center !important;
+    min-height: calc(100vh - 1rem) !important;
+    margin: 0.5rem auto !important;
+}
+
+.unidad-medida {
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.cantidad-cell {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+
+
 /* === BUSCADOR === */
 .search-container {
     background: white;
@@ -394,6 +432,9 @@
         font-size: 0.6rem;
     }
 }
+
+
+
 
 /* Pantallas muy pequeñas */
 @media (max-width: 320px) {

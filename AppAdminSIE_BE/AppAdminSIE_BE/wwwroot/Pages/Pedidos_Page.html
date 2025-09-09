@@ -108,5 +108,69 @@
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="miModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl"
+         style="display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-height: calc(100vh - 1rem) !important;
+                margin: 0.5rem auto !important;">
+        <div class="modal-content" style="width: 100%; max-width: 1140px;">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Pedido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tabla donde se llenan los productos -->
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped" id="tablaProductos">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Entregado</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaProductosBody">
+                        <!-- Los productos se llenan aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Edificio -->
+                <div class="mb-3">
+                    <label for="menuEdificios" class="form-label">Entregar en Edificio</label>
+                    <div class="input-group mb-3" id="menuEdificios">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelected">Seleccione un edificio</button>
+                        <ul class="dropdown-menu">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Fecha -->
+                <div class="mb-3">
+                    <label for="fechaEntrega" class="form-label">Fecha de Actividad</label>
+                    <div class="col-md-4 col-sm-6">
+                        <input type="date" class="form-control form-control-sm" id="fechaEntrega">
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="mb-3">
+                    <label for="observaciones" class="form-label">Observaciones</label>
+                    <textarea class="form-control" id="observaciones" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarPedidos">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -8,17 +8,15 @@ namespace JobOclock_BackEnd.Services
     public class ServicesSIE : IServicesSIE
     {
         private readonly IServicioRepository _actividadRepository;
-        private readonly IRegistroRepository _registroRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
         private readonly IProductoRepository _productoRepository;
         private readonly IEdificioRepository _edificioRepository;
         private readonly IPedidoRepository _pedidoRepository;
         private readonly IPedidoXProductoRepository _pedidoXProductoRepository;
-        public ServicesSIE(IServicioRepository actividadRepository,  IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
+        public ServicesSIE(IServicioRepository actividadRepository,  IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
         {
             _actividadRepository = actividadRepository;
-            _registroRepository = registroRepository;
             _usuarioRepository = ussuarioRepository;
             _usuarioXActividadRepository = usuarioXActividadRepository;
             _productoRepository = productoRepository;
@@ -74,24 +72,12 @@ namespace JobOclock_BackEnd.Services
         {
             return _pedidoXProductoRepository.GetAllPedidoXProductos();
         }
+        public void AddPedidoXProducto(PedidoXProducto pedidoxproducto)
+        {
+            _pedidoXProductoRepository.AddPedidoXProducto(pedidoxproducto);
+        }
 
 
-        // REGISTRO
-        public IEnumerable<Registro> GetRegistroByUsuario(int idUsuario)
-        {
-            return _registroRepository.GetByUsuario(idUsuario);
-        }
-        public Registro GetRegistroById(int id)
-        {
-            return _registroRepository.GetById(id);
-        }
-        public void AddRegistro(Registro registro)
-        {
-            _registroRepository.Add(registro);
-        }
-        public void UpdateRegistroSalida(int idRegistro, string horaSalida) { 
-            _registroRepository.UpdateSalida(idRegistro,horaSalida);
-        }
 
         // USUARIO
         public IEnumerable<Usuario> GetAllUsuarios()

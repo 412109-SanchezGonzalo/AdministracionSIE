@@ -26,11 +26,7 @@ namespace JobOclock_BackEnd.Services
 
         IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
 
-        // REGISTRO 
-        IEnumerable<Registro> GetRegistroByUsuario(int idUsuario);
-        Registro GetRegistroById(int id);
-        void AddRegistro(Registro registro);
-        void UpdateRegistroSalida(int idRegistro, string horaSalida);
+        void AddPedidoXProducto(PedidoXProducto pedidoxproducto);
 
         // USUARIO
         IEnumerable<Usuario> GetAllUsuarios();

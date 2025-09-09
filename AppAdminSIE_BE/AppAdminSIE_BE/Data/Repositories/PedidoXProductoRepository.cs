@@ -28,7 +28,8 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pxp.producto_id,
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
-                                        pro.UnidadMedida
+                                        pro.UnidadMedida,
+                                        pxp.observaciones 
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id
                                     JOIN Productos pro ON pxp.producto_id = pro.id 
@@ -46,6 +47,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
+                    var ordObservaciones = reader.GetOrdinal("observaciones");
 
                     while (reader.Read())
                     {
@@ -59,7 +61,8 @@ namespace AppAdminSIE_BE.Data.Repositories
                             Cantidad = reader.GetDouble(ordCantidad), // Usar GetDouble para manejar decimales
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
-                            UnidadMedidaProducto = reader.GetString(ordUnidadMedida)
+                            UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
+                            Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones)
                         });
                     }
                 }
@@ -67,6 +70,24 @@ namespace AppAdminSIE_BE.Data.Repositories
             return listaPedidosXProductos;
         }
 
-       
+        public void AddPedidoXProducto(PedidoXProducto pedidoxproducto)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            using var cmd = new MySqlCommand(
+                "INSERT INTO PedidoXProducto (pedido_id,producto_id,cantidad,id_edificio,observaciones) " +
+                "VALUES (@idPedido, @idProducto, @Cantidad, @idEdificio, @Observaciones)", conn);
+
+            cmd.Parameters.AddWithValue("@idPedido", pedidoxproducto.IdPedido);
+            cmd.Parameters.AddWithValue("@idProducto", pedidoxproducto.IdProducto);
+            cmd.Parameters.AddWithValue("@Cantidad",pedidoxproducto.Cantidad);
+            cmd.Parameters.AddWithValue("@idEdificio", pedidoxproducto.IdEdificio);
+            cmd.Parameters.AddWithValue("@Observaciones", pedidoxproducto.Observaciones);         
+
+            conn.Open();
+            cmd.ExecuteNonQuery();
+        }
+
+
+
     }
 }

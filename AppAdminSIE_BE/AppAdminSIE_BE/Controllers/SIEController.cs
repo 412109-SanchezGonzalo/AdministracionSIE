@@ -118,33 +118,34 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        // REGISTRO
-
-        [HttpPost("Crear-registro")]
-        public ActionResult CreateRegister([FromBody] Registro registro)
+        // PEDIDO X PRODUCTO
+        [HttpGet("Obtener-todos-los-pedidoxproducto")]
+        public ActionResult<List<PedidoXProducto>> GetPedidos()
         {
             try
             {
-                _service.AddRegistro(registro);
-                return Ok("Registro Cargado ! ");
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
-        }
-
-        [HttpPost("Obtener-registros-por-idUsuario")]
-        public ActionResult<List<Registro>> GetAllRegistrosByIdUsuario([FromBody] int idUsuario)
-        {
-            try
-            {
-                var registros = _service.GetRegistroByUsuario(idUsuario);
-                if (registros != null)
+                var lista = _service.GetAllPedidoXProductos();
+                if (lista != null)
                 {
-                    return Ok(registros);
+                    return Ok(lista);
                 }
                 return NotFound();
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
+
+        [HttpPost("Crear-pedidoxproducto")]
+        public ActionResult CrearPedidoXProducto([FromBody] PedidoXProducto pedidoXProducto) 
+        {
+            try
+            {
+                _service.AddPedidoXProducto(pedidoXProducto);
+                return Ok("PedidoXProducto Creado !");
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+
 
         // USUARIO
 
