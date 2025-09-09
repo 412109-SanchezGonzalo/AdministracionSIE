@@ -21,26 +21,30 @@ namespace AppAdminSIE_BE.Data.Repositories
             using (var cmd = new MySqlCommand(@"
                                     SELECT
                                         pxp.id_pedidoxproducto,
+                                        pxp.id_edificio,
+                                        e.nombre as Edificio,
                                         pxp.pedido_id,
                                         ped.Estado,
                                         pxp.producto_id,
-                                        pro.Nombre,
-                                        pxp.cantidad,
+                                        pro.Nombre as Producto,
+                                        pxp.cantidad as Cantidad,
                                         pro.UnidadMedida
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id
-                                    JOIN Productos pro ON pxp.producto_id = pro.id", conn))
+                                    JOIN Productos pro ON pxp.producto_id = pro.id 
+                                    JOIN Edificio e ON pxp.id_edificio = e.id_edificio", conn))
             {
                 conn.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
                     // Mapeamos las columnas correctas de la consulta SQL
                     var ordIdPXP = reader.GetOrdinal("id_pedidoxproducto");
+                    var ordIdEdificio = reader.GetOrdinal("Edificio");
                     var ordIdPedido = reader.GetOrdinal("pedido_id");
                     var ordEstado = reader.GetOrdinal("Estado");
                     var ordIdProducto = reader.GetOrdinal("producto_id");
-                    var ordNombreProducto = reader.GetOrdinal("Nombre");
-                    var ordCantidad = reader.GetOrdinal("cantidad");
+                    var ordNombreProducto = reader.GetOrdinal("Producto");
+                    var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
 
                     while (reader.Read())
@@ -51,6 +55,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             IdPedidoXProducto = reader.GetInt32(ordIdPXP),
                             IdPedido = reader.GetInt32(ordIdPedido),
                             IdProducto = reader.GetInt32(ordIdProducto),
+                            IdEdificio = reader.GetInt32(ordIdEdificio),
                             Cantidad = reader.GetDouble(ordCantidad), // Usar GetDouble para manejar decimales
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
