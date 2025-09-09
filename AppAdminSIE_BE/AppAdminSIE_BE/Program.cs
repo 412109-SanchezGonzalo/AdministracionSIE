@@ -25,6 +25,8 @@ var connStr = builder.Configuration.GetConnectionString("JobOclockSIE");
 
 builder.Services.AddScoped<IServicioRepository>(_ => new ServicioRepository(connStr));
 builder.Services.AddScoped<IRegistroRepository>(_ => new RegistroRepository(connStr));
+builder.Services.AddScoped<IPedidoRepository>(_ => new PedidoRepository(connStr));
+builder.Services.AddScoped<IPedidoXProductoRepository>(_=> new PedidoXProductoRepository(connStr));
 builder.Services.AddScoped<IUsuarioRepository>(_ => new UsuarioRepository(connStr));
 builder.Services.AddScoped<IProductoRepository>(_ => new ProductoRepository(connStr));
 builder.Services.AddScoped<IUsuarioXServicioRepository>(_ => new UsuarioXServicioRepository(connStr));
