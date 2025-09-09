@@ -1,6 +1,134 @@
+// ===================================
+// SISTEMA DE LOADING PARA BOTONES
+// ===================================
+
+/**
+ * Activa el estado de loading en un botón
+ * @param {string|HTMLElement} button - ID del botón o elemento del botón
+ * @param {string} loadingText - Texto opcional para mostrar durante el loading
+ */
+function setButtonLoading(button, loadingText = null) {
+    const btn = typeof button === 'string' ? document.getElementById(button) : button;
+    if (!btn) return;
+
+    // Guardar el texto original si no se ha guardado ya
+    if (!btn.dataset.originalText) {
+        btn.dataset.originalText = btn.innerHTML;
+    }
+
+    // Agregar clase de loading
+    btn.classList.add('btn-loading');
+
+    // Cambiar el texto si se proporciona
+    if (loadingText) {
+        btn.innerHTML = `<span class="btn-text">${loadingText}</span>`;
+    }
+
+    // Deshabilitar el botón
+    btn.disabled = true;
+}
+
+/**
+ * Desactiva el estado de loading en un botón
+ * @param {string|HTMLElement} button - ID del botón o elemento del botón
+ * @param {string} newText - Nuevo texto opcional para el botón
+ */
+function removeButtonLoading(button, newText = null) {
+    const btn = typeof button === 'string' ? document.getElementById(button) : button;
+    if (!btn) return;
+
+    // Remover clase de loading
+    btn.classList.remove('btn-loading');
+
+    // Restaurar el texto original o usar el nuevo texto
+    if (newText) {
+        btn.innerHTML = `<span class="btn-text">${newText}</span>`;
+    } else if (btn.dataset.originalText) {
+        btn.innerHTML = btn.dataset.originalText;
+    }
+
+    // Habilitar el botón
+    btn.disabled = false;
+}
+
+/**
+ * Simula una operación asíncrona con loading
+ * @param {string|HTMLElement} button - ID del botón o elemento del botón
+ * @param {Function} asyncOperation - Función asíncrona a ejecutar
+ * @param {string} loadingText - Texto durante el loading
+ * @param {number} minDelay - Delay mínimo en ms para mostrar el loading
+ */
+async function executeWithLoading(button, asyncOperation, loadingText = 'Cargando...', minDelay = 500) {
+    const btn = typeof button === 'string' ? document.getElementById(button) : button;
+    if (!btn) return;
+
+    setButtonLoading(btn, loadingText);
+
+    const startTime = Date.now();
+
+    try {
+        // Ejecutar la operación asíncrona
+        const result = await asyncOperation();
+
+        // Asegurar que el loading se muestre por el tiempo mínimo
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime < minDelay) {
+            await new Promise(resolve => setTimeout(resolve, minDelay - elapsedTime));
+        }
+
+        removeButtonLoading(btn);
+        return result;
+    } catch (error) {
+        removeButtonLoading(btn);
+        throw error;
+    }
+}
+
+
 
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando admin_home.js...');
+
+    // LOADING
+    // Lista de IDs de botones que deben tener loading automático
+    const buttonIds = [
+        'btnSearch',
+        'btnNewTask',
+        'btnClear',
+        'btnVerTask',
+        'btnRetry',
+        'btnConfirmar',
+        'btnEditar',
+        'btnEliminar',
+        'btnConfirmEdit'
+    ];
+
+    buttonIds.forEach(buttonId => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            // Envolver el contenido existente en un span si no lo está ya
+            if (!button.querySelector('.btn-text')) {
+                button.innerHTML = `<span class="btn-text">${button.innerHTML}</span>`;
+            }
+
+            // Agregar event listener para activar loading automáticamente
+            button.addEventListener('click', function(e) {
+                // Solo activar loading si el botón no está ya en estado loading
+                if (!this.classList.contains('btn-loading')) {
+                    setButtonLoading(this);
+
+                    // Auto-remover loading después de 3 segundos si no se remueve manualmente
+                    setTimeout(() => {
+                        if (this.classList.contains('btn-loading')) {
+                            removeButtonLoading(this);
+                        }
+                    }, 3000);
+                }
+            });
+        }
+    });
+
+
 
     // 🔹 Array global para guardar seleccionados
     let empleadosSeleccionados = [];
@@ -1347,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (btnAll) btnAll.addEventListener('click', loadAllUsers);
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
-    if(btnEliminar) btnEliminar.addEventListener('click', await DeleteTask);
+    if(btnEliminar) btnEliminar.addEventListener('click', DeleteTask);
 
     btnEditar.addEventListener('click', async () => {
         console.log("✏️ Editar tarea habilitado");
@@ -1415,6 +1543,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const resultado = await response.json();
                 alert(`✅ La Tarea asignada al empleado ${nombreEmpleado} fué eliminada con éxito`);
                 tareaSeleccionada = [];
+                const modalVerTask = document.getElementById('modal-VerTask');
+                modalVerTask.style.display = 'none';
 
             } catch(error)
             {
@@ -1472,3 +1602,72 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 });
+// ===================================
+// FUNCIONES ESPECÍFICAS PARA LA APLICACIÓN
+// ===================================
+
+/**
+ * Maneja el loading del botón de búsqueda
+ */
+async function handleSearchButton() {
+    await executeWithLoading('btnSearch', async () => {
+        // Aquí va tu lógica de búsqueda
+        console.log('Buscando empleados...');
+        // Simular llamada a API
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }, 'Buscando...');
+}
+
+/**
+ * Maneja el loading del botón de nueva tarea
+ */
+async function handleNewTaskButton() {
+    await executeWithLoading('btnNewTask', async () => {
+        // Aquí va tu lógica para abrir modal de nueva tarea
+        console.log('Abriendo modal de nueva tarea...');
+        // Simular carga de datos
+        await new Promise(resolve => setTimeout(resolve, 800));
+    }, 'Abriendo...');
+}
+
+/**
+ * Maneja el loading del botón de ver tareas
+ */
+async function handleVerTaskButton() {
+    await executeWithLoading('btnVerTask', async () => {
+        // Aquí va tu lógica para ver tareas
+        console.log('Cargando tareas asignadas...');
+        // Simular carga de datos
+        await new Promise(resolve => setTimeout(resolve, 1200));
+    }, 'Cargando tareas...');
+}
+
+/**
+ * Maneja el loading del botón de confirmar
+ */
+async function handleConfirmarButton() {
+    await executeWithLoading('btnConfirmar', async () => {
+        // Aquí va tu lógica para confirmar tarea
+        console.log('Guardando tarea...');
+        // Simular guardado
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    }, 'Guardando...');
+}
+
+// ===================================
+// EXPORTAR FUNCIONES PARA USO GLOBAL
+// ===================================
+
+// Si estás usando módulos ES6
+// export { setButtonLoading, removeButtonLoading, executeWithLoading };
+
+// Para uso global (sin módulos)
+window.ButtonLoading = {
+    set: setButtonLoading,
+    remove: removeButtonLoading,
+    executeWith: executeWithLoading,
+    handleSearch: handleSearchButton,
+    handleNewTask: handleNewTaskButton,
+    handleVerTask: handleVerTaskButton,
+    handleConfirmar: handleConfirmarButton
+};

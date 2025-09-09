@@ -8,21 +8,23 @@ namespace JobOclock_BackEnd.Services
     public class ServicesSIE : IServicesSIE
     {
         private readonly IServicioRepository _actividadRepository;
-        private readonly IFotoRegistroRepository _fotoRegistroRepository;
-        private readonly IPosicionUsuarioRepository _posicionUsuarioRepository;
         private readonly IRegistroRepository _registroRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
+        private readonly IProductoRepository _productoRepository;
         private readonly IEdificioRepository _edificioRepository;
-        public ServicesSIE(IServicioRepository actividadRepository, IFotoRegistroRepository fotoRegistroRepository, IPosicionUsuarioRepository posicionUsuarioRepository, IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IEdificioRepository edificioRepository)
+        private readonly IPedidoRepository _pedidoRepository;
+        private readonly IPedidoXProductoRepository _pedidoXProductoRepository;
+        public ServicesSIE(IServicioRepository actividadRepository,  IRegistroRepository registroRepository, IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
         {
             _actividadRepository = actividadRepository;
-            _fotoRegistroRepository = fotoRegistroRepository;
-            _posicionUsuarioRepository = posicionUsuarioRepository;
             _registroRepository = registroRepository;
             _usuarioRepository = ussuarioRepository;
             _usuarioXActividadRepository = usuarioXActividadRepository;
+            _productoRepository = productoRepository;
             _edificioRepository = edificioRepository;
+            _pedidoRepository = pedidoRepository;
+            _pedidoXProductoRepository = pedidoXProductoRepository;
         }
         
         // ACTIVIDAD
@@ -42,29 +44,37 @@ namespace JobOclock_BackEnd.Services
             return _edificioRepository.GetAllEdificios();
         }
 
-        // FOTO REGISTRO
-        public IEnumerable<FotoRegistro> GetFotoRegistroByRegistro(int idRegistro)
+
+        // PRODUCTO
+
+        public IEnumerable<Producto> GetAllProductos()
         {
-            return _fotoRegistroRepository.GetByRegistro(idRegistro);
-        }
-        public void AddFotoRegistro(FotoRegistro foto)
-        {
-            _fotoRegistroRepository.Add(foto);
+            return _productoRepository.GetAllProducto();
         }
 
-        // POSICION 
-        public IEnumerable<PosicionUsuario> GetPosicionByUsuario(int intUsuario)
+        public Producto GetProductoByName(string name)
         {
-            return _posicionUsuarioRepository.GetByUsuario(intUsuario);
+            return _productoRepository.GetByName(name);
         }
-        public PosicionUsuario GetUltimaPosicion(int idUsuario)
+
+
+        // PEDIDO
+        public int AddPedido(DateTime fechaEntrega)
         {
-            return _posicionUsuarioRepository.GetUltimaPosicion(idUsuario);
+            return _pedidoRepository.AddPedido(fechaEntrega);
         }
-        public void Add(PosicionUsuario posicion)
+        public void UpdateEstado(int idPedido)
         {
-            _posicionUsuarioRepository.Add(posicion);
+            _pedidoRepository.UpdateEstado(idPedido);
         }
+
+        // PEDIDO X PRODUCTO
+
+        public IEnumerable<PedidoXProducto> GetAllPedidoXProductos()
+        {
+            return _pedidoXProductoRepository.GetAllPedidoXProductos();
+        }
+
 
         // REGISTRO
         public IEnumerable<Registro> GetRegistroByUsuario(int idUsuario)

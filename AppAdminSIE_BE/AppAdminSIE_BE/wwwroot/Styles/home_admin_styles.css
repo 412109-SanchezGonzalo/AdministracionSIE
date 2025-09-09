@@ -226,6 +226,32 @@ body {
     transform: scaleY(1);
 }
 
+/* === NAVBAR BOOTSTRAP FIXES === */
+
+/* Fix para logo centrado - CORREGIDO */
+.navbar-brand {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10;
+}
+
+.navbar .container-fluid {
+    position: relative;
+}
+
+.navbar-brand img {
+    height: 50px;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+.navbar-saludo {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.95rem;
+}
+
 /* === CONTENIDO PRINCIPAL === */
 .main-content {
     display: flex;
@@ -469,6 +495,11 @@ body {
         margin-right: 0.5rem;
     }
 
+    /* Logo en tablets - ajuste */
+    .navbar-brand img {
+        height: 40px;
+    }
+
     .main-content {
         padding: 1.5rem 0.5rem;
     }
@@ -529,8 +560,26 @@ body {
     }
 
     .navbar {
-        padding: 0.5rem;
-        min-height: 45px;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    .navbar-brand img {
+        height: 35px;
+    }
+
+    .navbar-toggler {
+        padding: 0.1rem 0.2rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    .navbar-toggler-icon {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .navbar-saludo {
+        font-size: 0.75rem !important;
+        max-width: 100px;
     }
 
     .logo {
@@ -539,18 +588,14 @@ body {
         transform: translateX(-50%);
     }
 
-    .navbar-saludo {
-        font-size: 0.75rem;
-        margin-right: 0.25rem;
-    }
-
-    .navbar-toggle {
-        padding: 0.25rem;
-    }
-
     .navbar-toggle::before {
         width: 20px;
         height: 20px;
+    }
+
+    /* Logo en móviles - ajuste */
+    .navbar-brand img {
+        height: 35px;
     }
 
     .main-content {
@@ -671,6 +716,44 @@ body {
         font-size: 0.8rem;
         min-width: auto;
     }
+
+    /* Logo en pantallas muy pequeñas */
+    .navbar-brand img {
+        height: 30px;
+    }
+}
+
+/* Responsive: en móviles volver a comportamiento normal del logo */
+@media (max-width: 991px) {
+    .navbar-brand {
+        position: static !important;
+        transform: none !important;
+        left: auto !important;
+    }
+
+    /* Reducir tamaño del botón hamburguesa */
+    .navbar-toggler {
+        padding: 0.15rem 0.3rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .navbar-toggler-icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    /* Saludo visible en móviles */
+    .navbar-saludo {
+        font-size: 0.85rem !important;
+        max-width: 150px;
+        text-overflow: ellipsis;
+    }
+
+    /* Asegurar que el saludo sea visible en móviles */
+    .navbar-nav.ms-auto {
+        margin-top: 0.5rem;
+    }
+
 }
 
 /* Landscape en móviles */
@@ -682,6 +765,15 @@ body {
 
     .logo {
         height: 1.8rem;
+    }
+
+    .navbar-brand img {
+        height: 40px;
+    }
+
+    .navbar-saludo {
+        font-size: 0.8rem !important;
+        max-width: 120px;
     }
 
     .main-content {
@@ -709,6 +801,11 @@ body {
         height: 4rem;
     }
 
+    .navbar-brand img {
+        height: 60px;
+        max-height: 70px;
+    }
+
     .main-content {
         padding: 3rem 2rem;
     }
@@ -729,5 +826,192 @@ body {
         top: 80px;
         height: calc(100vh - 80px);
         padding: 2rem;
+    }
+}
+
+/* ===================================
+   SISTEMA DE LOADING PARA BOTONES
+   ================================= */
+
+/* Estado de loading para botones */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* Spinner animado dentro del botón */
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s ease infinite;
+}
+
+/* Animación del spinner */
+@keyframes button-loading-spinner {
+    from {
+        transform: rotate(0turn);
+    }
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+/* ===================================
+   COLORES ESPECÍFICOS POR TIPO DE BOTÓN
+   ================================= */
+
+/* Botones primarios */
+.btn-primary.btn-loading::after {
+    border-top-color: #ffffff;
+}
+
+/* Botones de éxito */
+.btn-success.btn-loading::after {
+    border-top-color: #ffffff;
+}
+
+/* Botones outline secundarios */
+.btn-outline-secondary.btn-loading::after {
+    border-top-color: #6c757d;
+}
+
+/* Botones outline primarios */
+.btn-outline-primary.btn-loading::after {
+    border-top-color: #0d6efd;
+}
+
+/* Botones de peligro */
+.btn-danger.btn-loading::after {
+    border-top-color: #ffffff;
+}
+
+/* Botones de advertencia */
+.btn-warning.btn-loading::after {
+    border-top-color: #000000;
+}
+
+/* Botones de información */
+.btn-info.btn-loading::after {
+    border-top-color: #ffffff;
+}
+
+/* Botones con colores personalizados */
+.btn-loading[style*="background-color: #dc6900"]::after {
+    border-top-color: #ffffff;
+}
+
+.btn-loading[style*="background-color: #78b638"]::after {
+    border-top-color: #ffffff;
+}
+
+.btn-loading[style*="background-color: #2e7700"]::after {
+    border-top-color: #ffffff;
+}
+
+.btn-loading[style*="background-color: #005288"]::after {
+    border-top-color: #ffffff;
+}
+
+.btn-loading[style*="background-color: #88131e"]::after {
+    border-top-color: #ffffff;
+}
+
+.btn-loading[style*="background-color: #007825"]::after {
+    border-top-color: #ffffff;
+}
+
+/* ===================================
+   TRANSICIONES Y EFECTOS
+   ================================= */
+
+/* Transición suave para todos los botones */
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Efecto hover deshabilitado durante loading */
+.btn-loading:hover {
+    transform: none;
+}
+
+/* ===================================
+   TAMAÑOS ESPECÍFICOS DE SPINNER
+   ================================= */
+
+/* Spinner más pequeño para botones sm */
+.btn-sm.btn-loading::after {
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    margin-top: -7px;
+    border-width: 1.5px;
+}
+
+/* Spinner más grande para botones lg */
+.btn-lg.btn-loading::after {
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    border-width: 2.5px;
+}
+
+/* ===================================
+   UTILIDADES ADICIONALES
+   ================================= */
+
+/* Ocultar texto del botón durante loading */
+.btn-loading .btn-text {
+    opacity: 0;
+}
+
+/* Mantener el ancho del botón durante loading */
+.btn-loading {
+    min-width: fit-content;
+}
+
+/* Prevenir cambios de layout */
+.btn-loading {
+    white-space: nowrap;
+}
+
+/* ===================================
+   ACCESIBILIDAD
+   ================================= */
+
+/* Reducir animación para usuarios que prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+    .btn-loading::after {
+        animation: button-loading-spinner 2s linear infinite;
+    }
+}
+
+/* Focus visible deshabilitado durante loading */
+.btn-loading:focus {
+    box-shadow: none;
+}
+
+/* ===================================
+   RESPONSIVO
+   ================================= */
+
+/* En pantallas pequeñas, spinner ligeramente más pequeño */
+@media (max-width: 576px) {
+    .btn-loading::after {
+        width: 14px;
+        height: 14px;
+        margin-left: -7px;
+        margin-top: -7px;
     }
 }

@@ -36,5 +36,50 @@
             <p id="error-message" class="error_message"></p>
         </form>
     </div>
+    <script>
+        // Configuración adicional si es necesaria
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ejemplo de configuración personalizada
+            if (window.loginLoader) {
+                // Personalizar los pasos del loading si es necesario
+                window.loginLoader.steps = [
+                    { text: "Verificando datos", subtext: "Validando credenciales", progress: 20 },
+                    { text: "Conectando al servidor", subtext: "Estableciendo conexión segura", progress: 40 },
+                    { text: "Autenticando usuario", subtext: "Verificando permisos", progress: 60 },
+                    { text: "Cargando perfil", subtext: "Obteniendo configuración", progress: 80 },
+                    { text: "Preparando interfaz", subtext: "Finalizando acceso", progress: 100 }
+                ];
+            }
+
+            // Manejar Enter en los campos de input
+            const inputs = document.querySelectorAll('#username, #password');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                    }
+                });
+            });
+        });
+
+        // Función para testing manual del loadingg
+        function testLoading() {
+            if (window.LoginUtils) {
+                window.LoginUtils.showLoading();
+                setTimeout(() => {
+                    window.LoginUtils.hideLoading();
+                }, 3000);
+            }
+        }
+
+        // Función para simular error
+        function testError() {
+            const errorEl = document.getElementById('error-message');
+            if (errorEl) {
+                errorEl.textContent = 'Error de prueba';
+                errorEl.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -62,10 +62,61 @@ namespace JobOclock_BackEnd.Controllers
              catch (Exception ex) { return BadRequest("Sin Edificios"); }
          }
 
-         
-        // FOTO REGISTRO
 
-        // POSICION USUARIO
+        // PRODUCTO
+
+        [HttpGet("Obtener-todos-los-productos")]
+        public ActionResult GetAllProductos()
+        {
+            try
+            {
+                var productos = _service.GetAllProductos();
+                if (productos != null)
+                {
+                    return Ok(productos);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+
+        [HttpPost("Obtener-producto-por-nombre")]
+        public ActionResult GetProductoByName([FromBody] string name)
+        {
+            try
+            {
+                var producto = _service.GetProductoByName(name);
+                if (producto != null)
+                {
+                    return Ok(producto);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        // PEDIDO
+        [HttpPost("Crear-pedido")]
+        public ActionResult<int> AddPedidos([FromBody] DateTime fechaPedido)
+        {
+            try
+            {
+                return Ok(_service.AddPedido(fechaPedido));
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPut("Editar-estado-pedido")]
+        public ActionResult UpdateEstadoPedido([FromBody] int idPedido)
+        {
+            try
+            {
+                _service.UpdateEstado(idPedido);
+                return Ok("Estado Actualizado !");
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
 
         // REGISTRO
 
