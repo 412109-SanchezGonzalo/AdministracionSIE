@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando pedidos_script.js...');
 
+    
+
     // Arrays globales
     let productosSeleccionados = [];
     let productosGlobal = [];
@@ -438,30 +440,220 @@ document.addEventListener('DOMContentLoaded', async function () {
             const resp = await fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto");
             const data = await resp.json();
 
+            console.log("Datos recibidos:", data); // Para debug
+
             lista.innerHTML = ""; // limpiar lista antes de renderizar
 
-            data.forEach(pedido => {
-                let estadoBadge = pedido.estadoPedido === "Pendiente"
-                    ? `<span class="badge rounded-pill bg-danger">No Entregado</span>`
-                    : `<span class="badge rounded-pill bg-success">Entregado</span>`;
+            if (!data || data.length === 0) {
+                lista.innerHTML = `<li class="list-group-item text-muted">📭 No hay pedidos registrados</li>`;
+                return;
+            }
+
+            // 🔹 AGRUPAR por idPedido para evitar duplicados
+            const pedidosAgrupados = {};
+
+            data.forEach(pedidoProducto => {
+                const idPedido = pedidoProducto.idPedido;
+
+                if (!pedidosAgrupados[idPedido]) {
+                    // Primera vez que vemos este pedido - crear entrada
+                    pedidosAgrupados[idPedido] = {
+                        id: idPedido,
+                        fecha: pedidoProducto.fecha,
+                        edificio: pedidoProducto.edificio,
+                        observaciones: pedidoProducto.observaciones,
+                        productos: []
+                    };
+                }
+
+                // Agregar este producto al pedido
+                pedidosAgrupados[idPedido].productos.push(pedidoProducto);
+            });
+
+            console.log("Pedidos agrupados:", pedidosAgrupados); // Para debug
+
+            // 🔹 RENDERIZAR cada pedido agrupado
+            Object.values(pedidosAgrupados).forEach(pedido => {
+                // Determinar estado general del pedido (todos entregados o no)
+                const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
+                const estadoBadge = todosEntregados
+                    ? `<span class="badge rounded-pill bg-success">Entregado</span>`
+                    : `<span class="badge rounded-pill bg-danger">Pendiente</span>`;
+
+                const cantidadProductos = pedido.productos.length;
+
+                // Formatear fecha si existe
+                let fechaFormateada = "Sin fecha";
+                if (pedido.fecha) {
+                    try {
+                        const fecha = new Date(pedido.fecha);
+                        fechaFormateada = fecha.toLocaleDateString('es-ES');
+                    } catch (e) {
+                        fechaFormateada = pedido.fecha;
+                    }
+                }
 
                 let item = `
-        <li class="list-group-item d-flex justify-content-between align-items-start">
-          <div class="ms-2 me-auto">
-            <div class="fw-bold">Fecha: ${pedido.fecha || "Sin fecha"}</div>
-            <div class="fw-bold">Edificio: ${pedido.idEdificio}</div>
-            <small class="text-muted">Observaciones: ${pedido.observaciones || "Sin observaciones"}</small>
-          </div>
-          ${estadoBadge}
-        </li>
-      `;
+                <li class="list-group-item d-flex justify-content-between align-items-start pedido-item" 
+                    data-pedido-id="${pedido.id}" 
+                    style="cursor: pointer; border-left: 4px solid ${todosEntregados ? '#198754' : '#dc3545'};">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Pedido #${pedido.id}</div>
+                        <div><strong>Fecha:</strong> ${fechaFormateada}</div>
+                        <div><strong>Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                        <small class="text-muted">${cantidadProductos} producto(s)</small>
+                        <br>
+                        <small class="text-muted">Observaciones: ${pedido.observaciones || "Sin observaciones"}</small>
+                    </div>
+                    <div class="text-end">
+                        ${estadoBadge}
+                        <br>
+                    </div>
+                </li>
+            `;
                 lista.innerHTML += item;
+            });
+
+            // 🔹 AGREGAR event listeners para mostrar detalles
+            document.querySelectorAll('.pedido-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const pedidoId = this.getAttribute('data-pedido-id');
+                    const pedidoSeleccionado = pedidosAgrupados[pedidoId];
+                    mostrarDetallesPedido(pedidoSeleccionado);
+                });
             });
 
         } catch (error) {
             console.error("Error cargando pedidos:", error);
-            lista.innerHTML = `<li class="list-group-item text-danger">⚠ Error cargando pedidos</li>`;
+            lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
         }
+    }
+
+    // 🔹 AGREGAR esta nueva función después de verPedidosRegistrados():
+
+    function mostrarDetallesPedido(pedido) {
+        console.log('Mostrando detalles del pedido:', pedido);
+
+        // Crear modal dinámico
+        let modalDetalles = document.getElementById('modalDetallesPedido');
+
+        if (!modalDetalles) {
+            // Crear modal si no existe
+            modalDetalles = document.createElement('div');
+            modalDetalles.className = 'modal fade';
+            modalDetalles.id = 'modalDetallesPedido';
+            modalDetalles.setAttribute('tabindex', '-1');
+            modalDetalles.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #212529; color: white;">
+                        <h5 class="modal-title" id="modalDetallesTitle">📦 Detalles del Pedido</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="detallesPedidoInfo" class="mb-4"></div>
+                        <h6 class="fw-bold mb-3">📋 Productos del Pedido:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 10%;">ID</th>
+                                        <th style="width: 40%;">Producto</th>
+                                        <th style="width: 15%;">Cantidad</th>
+                                        <th style="width: 15%;">Unidad</th>
+                                        <th style="width: 20%;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaDetallesProductos">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            ← Volver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+            document.body.appendChild(modalDetalles);
+        }
+
+        // Formatear fecha
+        let fechaFormateada = "Sin fecha";
+        if (pedido.fecha) {
+            try {
+                const fecha = new Date(pedido.fecha);
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                fechaFormateada = pedido.fecha;
+            }
+        }
+
+        // Actualizar título
+        document.getElementById('modalDetallesTitle').textContent = `📦 Pedido #${pedido.id}`;
+
+        // Actualizar información general
+        const infoDiv = document.getElementById('detallesPedidoInfo');
+        const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
+        const estadoGeneral = todosEntregados ?
+            `<span class="badge bg-success fs-6">✅ Completado</span>` :
+            `<span class="badge bg-danger fs-6">⏳ Pendiente</span>`;
+
+        infoDiv.innerHTML = `
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                        <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                        <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneral}</p>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+        // Llenar tabla de productos
+        const tablaBody = document.getElementById('tablaDetallesProductos');
+        tablaBody.innerHTML = '';
+
+        pedido.productos.forEach(producto => {
+            const estadoBadge = producto.estadoPedido === "Entregado"
+                ? `<span class="badge bg-success">✅ Entregado</span>`
+                : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+            <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+            <td>${producto.cantidad || 'N/A'}</td>
+            <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+            <td>${estadoBadge}</td>
+        `;
+            tablaBody.appendChild(row);
+        });
+
+        // Cerrar modal de pedidos si está abierto
+        const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
+        if (modalPedidos) {
+            modalPedidos.hide();
+        }
+
+        // Mostrar modal de detalles
+        const modal = new bootstrap.Modal(modalDetalles);
+        modal.show();
     }
 
 
@@ -539,5 +731,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     btnVerPedidos.addEventListener("click", function () {
         verPedidosRegistrados();
+
+        // abrir modal después de cargar lista
+        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
+        modalPedidos.show();
     })
 });

@@ -57,6 +57,7 @@ namespace JobOclock_BackEnd.Services
 
 
         // PEDIDO
+        IEnumerable<Pedido> GetAllPedidos();
         public int AddPedido(DateTime fechaEntrega)
         {
             return _pedidoRepository.AddPedido(fechaEntrega);
