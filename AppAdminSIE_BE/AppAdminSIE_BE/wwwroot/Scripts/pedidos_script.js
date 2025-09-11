@@ -431,36 +431,40 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Mostrar Modal Para Ver Pedidos Registrados
 
-    const lista = document.getElementById("listaPedidos");
+    async function verPedidosRegistrados(){
+        const lista = document.getElementById("listaPedidos");
 
-    try {
-        const resp = await fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto");
-        const data = await resp.json();
+        try {
+            const resp = await fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto");
+            const data = await resp.json();
 
-        lista.innerHTML = ""; // limpiar lista antes de renderizar
+            lista.innerHTML = ""; // limpiar lista antes de renderizar
 
-        data.forEach(pedido => {
-            let estadoBadge = pedido.Estado === "Pendiente"
-                ? `<span class="badge rounded-pill bg-danger">No Entregado</span>`
-                : `<span class="badge rounded-pill bg-success">Entregado</span>`;
+            data.forEach(pedido => {
+                let estadoBadge = pedido.estadoPedido === "Pendiente"
+                    ? `<span class="badge rounded-pill bg-danger">No Entregado</span>`
+                    : `<span class="badge rounded-pill bg-success">Entregado</span>`;
 
-            let item = `
+                let item = `
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <div class="ms-2 me-auto">
             <div class="fw-bold">Fecha: ${pedido.fecha || "Sin fecha"}</div>
-            <div class="fw-bold">Edificio: ${pedido.Edificio}</div>
+            <div class="fw-bold">Edificio: ${pedido.idEdificio}</div>
             <small class="text-muted">Observaciones: ${pedido.observaciones || "Sin observaciones"}</small>
           </div>
           ${estadoBadge}
         </li>
       `;
-            lista.innerHTML += item;
-        });
+                lista.innerHTML += item;
+            });
 
-    } catch (error) {
-        console.error("Error cargando pedidos:", error);
-        lista.innerHTML = `<li class="list-group-item text-danger">⚠ Error cargando pedidos</li>`;
+        } catch (error) {
+            console.error("Error cargando pedidos:", error);
+            lista.innerHTML = `<li class="list-group-item text-danger">⚠ Error cargando pedidos</li>`;
+        }
     }
+
+
 
 
 
@@ -531,5 +535,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             ConfirmarPedido();
         }
 
+    })
+
+    btnVerPedidos.addEventListener("click", function () {
+        verPedidosRegistrados();
     })
 });
