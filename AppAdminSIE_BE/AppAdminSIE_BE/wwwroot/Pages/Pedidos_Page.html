@@ -109,7 +109,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Registrar Pedido -->
 <div class="modal fade" id="miModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl"
          style="display: flex !important;
@@ -172,5 +172,32 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Ver Pedidos Registrados -->
+<div class="modal fade" id="modalPedidos" tabindex="-1" aria-labelledby="modalPedidosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- Encabezado -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPedidosLabel">
+                    📋 Pedidos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Cuerpo -->
+            <div class="modal-body">
+                <h6 class="fw-bold">Pedidos Activos</h6>
+
+                <ol class="list-group list-group-numbered mt-3" id="listaPedidos">
+                    <!-- Aquí se cargan dinámicamente los pedidos -->
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

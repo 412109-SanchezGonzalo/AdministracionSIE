@@ -8,7 +8,7 @@ namespace AppAdminSIE_BE.Models
         public int IdPedidoXProducto { get; set; }
         public int IdPedido { get; set; }
         public int IdProducto { get; set; }
-        public int IdEdificio { get; set; }
+        public string Edificio { get; set; }
         public double Cantidad { get; set; }
         public string EstadoPedido { get; set; }
         public string NombreProducto { get; set; }
