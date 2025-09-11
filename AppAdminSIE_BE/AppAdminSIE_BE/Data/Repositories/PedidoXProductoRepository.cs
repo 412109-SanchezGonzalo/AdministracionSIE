@@ -31,7 +31,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pro.UnidadMedida,
                                         pxp.observaciones 
                                     FROM PedidoXProducto pxp
-                                    JOIN Pedidos ped ON pxp.pedido_id = ped.id
+                                    JOIN Pedidos ped ON pxp.pedido_id = ped.id_pedido
                                     JOIN Productos pro ON pxp.producto_id = pro.id 
                                     JOIN Edificio e ON pxp.id_edificio = e.id_edificio", conn))
             {

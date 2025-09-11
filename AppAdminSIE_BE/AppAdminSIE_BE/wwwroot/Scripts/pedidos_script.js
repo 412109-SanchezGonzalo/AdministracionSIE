@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnRetry = document.getElementById('btnRetry');
     const btnNewPedido = document.getElementById('btnNewPedido');
     const btnVerPedidos = document.getElementById('btnVerPedidos');
-    const btnConfirmar = document.getElementById("btnConfirmar");
     const btnConfirmarPedidos = document.getElementById('btnConfirmarPedidos');
 
     // Modal
@@ -305,6 +304,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function ConfirmarPedido(){
         try {
             const fechaEntrega = document.getElementById('fechaEntrega').value;
+            const fechaISO = new Date(fechaEntrega).toISOString();
             const observaciones = document.getElementById('observaciones').value;
 
             // Validar que haya fecha
@@ -314,16 +314,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             // 1. Crear el pedido principal (solo fecha)
-            const bodyPedido = {
-                fechaEntrega: fechaEntrega
-            };
 
             const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(bodyPedido)
+                body: JSON.stringify(fechaISO)
             });
 
             if (!responsePedido.ok) {
@@ -338,10 +335,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                     idPedido: pedidoId,
                     idProducto: producto.id,
                     idEdificio: obtenerIdEdificio(),
-                    cantidad: productosSeleccionados.cantidad,
+                    cantidad: producto.cantidad,
                     estadoPedido: 'No Entregado',
-                    nombreProducto: productosSeleccionados.nombre,
-                    unidadMedidaProducto: productosSeleccionados.unidadMedidaProducto,
+                    nombreProducto: producto.nombre,
+                    unidadMedidaProducto: producto.unidadMedida,
                     observaciones: observaciones || ""
                 };
 
@@ -379,9 +376,64 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
+    function ValidarCampos()
+    {
+        console.log('Validando formulario de nuevo pedido...');
+
+        const errores = [];
+
+        const edificioButton = document.getElementById('edificioSelected');
+        const edificioSeleccionado = edificioButton ? edificioButton.getAttribute('data-selected') : null;
+
+        if (!edificioSeleccionado || edificioButton.textContent.trim() === 'Seleccione un edificio') {
+            errores.push('Debe seleccionar un edificio');
+            console.log('Error: No se seleccionó edificio');
+        } else {
+            console.log('Edificio seleccionado:', edificioSeleccionado);
+        }
+
+        // 3. Validar que la fecha no sea menor a la fecha actual
+        const fechaInput = document.getElementById('fechaEntrega');
+        const fechaSeleccionada = fechaInput ? fechaInput.value : '';
+
+        if (!fechaSeleccionada) {
+            errores.push('Debe seleccionar una fecha');
+            console.log('Error: No se seleccionó fecha');
+        } else {
+            // Obtener fecha actual sin hora (solo YYYY-MM-DD)
+            const fechaActual = new Date();
+            const fechaActualString = fechaActual.toISOString().split('T')[0];
+
+            // Comparar fechas
+            if (fechaSeleccionada < fechaActualString) {
+                errores.push('La fecha no puede ser anterior a la fecha actual');
+                console.log('Error: Fecha anterior a hoy. Seleccionada:', fechaSeleccionada, 'Actual:', fechaActualString);
+            } else {
+                console.log('Fecha válida:', fechaSeleccionada);
+            }
+        }
+
+        // Mostrar resultados
+        if (errores.length > 0) {
+            console.log('Errores encontrados:', errores);
+
+            // Mostrar alert con todos los errores
+            const mensajeError = 'Por favor corrija los siguientes errores:\n\n' +
+                errores.map((error, index) => `${index + 1}. ${error}`).join('\n');
+            alert(mensajeError);
+
+            return false; // Formulario inválido
+        }
+
+        console.log('Formulario válido - todos los campos están correctos');
+        return true; // Formulario válido
+    }
+
+
     // ✅ Eventos
     if (btnSearch) btnSearch.addEventListener('click', loadAllProducts);
     btnNewPedido.addEventListener("click", function () {
+        console.table(productosSeleccionados);
         const tablaBody = document.getElementById("tablaProductosBody");
         tablaBody.innerHTML = ""; // limpiar antes de cargar
 
@@ -435,29 +487,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         this.debounceTimer = setTimeout(searchByName, 300);
     });
 
-    // Modal → Confirmar
-    btnConfirmar.addEventListener("click", function () {
-        const id = document.getElementById("idProducto").value;
-        const producto = document.getElementById("nombreProducto").value;
-        const cantidad = document.getElementById("cantidadProducto").value;
-        const unidad = document.getElementById("unidadMedida").value;
-        const entregado = document.getElementById("entregado").checked ? "✅" : "❌";
 
-        if (id && producto && cantidad && unidad) {
-            const fila = document.createElement("tr");
-            fila.innerHTML = `
-                <td>${id}</td>
-                <td>${producto}</td>
-                <td>${cantidad}</td>
-                <td>${unidad}</td>
-                <td>${entregado}</td>
-            `;
-            tabla.appendChild(fila);
-
-            bootstrap.Modal.getInstance(modalElement).hide();
-            formProducto.reset();
-        } else {
-            alert("⚠️ Complete todos los campos antes de confirmar.");
+    btnConfirmarPedidos.addEventListener("click", function () {
+        console.table(productosSeleccionados);
+        const isValid = ValidarCampos();
+        if(isValid)
+        {
+            console.log('Formulario válido - procediendo con el envío...');
+            ConfirmarPedido();
         }
-    });
+
+    })
 });
