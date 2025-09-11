@@ -99,11 +99,11 @@ namespace JobOclock_BackEnd.Controllers
         // PEDIDO
 
         [HttpGet("Obtener-todos-los-pedidos")]
-        public ActionResult<List<Pedido>> GetAllProducto()
+        public ActionResult<List<Pedido>> GetAllPedidos()
         {
             try
             {
-                var list = _service.GetAllProductos();
+                var list = _service.GetAllPedidos();
                 if (list != null)
                 {
                     return Ok(list);

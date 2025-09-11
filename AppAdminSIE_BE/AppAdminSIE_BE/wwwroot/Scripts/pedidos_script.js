@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando pedidos_script.js...');
 
-    
+
 
     // Arrays globales
     let productosSeleccionados = [];
@@ -437,29 +437,46 @@ document.addEventListener('DOMContentLoaded', async function () {
         const lista = document.getElementById("listaPedidos");
 
         try {
-            const resp = await fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto");
-            const data = await resp.json();
+            // 🔹 Obtener datos de ambas tablas
+            console.log("Obteniendo datos de ambas tablas...");
 
-            console.log("Datos recibidos:", data); // Para debug
+            const [respPedidosProductos, respPedidos] = await Promise.all([
+                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
+                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos") // Asegúrate de que este endpoint exista
+            ]);
+
+            const pedidosProductos = await respPedidosProductos.json();
+            const pedidos = await respPedidos.json();
+
+            console.log("PedidosXProductos:", pedidosProductos);
+            console.log("Pedidos:", pedidos);
 
             lista.innerHTML = ""; // limpiar lista antes de renderizar
 
-            if (!data || data.length === 0) {
+            if (!pedidosProductos || pedidosProductos.length === 0) {
                 lista.innerHTML = `<li class="list-group-item text-muted">📭 No hay pedidos registrados</li>`;
                 return;
             }
 
-            // 🔹 AGRUPAR por idPedido para evitar duplicados
+            // 🔹 CREAR un mapa de pedidos por ID para acceso rápido a las fechas
+            const pedidosMap = {};
+            pedidos.forEach(pedido => {
+                pedidosMap[pedido.id] = pedido;
+            });
+
+            // 🔹 AGRUPAR PedidosXProductos por idPedido
             const pedidosAgrupados = {};
 
-            data.forEach(pedidoProducto => {
+            pedidosProductos.forEach(pedidoProducto => {
                 const idPedido = pedidoProducto.idPedido;
 
                 if (!pedidosAgrupados[idPedido]) {
-                    // Primera vez que vemos este pedido - crear entrada
+                    // Obtener la fecha de la tabla Pedidos
+                    const pedidoPrincipal = pedidosMap[idPedido];
+
                     pedidosAgrupados[idPedido] = {
                         id: idPedido,
-                        fecha: pedidoProducto.fecha,
+                        fecha: pedidoPrincipal ? pedidoPrincipal.fecha : null, // 🔥 FECHA CORRECTA
                         edificio: pedidoProducto.edificio,
                         observaciones: pedidoProducto.observaciones,
                         productos: []
@@ -470,11 +487,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                 pedidosAgrupados[idPedido].productos.push(pedidoProducto);
             });
 
-            console.log("Pedidos agrupados:", pedidosAgrupados); // Para debug
+            console.log("Pedidos agrupados con fechas:", pedidosAgrupados);
 
             // 🔹 RENDERIZAR cada pedido agrupado
             Object.values(pedidosAgrupados).forEach(pedido => {
-                // Determinar estado general del pedido (todos entregados o no)
+                // Determinar estado general del pedido
                 const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
                 const estadoBadge = todosEntregados
                     ? `<span class="badge rounded-pill bg-success">Entregado</span>`
@@ -482,12 +499,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 const cantidadProductos = pedido.productos.length;
 
-                // Formatear fecha si existe
+                // Formatear fecha correctamente
                 let fechaFormateada = "Sin fecha";
                 if (pedido.fecha) {
                     try {
                         const fecha = new Date(pedido.fecha);
-                        fechaFormateada = fecha.toLocaleDateString('es-ES');
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
                     } catch (e) {
                         fechaFormateada = pedido.fecha;
                     }
@@ -499,15 +520,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                     style="cursor: pointer; border-left: 4px solid ${todosEntregados ? '#198754' : '#dc3545'};">
                     <div class="ms-2 me-auto">
                         <div class="fw-bold">Pedido #${pedido.id}</div>
-                        <div><strong>Fecha:</strong> ${fechaFormateada}</div>
-                        <div><strong>Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
-                        <small class="text-muted">${cantidadProductos} producto(s)</small>
+                        <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                        <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                        <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
                         <br>
-                        <small class="text-muted">Observaciones: ${pedido.observaciones || "Sin observaciones"}</small>
+                        <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
                     </div>
                     <div class="text-end">
                         ${estadoBadge}
                         <br>
+                        <small class="text-primary fw-bold">👆 Clic para detalles</small>
                     </div>
                 </li>
             `;
@@ -528,6 +550,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
         }
     }
+
 
     // 🔹 AGREGAR esta nueva función después de verPedidosRegistrados():
 
