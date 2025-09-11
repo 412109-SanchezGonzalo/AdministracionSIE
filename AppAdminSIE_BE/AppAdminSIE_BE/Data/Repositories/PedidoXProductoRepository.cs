@@ -40,7 +40,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                 {
                     // Mapeamos las columnas correctas de la consulta SQL
                     var ordIdPXP = reader.GetOrdinal("id_pedidoxproducto");
-                    var ordEdificio = reader.GetOrdinal("Edificio");
+                    var ordIdEdificio = reader.GetOrdinal("id_edificio");
                     var ordIdPedido = reader.GetOrdinal("pedido_id");
                     var ordEstado = reader.GetOrdinal("Estado");
                     var ordIdProducto = reader.GetOrdinal("producto_id");
@@ -57,7 +57,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             IdPedidoXProducto = reader.GetInt32(ordIdPXP),
                             IdPedido = reader.GetInt32(ordIdPedido),
                             IdProducto = reader.GetInt32(ordIdProducto),
-                            Edificio = reader.GetString(ordEdificio),
+                            IdEdificio = reader.GetInt32(ordIdEdificio),
                             Cantidad = reader.GetDouble(ordCantidad), // Usar GetDouble para manejar decimales
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
