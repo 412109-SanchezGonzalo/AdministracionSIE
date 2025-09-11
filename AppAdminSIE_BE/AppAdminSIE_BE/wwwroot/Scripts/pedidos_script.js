@@ -433,16 +433,18 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Mostrar Modal Para Ver Pedidos Registrados
 
+    // Función verPedidosRegistrados modificada con event listeners
+
     async function verPedidosRegistrados(){
         const lista = document.getElementById("listaPedidos");
 
         try {
-            // 🔹 Obtener datos de ambas tablas
+            // Obtener datos de ambas tablas
             console.log("Obteniendo datos de ambas tablas...");
 
             const [respPedidosProductos, respPedidos] = await Promise.all([
                 fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
-                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos") // Asegúrate de que este endpoint exista
+                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos")
             ]);
 
             const pedidosProductos = await respPedidosProductos.json();
@@ -458,40 +460,37 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            // 🔹 CREAR un mapa de pedidos por ID para acceso rápido a las fechas
+            // CREAR un mapa de pedidos por ID para acceso rápido a las fechas
             const pedidosMap = {};
             pedidos.forEach(pedido => {
-                pedidosMap[pedido.id] = pedido;
+                pedidosMap[pedido.idPedido] = pedido;
             });
 
-            // 🔹 AGRUPAR PedidosXProductos por idPedido
+            // AGRUPAR PedidosXProductos por idPedido
             const pedidosAgrupados = {};
 
             pedidosProductos.forEach(pedidoProducto => {
                 const idPedido = pedidoProducto.idPedido;
 
                 if (!pedidosAgrupados[idPedido]) {
-                    // Obtener la fecha de la tabla Pedidos
                     const pedidoPrincipal = pedidosMap[idPedido];
 
                     pedidosAgrupados[idPedido] = {
                         id: idPedido,
-                        fecha: pedidoPrincipal ? pedidoPrincipal.fecha : null, // 🔥 FECHA CORRECTA
+                        fechaEntrega: pedidoPrincipal ? pedidoPrincipal.fechaEntrega : null,
                         edificio: pedidoProducto.edificio,
                         observaciones: pedidoProducto.observaciones,
                         productos: []
                     };
                 }
 
-                // Agregar este producto al pedido
                 pedidosAgrupados[idPedido].productos.push(pedidoProducto);
             });
 
             console.log("Pedidos agrupados con fechas:", pedidosAgrupados);
 
-            // 🔹 RENDERIZAR cada pedido agrupado
+            // RENDERIZAR cada pedido agrupado
             Object.values(pedidosAgrupados).forEach(pedido => {
-                // Determinar estado general del pedido
                 const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
                 const estadoBadge = todosEntregados
                     ? `<span class="badge rounded-pill bg-success">Entregado</span>`
@@ -501,16 +500,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                 // Formatear fecha correctamente
                 let fechaFormateada = "Sin fecha";
-                if (pedido.fecha) {
+                if (pedido.fechaEntrega) {
                     try {
-                        const fecha = new Date(pedido.fecha);
+                        const fecha = new Date(pedido.fechaEntrega);
                         fechaFormateada = fecha.toLocaleDateString('es-ES', {
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit'
                         });
                     } catch (e) {
-                        fechaFormateada = pedido.fecha;
+                        fechaFormateada = pedido.fechaEntrega;
                     }
                 }
 
@@ -529,19 +528,32 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <div class="text-end">
                         ${estadoBadge}
                         <br>
-                        <small class="text-primary fw-bold">👆 Clic para detalles</small>
                     </div>
                 </li>
             `;
                 lista.innerHTML += item;
             });
 
-            // 🔹 AGREGAR event listeners para mostrar detalles
+            // ⭐ AGREGAR event listeners para mostrar detalles al hacer clic
             document.querySelectorAll('.pedido-item').forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', async function() {
                     const pedidoId = this.getAttribute('data-pedido-id');
-                    const pedidoSeleccionado = pedidosAgrupados[pedidoId];
-                    mostrarDetallesPedido(pedidoSeleccionado);
+                    console.log('Clic en pedido ID:', pedidoId);
+
+                    try {
+                        // Buscar el pedido específico en los datos ya cargados
+                        const pedidoDetalle = Object.values(pedidosAgrupados).find(p => p.id == pedidoId);
+
+                        if (pedidoDetalle) {
+                            mostrarDetallesPedido(pedidoDetalle);
+                        } else {
+                            console.error('No se encontró el pedido con ID:', pedidoId);
+                            alert('Error: No se pudo cargar el detalle del pedido');
+                        }
+                    } catch (error) {
+                        console.error('Error al mostrar detalles del pedido:', error);
+                        alert('Error al cargar detalles del pedido');
+                    }
                 });
             });
 
@@ -557,7 +569,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     function mostrarDetallesPedido(pedido) {
         console.log('Mostrando detalles del pedido:', pedido);
 
-        // Crear modal dinámico
+        // Buscar modal existente o crearlo
         let modalDetalles = document.getElementById('modalDetallesPedido');
 
         if (!modalDetalles) {
@@ -605,78 +617,92 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Formatear fecha
         let fechaFormateada = "Sin fecha";
-        if (pedido.fecha) {
+        if (pedido.fechaEntrega) {
             try {
-                const fecha = new Date(pedido.fecha);
+                const fecha = new Date(pedido.fechaEntrega);
                 fechaFormateada = fecha.toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
                 });
             } catch (e) {
-                fechaFormateada = pedido.fecha;
+                fechaFormateada = pedido.fechaEntrega;
             }
         }
 
-        // Actualizar título
-        document.getElementById('modalDetallesTitle').textContent = `📦 Pedido #${pedido.id}`;
+        // CORREGIR: Buscar el título DESPUÉS de asegurar que el modal existe
+        const titleElement = document.getElementById('modalDetallesTitle');
+        if (titleElement) {
+            titleElement.textContent = `📦 Pedido #${pedido.id}`;
+        } else {
+            console.error('❌ Elemento modalDetallesTitle no encontrado después de crear el modal');
+        }
 
         // Actualizar información general
         const infoDiv = document.getElementById('detallesPedidoInfo');
-        const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
-        const estadoGeneral = todosEntregados ?
-            `<span class="badge bg-success fs-6">✅ Completado</span>` :
-            `<span class="badge bg-danger fs-6">⏳ Pendiente</span>`;
+        if (infoDiv) {
+            const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
+            const estadoGeneral = todosEntregados ?
+                `<span class="badge bg-success fs-6">✅ Completado</span>` :
+                `<span class="badge bg-danger fs-6">⏳ Pendiente</span>`;
 
-        infoDiv.innerHTML = `
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
-                        <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
-                        <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneral}</p>
-                    </div>
-                    <div class="col-12 mt-2">
-                        <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+            infoDiv.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                            <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                            <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneral}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+        }
 
         // Llenar tabla de productos
         const tablaBody = document.getElementById('tablaDetallesProductos');
-        tablaBody.innerHTML = '';
+        if (tablaBody) {
+            tablaBody.innerHTML = '';
 
-        pedido.productos.forEach(producto => {
-            const estadoBadge = producto.estadoPedido === "Entregado"
-                ? `<span class="badge bg-success">✅ Entregado</span>`
-                : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
+            pedido.productos.forEach(producto => {
+                const estadoBadge = producto.estadoPedido === "Entregado"
+                    ? `<span class="badge bg-success">✅ Entregado</span>`
+                    : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
 
-            const row = document.createElement('tr');
-            row.innerHTML = `
-            <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
-            <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
-            <td>${producto.cantidad || 'N/A'}</td>
-            <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-            <td>${estadoBadge}</td>
-        `;
-            tablaBody.appendChild(row);
-        });
-
-        // Cerrar modal de pedidos si está abierto
-        const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
-        if (modalPedidos) {
-            modalPedidos.hide();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+                <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+                <td>${producto.cantidad || 'N/A'}</td>
+                <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+                <td>${estadoBadge}</td>
+            `;
+                tablaBody.appendChild(row);
+            });
         }
 
-        // Mostrar modal de detalles
-        const modal = new bootstrap.Modal(modalDetalles);
-        modal.show();
+        // Cerrar modal de pedidos si está abierto
+        const modalPedidosElement = document.getElementById('modalPedidos');
+        if (modalPedidosElement) {
+            const modalPedidos = bootstrap.Modal.getInstance(modalPedidosElement);
+            if (modalPedidos) {
+                modalPedidos.hide();
+            }
+        }
+
+        // Mostrar modal de detalles con un pequeño delay para asegurar que el modal anterior se cierre
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(modalDetalles);
+            modal.show();
+        }, 300);
     }
 
 
