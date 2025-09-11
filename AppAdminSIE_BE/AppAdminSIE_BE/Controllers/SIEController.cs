@@ -97,6 +97,23 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         // PEDIDO
+
+        [HttpGet("Obtener-todos-los-pedidos")]
+        public ActionResult<List<Pedido>> GetAllProducto()
+        {
+            try
+            {
+                var list = _service.GetAllProductos();
+                if (list != null)
+                {
+                    return Ok(list);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+
         [HttpPost("Crear-pedido")]
         public ActionResult<int> AddPedidos([FromBody] DateTime fechaPedido)
         {
