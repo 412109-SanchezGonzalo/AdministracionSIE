@@ -36,6 +36,25 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 🔹 Estado inicial
     searchProductInput.disabled = true;
 
+
+    try {
+        const password = localStorage.getItem('admin_password');
+        console.log('🔐 Admin password:', password);
+
+        const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(password)
+        });
+
+        saludoSpan.textContent = response.ok
+            ? `Hola, ${await response.text()} !`
+            : 'Hola, Usuario !';
+    } catch (error) {
+        console.log('⚠️ Error en autenticación admin:', error);
+        saludoSpan.textContent = 'Hola, Usuario !';
+    }
+
     // 📌 Funciones UI
     function showLoading() {
         loadingElement.classList.remove('d-none');
@@ -432,8 +451,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Mostrar Modal Para Ver Pedidos Registrados
-
-    // Función verPedidosRegistrados modificada con event listeners
+        
 
     async function verPedidosRegistrados(){
         const lista = document.getElementById("listaPedidos");
