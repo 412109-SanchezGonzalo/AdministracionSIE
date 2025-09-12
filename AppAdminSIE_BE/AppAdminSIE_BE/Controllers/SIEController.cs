@@ -167,7 +167,7 @@ namespace JobOclock_BackEnd.Controllers
         {
             try
             {
-                _service.UpdatePedidoXProducto(updatePedidoxproducto.IdPedido, updatePedidoxproducto.ObservacionesExtras);
+                _service.UpdatePedidoXProducto(updatePedidoxproducto.IdPedido, updatePedidoxproducto.ObservacionesExtras,updatePedidoxproducto.nuevoEstadoProducto);
                 return Ok("PedidoXProducto Actualizado !");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

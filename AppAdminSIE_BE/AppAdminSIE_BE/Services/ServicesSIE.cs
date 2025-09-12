@@ -81,9 +81,9 @@ namespace JobOclock_BackEnd.Services
             _pedidoXProductoRepository.AddPedidoXProducto(pedidoxproducto);
         }
 
-        public void UpdatePedidoXProducto(int idPedido, string? observacionesExtras)
+        public void UpdatePedidoXProducto(int idPedido, string? observacionesExtras, string nuevoEstadoProducto)
         {
-            _pedidoXProductoRepository.UpdatePedidoXProducto(idPedido, observacionesExtras);
+            _pedidoXProductoRepository.UpdatePedidoXProducto(idPedido, observacionesExtras, nuevoEstadoProducto);
         }
 
 

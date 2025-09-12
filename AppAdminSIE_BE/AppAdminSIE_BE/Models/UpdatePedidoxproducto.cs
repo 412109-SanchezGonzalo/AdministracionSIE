@@ -4,5 +4,6 @@
     {
         public int IdPedido { get; set; }
         public string? ObservacionesExtras { get; set; }
+        public string nuevoEstadoProducto { get; set; }
     }
 }

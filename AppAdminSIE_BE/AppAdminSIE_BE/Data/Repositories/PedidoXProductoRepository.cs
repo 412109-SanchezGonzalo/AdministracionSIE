@@ -95,7 +95,7 @@ namespace AppAdminSIE_BE.Data.Repositories
 
 
 
-        public void UpdatePedidoXProducto(int idPedido, string? observacionesExtras)
+        public void UpdatePedidoXProducto(int idPedido, string? observacionesExtras, string nuevoEstadoProducto)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
