@@ -87,6 +87,21 @@ document.addEventListener('DOMContentLoaded', async function () {
         userCount.textContent = count;
     }
 
+    function limpiarSeleccionProductos() {
+        productosSeleccionados = [];
+
+        // Resetear checkboxes
+        const checks = tableBody.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(chk => chk.checked = false);
+
+        // Resetear cantidades
+        const inputs = tableBody.querySelectorAll('input[type="number"]');
+        inputs.forEach(inp => inp.value = 1);
+
+        console.log("✅ Productos desmarcados correctamente");
+    }
+
+
     // ✅ Cargar todos los productos desde API
     async function loadAllProducts() {
         showLoading();
@@ -117,17 +132,20 @@ document.addEventListener('DOMContentLoaded', async function () {
             const tr = document.createElement('tr');
 
             tr.innerHTML = `
-            <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-            <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-            <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-            <td class="cantidad-cell"></td>
-            <td class="acciones-cell"></td>
-        `;
+        <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
+        <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
+        <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
+        <td class="cantidad-cell"></td>
+        <td class="acciones-cell"></td>
+    `;
+
+            // Buscar si el producto ya está seleccionado
+            const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
 
             // Input de cantidad
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
-            cantidadInput.value = 1;
+            cantidadInput.value = seleccionado ? seleccionado.cantidad : 1;
             cantidadInput.className = 'form-control form-control-sm d-inline-block';
             cantidadInput.style.width = '80px';
             cantidadInput.step = "any";
@@ -139,11 +157,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (seleccionado) seleccionado.cantidad = producto.cantidad;
             });
 
-            // Agregar primero el input y después el texto de unidad de medida
             const cantidadCell = tr.querySelector('.cantidad-cell');
             cantidadCell.appendChild(cantidadInput);
 
-            // Agregar el texto de unidad de medida después del input
             const unidadSpan = document.createElement('span');
             unidadSpan.className = 'unidad-medida ms-2';
             unidadSpan.textContent = producto.unidadMedida || 'Sin unidad';
@@ -153,16 +169,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             const check = document.createElement('input');
             check.type = 'checkbox';
             check.className = 'form-check-input';
+            check.checked = !!seleccionado; // 🔹 Mantener marcado si ya estaba seleccionado
 
             check.addEventListener('change', () => {
                 if (check.checked) {
-                    // Producto seleccionado - tomar el valor actual del input
                     producto.cantidad = parseFloat(cantidadInput.value);
                     if (!productosSeleccionados.find(p => p.id === producto.id)) {
                         productosSeleccionados.push({ ...producto });
                     }
                 } else {
-                    // Producto deseleccionado - resetear input a 1 y remover de seleccionados
                     cantidadInput.value = 1;
                     producto.cantidad = 1;
                     productosSeleccionados = productosSeleccionados.filter(p => p.id !== producto.id);
@@ -178,6 +193,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         showTable(productos.length);
     }
+
 
     // 🔍 Buscar producto en memoria
     function searchByName() {
@@ -199,6 +215,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         renderTable(resultados);
     }
+
 
 
 
@@ -328,19 +345,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             const fechaISO = new Date(fechaEntrega).toISOString();
             const observaciones = document.getElementById('observaciones').value;
 
-            // Validar que haya fecha
             if (!fechaEntrega) {
                 alert("Por favor seleccione una fecha de entrega");
                 return;
             }
 
-            // 1. Crear el pedido principal (solo fecha)
-
+            // 1. Crear el pedido principal
             const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fechaISO)
             });
 
@@ -350,44 +363,53 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const pedidoId = await responsePedido.json();
 
-            // 2. Crear los PedidoXProducto para cada producto seleccionado
+            // 2. Obtener información del edificio seleccionado
+            const edificioId = obtenerIdEdificio();
+            const edificioNombre = document.getElementById('edificioSelected').textContent;
+
+            // 3. Crear los PedidoXProducto con TODOS los campos requeridos
             for (const producto of productosSeleccionados) {
                 const bodyPedidoProducto = {
+                    // Campos que usa tu SQL
                     idPedido: pedidoId,
                     idProducto: producto.id,
-                    idEdificio: obtenerIdEdificio(),
                     cantidad: producto.cantidad,
-                    estadoPedido: 'No Entregado',
-                    nombreProducto: producto.nombre,
-                    unidadMedidaProducto: producto.unidadMedida,
-                    observaciones: observaciones || ""
+                    idEdificio: edificioId,
+                    observaciones: observaciones || "",
+
+                    // Campos requeridos por el modelo pero no en SQL
+                    edificio: edificioNombre || "Sin especificar",
+                    estadoPedido: "No Entregado",
+                    nombreProducto: producto.nombre || "Sin nombre",
+                    unidadMedidaProducto: producto.unidadMedida || "Sin unidad"
                 };
+
+                console.log('Enviando:', bodyPedidoProducto);
 
                 const responsePedidoProducto = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedidoxproducto', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bodyPedidoProducto)
                 });
 
                 if (!responsePedidoProducto.ok) {
-                    console.error(`Error al asociar producto ${producto.id} al pedido`);
+                    const errorText = await responsePedidoProducto.text();
+                    console.error(`Error al asociar producto ${producto.id}:`, errorText);
+                } else {
+                    console.log(`Producto ${producto.nombre} asociado correctamente`);
                 }
             }
 
             alert("Pedido creado exitosamente");
 
-            // Cerrar modal y limpiar datos
+            // Limpiar formulario
             const modal = bootstrap.Modal.getInstance(document.getElementById("miModal"));
             modal.hide();
-
-            // Limpiar formulario
             document.getElementById('fechaEntrega').value = '';
             document.getElementById('observaciones').value = '';
-            productosSeleccionados = [];
 
-            // Resetear tabla
+            // 🔹 Limpio seleccionados y la tabla
+            limpiarSeleccionProductos();
             renderTable(productosGlobal);
 
         } catch (error) {
@@ -451,7 +473,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Mostrar Modal Para Ver Pedidos Registrados
-        
+
 
     async function verPedidosRegistrados(){
         const lista = document.getElementById("listaPedidos");
@@ -607,14 +629,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                         <div id="detallesPedidoInfo" class="mb-4"></div>
                         <h6 class="fw-bold mb-3">📋 Productos del Pedido:</h6>
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-striped table-hover compact-table">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th style="width: 10%;">ID</th>
-                                        <th style="width: 40%;">Producto</th>
-                                        <th style="width: 15%;">Cantidad</th>
-                                        <th style="width: 15%;">Unidad</th>
-                                        <th style="width: 20%;">Estado</th>
+                                        <th scope="col" style="width: 15%;">ID</th>
+                                        <th scope="col" style="width: 40%;">Producto</th>
+                                        <th scope="col" style="width: 15%;">Cantidad</th>
+                                        <th scope="col" style="width: 20%;">Unidad</th>
+                                        <th scope="col" style="width: 40%;">Entregado</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablaDetallesProductos">
@@ -803,4 +825,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
         modalPedidos.show();
     })
+
+    const btnVolverAVerPedidos = document.getElementById('btnVolverAPedidosRegistrados');
+    btnVolverAVerPedidos.addEventListener('click', async function () {
+        verPedidosRegistrados();
+
+        // abrir modal después de cargar lista
+        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
+        modalPedidos.show();
+    })
+
+
+    // Selecciono el botón de la X (cerrar modal)
+    const btnCerrar = document.querySelector('#miModal .btn-close');
+
+    btnCerrar.addEventListener('click', () => {
+        limpiarSeleccionProductos();
+        renderTable(productosGlobal); // refrescar tabla para sacar los checks
+    });
+
 });

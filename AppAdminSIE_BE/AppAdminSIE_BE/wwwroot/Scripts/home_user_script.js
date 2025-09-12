@@ -345,4 +345,313 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     btnPendingTasks.addEventListener('click',verTareas);
+
+    /*  BOTON PÉDIDOS */
+
+
+    async function verPedidosRegistrados(){
+        const lista = document.getElementById("listaPedidos");
+
+        try {
+            // Obtener datos de ambas tablas
+            console.log("Obteniendo datos de ambas tablas...");
+
+            const [respPedidosProductos, respPedidos] = await Promise.all([
+                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
+                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos")
+            ]);
+
+            const pedidosProductos = await respPedidosProductos.json();
+            const pedidos = await respPedidos.json();
+
+            console.log("PedidosXProductos:", pedidosProductos);
+            console.log("Pedidos:", pedidos);
+
+            lista.innerHTML = ""; // limpiar lista antes de renderizar
+
+            if (!pedidosProductos || pedidosProductos.length === 0) {
+                lista.innerHTML = `<li class="list-group-item text-muted">📭 No hay pedidos registrados</li>`;
+                return;
+            }
+
+            // CREAR un mapa de pedidos por ID para acceso rápido a las fechas
+            const pedidosMap = {};
+            pedidos.forEach(pedido => {
+                pedidosMap[pedido.idPedido] = pedido;
+            });
+
+            // AGRUPAR PedidosXProductos por idPedido
+            const pedidosAgrupados = {};
+
+            pedidosProductos.forEach(pedidoProducto => {
+                const idPedido = pedidoProducto.idPedido;
+
+                if (!pedidosAgrupados[idPedido]) {
+                    const pedidoPrincipal = pedidosMap[idPedido];
+
+                    pedidosAgrupados[idPedido] = {
+                        id: idPedido,
+                        fechaEntrega: pedidoPrincipal ? pedidoPrincipal.fechaEntrega : null,
+                        edificio: pedidoProducto.edificio,
+                        observaciones: pedidoProducto.observaciones,
+                        productos: []
+                    };
+                }
+
+                pedidosAgrupados[idPedido].productos.push(pedidoProducto);
+            });
+
+            console.log("Pedidos agrupados con fechas:", pedidosAgrupados);
+
+            // RENDERIZAR cada pedido agrupado
+            Object.values(pedidosAgrupados).forEach(pedido => {
+                const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
+                const estadoBadge = todosEntregados
+                    ? `<span class="badge rounded-pill bg-success">Entregado</span>`
+                    : `<span class="badge rounded-pill bg-danger">Pendiente</span>`;
+
+                const cantidadProductos = pedido.productos.length;
+
+                // Formatear fecha correctamente
+                let fechaFormateada = "Sin fecha";
+                if (pedido.fechaEntrega) {
+                    try {
+                        const fecha = new Date(pedido.fechaEntrega);
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+                    } catch (e) {
+                        fechaFormateada = pedido.fechaEntrega;
+                    }
+                }
+
+                let item = `
+                <li class="list-group-item d-flex justify-content-between align-items-start pedido-item" 
+                    data-pedido-id="${pedido.id}" 
+                    style="cursor: pointer; border-left: 4px solid ${todosEntregados ? '#198754' : '#dc3545'};">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Pedido #${pedido.id}</div>
+                        <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                        <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                        <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
+                        <br>
+                        <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
+                    </div>
+                    <div class="text-end">
+                        ${estadoBadge}
+                        <br>
+                    </div>
+                </li>
+            `;
+                lista.innerHTML += item;
+            });
+
+            // ⭐ AGREGAR event listeners para mostrar detalles al hacer clic
+            document.querySelectorAll('.pedido-item').forEach(item => {
+                item.addEventListener('click', async function() {
+                    const pedidoId = this.getAttribute('data-pedido-id');
+                    console.log('Clic en pedido ID:', pedidoId);
+
+                    try {
+                        // Buscar el pedido específico en los datos ya cargados
+                        const pedidoDetalle = Object.values(pedidosAgrupados).find(p => p.id == pedidoId);
+
+                        if (pedidoDetalle) {
+                            mostrarDetallesPedido(pedidoDetalle);
+                        } else {
+                            console.error('No se encontró el pedido con ID:', pedidoId);
+                            alert('Error: No se pudo cargar el detalle del pedido');
+                        }
+                    } catch (error) {
+                        console.error('Error al mostrar detalles del pedido:', error);
+                        alert('Error al cargar detalles del pedido');
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error("Error cargando pedidos:", error);
+            lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
+        }
+    }
+
+
+    // 🔹 AGREGAR esta nueva función después de verPedidosRegistrados():
+
+    function mostrarDetallesPedido(pedido) {
+        console.log('Mostrando detalles del pedido:', pedido);
+
+        // Buscar modal existente o crearlo
+        let modalDetalles = document.getElementById('modalDetallesPedido');
+
+        if (!modalDetalles) {
+            // Crear modal si no existe
+            modalDetalles = document.createElement('div');
+            modalDetalles.className = 'modal fade';
+            modalDetalles.id = 'modalDetallesPedido';
+            modalDetalles.setAttribute('tabindex', '-1');
+            modalDetalles.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #212529; color: white;">
+                        <h5 class="modal-title" id="modalDetallesTitle">📦 Detalles del Pedido</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="detallesPedidoInfo" class="mb-4"></div>
+                        <h6 class="fw-bold mb-3">📋 Productos del Pedido:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover compact-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" style="width: 15%;">ID</th>
+                                        <th scope="col" style="width: 40%;">Producto</th>
+                                        <th scope="col" style="width: 15%;">Cantidad</th>
+                                        <th scope="col" style="width: 20%;">Unidad</th>
+                                        <th scope="col" style="width: 40%;">Entregado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaDetallesProductos">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            ← Volver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+            document.body.appendChild(modalDetalles);
+        }
+
+        // Formatear fecha
+        let fechaFormateada = "Sin fecha";
+        if (pedido.fechaEntrega) {
+            try {
+                const fecha = new Date(pedido.fechaEntrega);
+                fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                fechaFormateada = pedido.fechaEntrega;
+            }
+        }
+
+        // CORREGIR: Buscar el título DESPUÉS de asegurar que el modal existe
+        const titleElement = document.getElementById('modalDetallesTitle');
+        if (titleElement) {
+            titleElement.textContent = `📦 Pedido #${pedido.id}`;
+        } else {
+            console.error('❌ Elemento modalDetallesTitle no encontrado después de crear el modal');
+        }
+
+        // Actualizar información general
+        const infoDiv = document.getElementById('detallesPedidoInfo');
+        if (infoDiv) {
+            const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
+            const estadoGeneral = todosEntregados ?
+                `<span class="badge bg-success fs-6">✅ Completado</span>` :
+                `<span class="badge bg-danger fs-6">⏳ Pendiente</span>`;
+
+            infoDiv.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                            <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                            <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneral}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        // Llenar tabla de productos
+        const tablaBody = document.getElementById('tablaDetallesProductos');
+        if (tablaBody) {
+            tablaBody.innerHTML = '';
+
+            pedido.productos.forEach(producto => {
+                const estadoBadge = producto.estadoPedido === "Entregado"
+                    ? `<span class="badge bg-success">✅ Entregado</span>`
+                    : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+                <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+                <td>${producto.cantidad || 'N/A'}</td>
+                <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+                <td>${estadoBadge}</td>
+            `;
+                tablaBody.appendChild(row);
+            });
+        }
+
+        // Cerrar modal de pedidos si está abierto
+        const modalPedidosElement = document.getElementById('modalPedidos');
+        if (modalPedidosElement) {
+            const modalPedidos = bootstrap.Modal.getInstance(modalPedidosElement);
+            if (modalPedidos) {
+                modalPedidos.hide();
+            }
+        }
+
+        // Mostrar modal de detalles con un pequeño delay para asegurar que el modal anterior se cierre
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(modalDetalles);
+            modal.show();
+        }, 300);
+    }
+
+
+
+
+
+    const btnPedidos = document.getElementById('btnPedidos');
+
+    btnPedidos.addEventListener('click', (e) => {
+        verPedidosRegistrados();
+
+        // abrir modal después de cargar lista
+        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
+        modalPedidos.show();
+    })
+
+    const btnVolverAVerPedidos = document.getElementById('btnVolverAPedidosRegistrados');
+    btnVolverAVerPedidos.addEventListener('click', async function () {
+        verPedidosRegistrados();
+
+        // abrir modal después de cargar lista
+        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
+        modalPedidos.show();
+    })
+
+
+    // Selecciono el botón de la X (cerrar modal)
+    const btnCerrar = document.querySelector('#miModal .btn-close');
+
+    btnCerrar.addEventListener('click', () => {
+        limpiarSeleccionProductos();
+        renderTable(productosGlobal); // refrescar tabla para sacar los checks
+    });
+
+
+
+
 });

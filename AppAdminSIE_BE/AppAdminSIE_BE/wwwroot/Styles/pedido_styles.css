@@ -526,3 +526,8 @@
         padding: 2rem;
     }
 }
+/* 🔹 Forzar títulos blancos en tabla de detalles del modal */
+#modalDetallesPedido thead th {
+    color: #fff !important;
+    background-color: #000 !important;
+}
