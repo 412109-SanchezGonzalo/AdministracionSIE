@@ -29,6 +29,8 @@ namespace JobOclock_BackEnd.Services
 
         void AddPedidoXProducto(PedidoXProducto pedidoxproducto);
 
+        void UpdatePedidoXProducto(int idPedido, string? observacionesExtras);
+
         // USUARIO
         IEnumerable<Usuario> GetAllUsuarios();
         string GetUsuarioByPassword(string password);

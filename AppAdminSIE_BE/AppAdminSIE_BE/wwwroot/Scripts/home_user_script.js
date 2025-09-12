@@ -600,6 +600,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                 <td>${estadoBadge}</td>
             `;
                 tablaBody.appendChild(row);
+
+                const observacionesExtras = document.getElementById('observacionesExtras');
+                if (observacionesExtras) {
+                    observacionesExtras.textContent = pedido.observaciones;
+                }
             });
         }
 

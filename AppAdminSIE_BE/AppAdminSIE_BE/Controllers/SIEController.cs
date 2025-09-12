@@ -162,6 +162,17 @@ namespace JobOclock_BackEnd.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
+        [HttpPut("Editar-pedidoxproducto")]
+        public ActionResult UpdatePedidoXProducto([FromBody] UpdatePedidoxproducto updatePedidoxproducto)
+        {
+            try
+            {
+                _service.UpdatePedidoXProducto(updatePedidoxproducto.IdPedido, updatePedidoxproducto.ObservacionesExtras);
+                return Ok("PedidoXProducto Actualizado !");
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
 
 
         // USUARIO
