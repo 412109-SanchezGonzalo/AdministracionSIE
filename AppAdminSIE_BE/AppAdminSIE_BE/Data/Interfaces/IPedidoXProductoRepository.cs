@@ -6,7 +6,9 @@ namespace AppAdminSIE_BE.Data.Interfaces
     {
         IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
         void AddPedidoXProducto(PedidoXProducto pedidoxproducto);
-        void UpdatePedidoXProducto(int idPedido, string? observacionesExtras, string nuevoEstadoProducto);
-        
+        void UpdateObservacionesPedidoXProducto(int idPedido, string? observacionesExtras);
+        void UpdateEstadoProductoPedidoXProducto(int idPedido, int idProducto, string nuevoEstadoProducto);
+
+
     }
 }

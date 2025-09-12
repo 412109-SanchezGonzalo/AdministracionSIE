@@ -95,15 +95,34 @@ namespace AppAdminSIE_BE.Data.Repositories
 
 
 
-        public void UpdatePedidoXProducto(int idPedido, string? observacionesExtras, string nuevoEstadoProducto)
+        public void UpdateObservacionesPedidoXProducto(int idPedido, string? observacionesExtras)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "UPDATE PedidoXProducto SET observaciones = @observaciones " +
-                "WHERE pedido_id = @idPedido", conn))
+                "UPDATE PedidoXProducto SET observaciones = @observaciones," +
+                "estadoProducto = @estadoProducto " +
+                "WHERE pedido_id = @idPedido " , conn))
             {
                 cmd.Parameters.AddWithValue("@idPedido", idPedido);
                 cmd.Parameters.AddWithValue("@observaciones", observacionesExtras);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateEstadoProductoPedidoXProducto(int idPedido,int idProducto ,string nuevoEstadoProducto)
+        {
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(
+                "UPDATE PedidoXProducto SET estadoProducto = @nuevoEstado," +
+                "estadoProducto = @estadoProducto " +
+                "WHERE pedido_id = @idPedido " +
+                "AND producto_id = @idProducto", conn))
+            {
+                cmd.Parameters.AddWithValue("@idPedido", idPedido);
+                cmd.Parameters.AddWithValue("@idProducto", idProducto);
+                cmd.Parameters.AddWithValue("@nuevoEstado", nuevoEstadoProducto);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
