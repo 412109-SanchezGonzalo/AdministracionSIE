@@ -381,7 +381,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                     edificio: edificioNombre || "Sin especificar",
                     estadoPedido: "No Entregado",
                     nombreProducto: producto.nombre || "Sin nombre",
-                    unidadMedidaProducto: producto.unidadMedida || "Sin unidad"
+                    unidadMedidaProducto: producto.unidadMedida || "Sin unidad",
+                    estadoProducto: "No Entregado"
                 };
 
                 console.log('Enviando:', bodyPedidoProducto);
@@ -683,8 +684,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (infoDiv) {
             const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
             const estadoGeneral = todosEntregados ?
-                `<span class="badge bg-success fs-6">✅ Completado</span>` :
-                `<span class="badge bg-danger fs-6">⏳ Pendiente</span>`;
+                `<span class="badge bg-success fs-6">Completado</span>` :
+                `<span class="badge bg-danger fs-6">Pendiente</span>`;
 
             infoDiv.innerHTML = `
             <div class="card">
@@ -713,9 +714,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             tablaBody.innerHTML = '';
 
             pedido.productos.forEach(producto => {
-                const estadoBadge = producto.estadoPedido === "Entregado"
-                    ? `<span class="badge bg-success">✅ Entregado</span>`
-                    : `<span class="badge bg-warning text-dark">❌ No entregado</span>`;
+                const estadoBadge = producto.estadoProducto === "Entregado"
+                    ? `<span class="badge bg-success">Sí</span>`
+                    : `<span class="badge bg-danger">No</span>`;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
