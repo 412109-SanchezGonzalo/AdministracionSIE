@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             pedido.productos.forEach(producto => {
                 const estadoBadge = producto.estadoPedido === "Entregado"
                     ? `<span class="badge bg-success">✅ Entregado</span>`
-                    : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
+                    : `<span class="badge bg-warning text-dark">❌ No entregado</span>`;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `

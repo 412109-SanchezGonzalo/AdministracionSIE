@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     let tareaSeleccionada = [];
 
+    let productoSeleccionados = [];
+
+
+    const tableBody = document.getElementById('table-body');
+
 
 
     const btnPendingTasks = document.getElementById('btnTareasPendientes');
@@ -487,7 +492,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         let modalDetalles = document.getElementById('modalDetallesPedido');
 
         if (!modalDetalles) {
-            // Crear modal si no existe
             modalDetalles = document.createElement('div');
             modalDetalles.className = 'modal fade';
             modalDetalles.id = 'modalDetallesPedido';
@@ -510,11 +514,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                                         <th scope="col" style="width: 40%;">Producto</th>
                                         <th scope="col" style="width: 15%;">Cantidad</th>
                                         <th scope="col" style="width: 20%;">Unidad</th>
-                                        <th scope="col" style="width: 40%;">Entregado</th>
+                                        <th scope="col" style="width: 10%;">Entregado</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tablaDetallesProductos">
-                                </tbody>
+                                <tbody id="tablaDetallesProductos"></tbody>
                             </table>
                         </div>
                     </div>
@@ -544,15 +547,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         }
 
-        // CORREGIR: Buscar el título DESPUÉS de asegurar que el modal existe
+        // Título modal
         const titleElement = document.getElementById('modalDetallesTitle');
         if (titleElement) {
             titleElement.textContent = `📦 Pedido #${pedido.id}`;
-        } else {
-            console.error('❌ Elemento modalDetallesTitle no encontrado después de crear el modal');
         }
 
-        // Actualizar información general
+        // Info general
         const infoDiv = document.getElementById('detallesPedidoInfo');
         if (infoDiv) {
             const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
@@ -581,34 +582,35 @@ document.addEventListener('DOMContentLoaded', async function () {
         `;
         }
 
-        // Llenar tabla de productos
+        // Tabla productos
         const tablaBody = document.getElementById('tablaDetallesProductos');
         if (tablaBody) {
             tablaBody.innerHTML = '';
 
             pedido.productos.forEach(producto => {
-                const estadoBadge = producto.estadoPedido === "Entregado"
-                    ? `<span class="badge bg-success">✅ Entregado</span>`
-                    : `<span class="badge bg-warning text-dark">⏳ Pendiente</span>`;
+                const fila = document.createElement("tr");
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
+                const checkbox = `
+                <input type="checkbox" 
+                       class="form-check-input entregado-checkbox" 
+                       data-producto-id="${producto.idProducto}" 
+                       ${producto.estadoPedido === "Entregado" ? "checked disabled" : ""}>
+            `;
+
+                fila.innerHTML = `
                 <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
                 <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
                 <td>${producto.cantidad || 'N/A'}</td>
                 <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-                <td>${estadoBadge}</td>
+                <td>${checkbox}</td>
             `;
-                tablaBody.appendChild(row);
-
                 const observacionesExtras = document.getElementById('observacionesExtras');
-                if (observacionesExtras) {
-                    observacionesExtras.textContent = pedido.observaciones;
-                }
+                observacionesExtras.textContent = pedido.observaciones;
+                tablaBody.appendChild(fila);
             });
         }
 
-        // Cerrar modal de pedidos si está abierto
+        // Cerrar modalPedidos si está abierto
         const modalPedidosElement = document.getElementById('modalPedidos');
         if (modalPedidosElement) {
             const modalPedidos = bootstrap.Modal.getInstance(modalPedidosElement);
@@ -617,14 +619,26 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         }
 
-        // Mostrar modal de detalles con un pequeño delay para asegurar que el modal anterior se cierre
+        // Mostrar modal detalles
         setTimeout(() => {
             const modal = new bootstrap.Modal(modalDetalles);
             modal.show();
         }, 300);
     }
 
+    function limpiarSeleccionProductos() {
+        productosSeleccionados = [];
 
+        // Resetear checkboxes
+        const checks = tableBody.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(chk => chk.checked = false);
+
+        // Resetear cantidades
+        const inputs = tableBody.querySelectorAll('input[type="number"]');
+        inputs.forEach(inp => inp.value = 1);
+
+        console.log("✅ Productos desmarcados correctamente");
+    }
 
 
 
@@ -649,12 +663,25 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // Selecciono el botón de la X (cerrar modal)
-    const btnCerrar = document.querySelector('#miModal .btn-close');
+    const btnCerrar = document.querySelector('#modalDetallesPedido .btn-close');
 
     btnCerrar.addEventListener('click', () => {
-        limpiarSeleccionProductos();
-        renderTable(productosGlobal); // refrescar tabla para sacar los checks
+        limpiarSeleccionProductos();// refrescar tabla para sacar los checks
     });
+
+
+    const btnConfirmarEntrega =  document.getElementById('btnConfirmarEntrega');
+
+    btnConfirmarEntrega.addEventListener('click', () => {
+        document.querySelectorAll(".entregado-checkbox").forEach(chk => {
+            if (chk.checked && !chk.disabled) {
+                productoSeleccionados.push(chk.getAttribute("data-producto-id"));
+            }
+        });
+        console.table(productoSeleccionados);
+    })
+
+
 
 
 

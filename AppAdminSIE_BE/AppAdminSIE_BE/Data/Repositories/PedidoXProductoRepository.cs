@@ -25,6 +25,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         e.nombre as Edificio,
                                         pxp.pedido_id,
                                         ped.Estado,
+                                        pxp.estadoProducto,
                                         pxp.producto_id,
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
@@ -44,6 +45,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordEdificio = reader.GetOrdinal("Edificio");
                     var ordIdPedido = reader.GetOrdinal("pedido_id");
                     var ordEstado = reader.GetOrdinal("Estado");
+                    var ordEstadoProducto = reader.GetOrdinal("estadoProducto");
                     var ordIdProducto = reader.GetOrdinal("producto_id");
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
@@ -64,7 +66,8 @@ namespace AppAdminSIE_BE.Data.Repositories
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
                             UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
-                            Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones)
+                            Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
+                            EstadoProducto = reader.GetString(ordEstadoProducto)
                         });
                     }
                 }
@@ -76,14 +79,15 @@ namespace AppAdminSIE_BE.Data.Repositories
         {
             using var conn = new MySqlConnection(_connectionString);
             using var cmd = new MySqlCommand(
-                "INSERT INTO PedidoXProducto (pedido_id,producto_id,cantidad,id_edificio,observaciones) " +
-                "VALUES (@idPedido, @idProducto, @Cantidad, @idEdificio, @Observaciones)", conn);
+                "INSERT INTO PedidoXProducto (pedido_id,producto_id,cantidad,id_edificio,observaciones,estadoProducto) " +
+                "VALUES (@idPedido, @idProducto, @Cantidad, @idEdificio, @Observaciones,@estadoProducto)", conn);
 
             cmd.Parameters.AddWithValue("@idPedido", pedidoxproducto.IdPedido);
             cmd.Parameters.AddWithValue("@idProducto", pedidoxproducto.IdProducto);
             cmd.Parameters.AddWithValue("@Cantidad",pedidoxproducto.Cantidad);
             cmd.Parameters.AddWithValue("@idEdificio", pedidoxproducto.IdEdificio);
-            cmd.Parameters.AddWithValue("@Observaciones", pedidoxproducto.Observaciones);         
+            cmd.Parameters.AddWithValue("@Observaciones", pedidoxproducto.Observaciones);
+            cmd.Parameters.AddWithValue("estadoProducto", pedidoxproducto.EstadoProducto);
 
             conn.Open();
             cmd.ExecuteNonQuery();
