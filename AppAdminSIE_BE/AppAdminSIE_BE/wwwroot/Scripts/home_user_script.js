@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         // ⭐ La corrección del error
-        const observacionesNuevas = document.getElementById('observacionesExtras');
+        const observacionesNuevas = document.getElementById('observacionesExtras').value;
 
         actualizarEstadoProductos(productosAEntregar, idPedidoSeleccionado, observacionesNuevas);
     });
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const datosFetch = {
                 idPedido: idPedido,
                 idProducto: producto.idProducto,
-                observacionesExtras: observaciones.value,
+                observacionesExtras: observaciones,
                 nuevoEstadoProducto: "Entregado"
             };
 
