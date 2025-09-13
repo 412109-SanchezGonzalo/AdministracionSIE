@@ -111,12 +111,11 @@ namespace AppAdminSIE_BE.Data.Repositories
             }
         }
 
-        public void UpdateEstadoProductoPedidoXProducto(int idPedido,int idProducto ,string nuevoEstadoProducto)
+        public void UpdateEstadoProductoPedidoXProducto(int idPedido, int idProducto, string nuevoEstadoProducto)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "UPDATE PedidoXProducto SET estadoProducto = @nuevoEstado," +
-                "estadoProducto = @estadoProducto " +
+                "UPDATE PedidoXProducto SET estadoProducto = @nuevoEstado " +
                 "WHERE pedido_id = @idPedido " +
                 "AND producto_id = @idProducto", conn))
             {
@@ -128,6 +127,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+
 
 
     }
