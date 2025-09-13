@@ -13,8 +13,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Base URL para la API
     const BASE_URL = 'https://administracionsie.onrender.com/api/SIE';
 
+    // ----------------------------------------------------
+    //              FUNCIONES UTILITY GLOBALES
+    // ----------------------------------------------------
+
     // Función para manejar errores de fetch
-    async function safeFetch(url, options = {}) {
+    const safeFetch = async (url, options = {}) => {
         try {
             console.log(`🔄 Realizando petición a: ${url}`);
             const response = await fetch(url, {
@@ -35,7 +39,118 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.error(`❌ Error en fetch a ${url}:`, error);
             throw error;
         }
-    }
+    };
+
+    // Función para mostrar mensajes de error globales
+    const showErrorMessage = (message, type = 'warning') => {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-warning';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '20px';
+        errorDiv.style.right = '20px';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(errorDiv);
+
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+            }
+        }, 5000);
+    };
+
+    // ----------------------------------------------------
+    //         FUNCIONES ESPECÍFICAS DEL MODAL DE TAREAS
+    // ----------------------------------------------------
+
+    // Función para mostrar estado de carga en el modal de tareas
+    const mostrarCargandoTareas = () => {
+        const modalContent = document.querySelector('#modal-VerTask .modal-content-location');
+        if (!modalContent) return;
+
+        // NUEVO: Ocultar botones de navegación
+        ocultarBotonesNavegacion();
+
+        // Ocultar formulario y lista existentes
+        const formContainer = document.getElementById('formContainer');
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (formContainer) formContainer.style.display = 'none';
+        if (listGroupContainer) listGroupContainer.style.display = 'none';
+
+        // Crear o actualizar contenedor de carga
+        let loadingContainer = document.getElementById('loadingTareasContainer');
+        if (!loadingContainer) {
+            loadingContainer = document.createElement('div');
+            loadingContainer.id = 'loadingTareasContainer';
+            loadingContainer.className = 'text-center p-4';
+            modalContent.appendChild(loadingContainer);
+        }
+
+        loadingContainer.innerHTML = `
+        <div class="d-flex flex-column align-items-center gap-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mb-0">🔄 Cargando tareas asignadas...</p>
+        </div>
+    `;
+        loadingContainer.style.display = 'block';
+    };
+
+    // Función para mostrar error en el modal de tareas
+    const mostrarErrorTareas = (mensaje) => {
+        const modalContent = document.querySelector('#modal-VerTask .modal-content-location');
+        if (!modalContent) return;
+
+        // Ocultar otros contenedores
+        const formContainer = document.getElementById('formContainer');
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        const loadingContainer = document.getElementById('loadingTareasContainer');
+
+        if (formContainer) formContainer.style.display = 'none';
+        if (listGroupContainer) listGroupContainer.style.display = 'none';
+        if (loadingContainer) loadingContainer.style.display = 'none';
+
+        // Crear o actualizar contenedor de error
+        let errorContainer = document.getElementById('errorTareasContainer');
+        if (!errorContainer) {
+            errorContainer = document.createElement('div');
+            errorContainer.id = 'errorTareasContainer';
+            errorContainer.className = 'text-center p-4';
+            modalContent.appendChild(errorContainer);
+        }
+
+        errorContainer.innerHTML = `
+            <div class="d-flex flex-column align-items-center gap-3">
+                <div class="text-danger">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i>
+                </div>
+                <p class="text-muted mb-2">⚠️ ${mensaje}</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('btnTareasPendientes').click()">
+                    🔄 Reintentar
+                </button>
+            </div>
+        `;
+        errorContainer.style.display = 'block';
+    };
+
+    // Función para ocultar estados de carga/error
+    const ocultarEstadosCargaTareas = () => {
+        const loadingContainer = document.getElementById('loadingTareasContainer');
+        const errorContainer = document.getElementById('errorTareasContainer');
+
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (errorContainer) errorContainer.style.display = 'none';
+    };
+
+    // ----------------------------------------------------
+    //                   AUTENTICACIÓN
+    // ----------------------------------------------------
 
     // 🔐 Autenticación y bienvenida
     try {
@@ -55,30 +170,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
         console.error('⚠️ Error en autenticación:', error);
         saludoSpan.textContent = 'Hola, Usuario !';
-        // Mostrar mensaje de error al usuario
         showErrorMessage('Error de conexión. Verificando servidor...');
-    }
-
-    // Función para mostrar mensajes de error
-    function showErrorMessage(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'alert alert-warning alert-dismissible fade show';
-        errorDiv.style.position = 'fixed';
-        errorDiv.style.top = '20px';
-        errorDiv.style.right = '20px';
-        errorDiv.style.zIndex = '9999';
-        errorDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(errorDiv);
-
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.parentNode.removeChild(errorDiv);
-            }
-        }, 5000);
     }
 
     navbarToggle.addEventListener('click', () => {
@@ -89,7 +181,40 @@ document.addEventListener('DOMContentLoaded', async function () {
     //                 TAREAS PENDIENTES
     // ----------------------------------------------------
 
+    // Función para limpiar/ocultar botones de navegación
+    function ocultarBotonesNavegacion() {
+        const btnVolver = document.getElementById('btnVolverLista');
+        const btnGuardarCambios = document.getElementById('btnGuardarCambios');
+
+        if (btnVolver) {
+            btnVolver.style.display = 'none';
+        }
+        if (btnGuardarCambios) {
+            btnGuardarCambios.style.display = 'none';
+        }
+    }
+    // Función para mostrar botones de navegación
+    function mostrarBotonesNavegacion() {
+        const btnVolver = document.getElementById('btnVolverLista');
+        const btnGuardarCambios = document.getElementById('btnGuardarCambios');
+
+        if (btnVolver) {
+            btnVolver.style.display = 'inline-block';
+        }
+        if (btnGuardarCambios) {
+            btnGuardarCambios.style.display = 'inline-block';
+        }
+    }
+
     async function verTareas() {
+        // Mostrar el modal inmediatamente con indicador de carga
+        const modalVerTask = document.getElementById('modal-VerTask');
+        if (modalVerTask) {
+            // Limpiar contenido previo y mostrar loading
+            mostrarCargandoTareas();
+            modalVerTask.style.display = 'flex';
+        }
+
         try {
             const password = localStorage.getItem('user_password');
             if (!password) {
@@ -105,6 +230,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             await openModalVerTask(employeeId);
         } catch (error) {
             console.error('Error al obtener ID de usuario:', error);
+            mostrarErrorTareas('Error al cargar tareas. Verificando conexión...');
             showErrorMessage('Error al cargar tareas. Verificando conexión...');
         }
     }
@@ -120,24 +246,37 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
+            // Ocultar estados de carga/error
+            ocultarEstadosCargaTareas();
+
             if (Array.isArray(data) && data.length > 0) {
                 if (data.length === 1) {
                     mostrarTareaEnModal(data[0]);
                 } else {
                     mostrarListGroupTareas(data);
                 }
-                modalVerTask.style.display = 'flex';
             } else {
-                showErrorMessage('No tienes tareas asignadas en este momento.');
+                mostrarErrorTareas('No tienes tareas asignadas en este momento.');
             }
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
-            showErrorMessage('Error al cargar las tareas. Verifica tu conexión.');
+            mostrarErrorTareas('Error al cargar las tareas. Verifica tu conexión.');
         }
     }
 
     function mostrarTareaEnModal(tarea) {
+        // DEBUG: Ver qué datos tenemos
+        console.log('🔍 Datos de la tarea recibida:', tarea);
+        console.log('🔍 Propiedades de la tarea:', Object.keys(tarea));
+
         tareaSeleccionada = [tarea];
+
+        // Ocultar estados de carga/error
+        ocultarEstadosCargaTareas();
+
+        // NUEVO: Ocultar botones de navegación (no se necesitan para una sola tarea)
+        ocultarBotonesNavegacion();
+
         const listGroupContainer = document.getElementById('listGroupContainer');
         if (listGroupContainer) {
             listGroupContainer.style.display = 'none';
@@ -156,9 +295,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (edificioButton) edificioButton.textContent = tarea.nombreEdificio || 'Sin edificio asignado';
         if (fechaInput && tarea.fecha) fechaInput.value = new Date(tarea.fecha).toISOString().split('T')[0];
         if (observacionesInput) observacionesInput.value = tarea.observaciones || '';
+
+        // NUEVO: Restablecer título del modal para una sola tarea
+        const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
+        if (modalTitle) modalTitle.innerHTML = `📝 ${tarea.nombreServicio || 'Tarea sin nombre'}`;
     }
 
     function mostrarListGroupTareas(tareas) {
+        // Ocultar estados de carga/error
+        ocultarEstadosCargaTareas();
+
+        // NUEVO: Ocultar botones de navegación cuando se muestra la lista
+        ocultarBotonesNavegacion();
+
         const formContainer = document.getElementById('formContainer');
         if (formContainer) {
             formContainer.style.display = 'none';
@@ -187,28 +336,39 @@ document.addEventListener('DOMContentLoaded', async function () {
             listItem.className = 'list-group-item list-group-item-action';
             let fechaFormateada = tarea.fecha ? new Date(tarea.fecha).toLocaleDateString('es-ES') : 'Sin fecha';
             listItem.innerHTML = `
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">${tarea.nombreServicio || 'Actividad sin nombre'}</h6>
-                    <small class="text-muted">${fechaFormateada}</small>
-                </div>
-                <p class="mb-1"><strong>Edificio:</strong> ${tarea.nombreEdificio || 'Sin edificio'}</p>
-                <small class="text-muted">${tarea.observaciones || 'Sin observaciones'}</small>
-            `;
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${tarea.nombreServicio || 'Actividad sin nombre'}</h6>
+                <small class="text-muted">${fechaFormateada}</small>
+            </div>
+            <p class="mb-1"><strong>Edificio:</strong> ${tarea.nombreEdificio || 'Sin edificio'}</p>
+            <small class="text-muted">${tarea.observaciones || 'Sin observaciones'}</small>
+        `;
             listItem.addEventListener('click', (e) => {
                 e.preventDefault();
-                abrirDetalleTarea(tarea, index);
+                abrirDetalleTarea(tarea, index, tareas); // CAMBIO: Pasar todas las tareas
             });
             listGroup.appendChild(listItem);
         });
+
+        // NUEVO: Restablecer título del modal
+        const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
+        if (modalTitle) modalTitle.innerHTML = '📝 Tareas Asignadas';
     }
 
-    function abrirDetalleTarea(tarea, index) {
+    function abrirDetalleTarea(tarea, index, todasLasTareas) {
         const listGroupContainer = document.getElementById('listGroupContainer');
         if (listGroupContainer) listGroupContainer.style.display = 'none';
         const formContainer = document.getElementById('formContainer');
         if (formContainer) formContainer.style.display = 'block';
         mostrarTareaEnModal(tarea);
 
+        // Deshabilitar campos
+        document.getElementById('activitySelectedByUser').disabled = true;
+        document.getElementById('edificioSelectedByUser').disabled = true;
+        document.getElementById('verDateActivityByUser').disabled = true;
+        document.getElementById('VerCommentsByUser').disabled = false; // Asegúrate de que este esté habilitado
+
+        // Crea el botón "Volver" si no existe
         let btnVolver = document.getElementById('btnVolverLista');
         if (!btnVolver) {
             btnVolver = document.createElement('button');
@@ -216,34 +376,132 @@ document.addEventListener('DOMContentLoaded', async function () {
             btnVolver.type = 'button';
             btnVolver.className = 'btn btn-secondary';
             btnVolver.innerHTML = '← Volver a la Lista';
-            btnVolver.addEventListener('click', () => {
-                tareaSeleccionada = [];
-                document.getElementById('modal-VerTask').style.display = 'none';
-                verTareas();
-                volverAListaTareas();
-            });
             document.querySelector('#modal-VerTask .modal-content-location').appendChild(btnVolver);
         }
-        btnVolver.style.display = 'inline-block';
+        // Asegúrate de que el event listener del botón "Volver" esté actualizado
+        btnVolver.onclick = () => volverAListaTareas(todasLasTareas);
+
+        // Crea el botón "Guardar Cambios" si no existe
+        let btnGuardarCambios = document.getElementById('btnGuardarCambios');
+        if (!btnGuardarCambios) {
+            btnGuardarCambios = document.createElement('button');
+            btnGuardarCambios.id = 'btnGuardarCambios';
+            btnGuardarCambios.type = 'button';
+            btnGuardarCambios.className = 'btn btn-secondary btn-sm';
+            btnGuardarCambios.style.backgroundColor = '#2e7700';
+            btnGuardarCambios.style.width = 'auto';
+            btnGuardarCambios.style.padding = '4px 12px';
+            btnGuardarCambios.style.marginLeft = '10px';
+            btnGuardarCambios.innerHTML = 'Guardar Cambios';
+            document.querySelector('#modal-VerTask .modal-content-location').appendChild(btnGuardarCambios);
+        }
+
+        // **CORRECCIÓN CLAVE**
+        // Remueve cualquier event listener anterior para evitar duplicaciones
+        btnGuardarCambios.replaceWith(btnGuardarCambios.cloneNode(true));
+        btnGuardarCambios = document.getElementById('btnGuardarCambios');
+
+        // Agrega el event listener con la tarea correcta
+        btnGuardarCambios.addEventListener('click', () => {
+            GuardarCambiosTarea(todasLasTareas[index]);
+        });
+
+        // ... (código para mostrar los botones y actualizar el título del modal)
+        mostrarBotonesNavegacion();
         const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
         if (modalTitle) modalTitle.innerHTML = `📝 Tarea ${index + 1}: ${tarea.nombreServicio || 'Sin nombre'}`;
     }
 
-    function volverAListaTareas() {
+
+    function volverAListaTareas(tareasActualizadas) {
         const formContainer = document.getElementById('formContainer');
         if (formContainer) formContainer.style.display = 'none';
         const listGroupContainer = document.getElementById('listGroupContainer');
         if (listGroupContainer) listGroupContainer.style.display = 'block';
-        const btnVolver = document.getElementById('btnVolverLista');
-        if (btnVolver) btnVolver.style.display = 'none';
+
+        mostrarListGroupTareas(tareasActualizadas);
+        // NUEVO: Ocultar botones al volver a la lista
+        ocultarBotonesNavegacion();
+
         const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
         if (modalTitle) modalTitle.innerHTML = '📝 Tareas Asignadas';
+    }
+
+    async function GuardarCambiosTarea(tareaAActualizar) {
+        try {
+            console.log('🔍 Intentando guardar cambios para tarea:', tareaAActualizar);
+
+            if (!tareaAActualizar) {
+                alert('❌ No hay tarea seleccionada');
+                return;
+            }
+
+            let idServicio = tareaAActualizar.idUsuarioXActividad;
+
+            if (!idServicio) {
+                console.error('❌ No se encontró ID de servicio. Propiedades disponibles:', Object.keys(tareaAActualizar));
+                alert('❌ Error: No se pudo identificar la tarea');
+                return;
+            }
+
+            const observacionesInput = document.getElementById('VerCommentsByUser');
+            const observacionesExtras = observacionesInput ? observacionesInput.value : '';
+
+            const data = {
+                idServicioXUsuario: idServicio,
+                observaciones: observacionesExtras
+            };
+
+            const btnGuardar = document.getElementById('btnGuardarCambios');
+            const textoOriginal = btnGuardar ? btnGuardar.textContent : '';
+            if (btnGuardar) {
+                btnGuardar.textContent = 'Guardando...';
+                btnGuardar.disabled = true;
+            }
+
+            const response = await safeFetch(`${BASE_URL}/Editar-observaciones-servicioxusuario`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            if (btnGuardar) {
+                btnGuardar.textContent = textoOriginal;
+                btnGuardar.disabled = false;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Error del servidor:', errorText);
+                alert('❌ No se pudieron guardar los cambios');
+                return;
+            }
+
+            // CAMBIO CRÍTICO: Actualizar el objeto original en memoria
+            tareaAActualizar.observaciones = observacionesExtras;
+
+            alert('✅ Cambios Guardados');
+            console.log('✅ Cambios guardados exitosamente');
+
+        } catch (error) {
+            console.error('❌ Error al guardar cambios:', error);
+            const btnGuardar = document.getElementById('btnGuardarCambios');
+            if (btnGuardar) {
+                btnGuardar.textContent = 'Guardar Cambios';
+                btnGuardar.disabled = false;
+            }
+            alert('❌ Error al guardar los cambios. Verifica tu conexión.');
+            showErrorMessage('Error al guardar cambios. Verifica tu conexión.');
+        }
     }
 
     const closeVerTaskModalBtn = document.getElementById('closeVerTaskModalBtn');
     if (closeVerTaskModalBtn) {
         closeVerTaskModalBtn.addEventListener('click', () => {
             tareaSeleccionada = [];
+            // Ocultar botones al cerrar
+            ocultarBotonesNavegacion();
+            // Limpiar estados de carga/error al cerrar
+            ocultarEstadosCargaTareas();
             document.getElementById('modal-VerTask').style.display = "none";
         });
     }
