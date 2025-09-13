@@ -99,8 +99,7 @@ namespace AppAdminSIE_BE.Data.Repositories
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "UPDATE PedidoXProducto SET observaciones = @observaciones," +
-                "estadoProducto = @estadoProducto " +
+                "UPDATE PedidoXProducto SET observaciones = @observaciones " +
                 "WHERE pedido_id = @idPedido " , conn))
             {
                 cmd.Parameters.AddWithValue("@idPedido", idPedido);
