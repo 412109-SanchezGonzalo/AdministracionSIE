@@ -11,9 +11,12 @@
     <title>SIE | Administrador</title>
 </head>
 <body>
-<!-- navbar -->
+<!-- Navbar con el botón hamburguesa -->
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
         <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
         <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
@@ -33,6 +36,24 @@
         </div>
     </div>
 </nav>
+
+<!-- Menú lateral en móviles -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasMenuLabel">Opciones</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-group">
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Home_Admin_Page.html">Tareas</a></li>
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Pedidos_Page.html">Pedidos</a></li>
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Login_page.html">Cerrar Sesión</a></li>
+        </ul>
+    </div>
+</div>
+
+
+
 
 <div class="right-panel">
     <div class="compact-header">
@@ -55,13 +76,6 @@
 
         </div>
         <div class="row g-2 mt-1">
-            <div class="col-6">
-                <button class="btn btn-outline-secondary btn-sm w-100" id="btnClear">🗑️ Limpiar</button>
-            </div>
-
-            <div class="col-3">
-                <button class="btn btn-success btn-sm w-100" id="btnVerTask" style="background-color: #78b638">Ver Tareas Asignadas</button>
-            </div>
 
             <div class="col-6">
                 <!-- Texto Usuarios en la primera fila -->
@@ -70,7 +84,9 @@
                         <span id="user-count" class="badge bg-primary badge-xs">0</span>
                     </small>
                 </div>
-
+            </div>
+            <div class="col-3">
+                <button class="btn btn-success btn-sm w-100" id="btnVerTask" style="background-color: #78b638">Ver Tareas Asignadas</button>
             </div>
 
         </div>

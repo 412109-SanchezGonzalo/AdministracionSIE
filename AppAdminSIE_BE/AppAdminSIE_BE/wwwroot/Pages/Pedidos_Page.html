@@ -9,13 +9,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../Styles/pedido_styles.css"/>
     <title>SIE | Pedidos</title>
-
-
 </head>
 <body>
-<!-- navbar -->
+<!-- Navbar con el botón hamburguesa -->
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
         <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
         <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
@@ -26,15 +27,32 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                         <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Home_Admin_Page.html">Tareas</a></li>
-                        <li><a class="dropdown-item" href="http://administracionsie.onrender.com/Pages/Pedidos_Page.html">Pedidos</a></li>
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Pedidos_Page.html">Pedidos</a></li>
                         <li><hr class="dropdown-divider" style="background-color: white"></li>
-                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com">Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item" href="https://administracionsie.onrender.com/Pages/Login_page.html">Cerrar Sesión</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<!-- Menú lateral en móviles -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasMenuLabel">Opciones</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-group">
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Home_Admin_Page.html">Tareas</a></li>
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Pedidos_Page.html">Pedidos</a></li>
+            <li class="list-group-item"><a href="https://administracionsie.onrender.com/Pages/Login_page.html">Cerrar Sesión</a></li>
+        </ul>
+    </div>
+</div>
+
+
 <div class="right-panel">
     <div class="compact-header">
         <h4 style="color: white">📋 Pedidos </h4>
@@ -56,6 +74,7 @@
 
         </div>
         <div class="row g-2 mt-1">
+
 
             <div class="col-6">
                 <!-- Texto Usuarios en la primera fila -->
@@ -233,11 +252,11 @@
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
                         <tr>
-                            <th scope="col" style="width: 10%;">ID</th>
-                            <th scope="col" style="width: 40%;">Producto</th>
-                            <th scope="col" style="width: 15%;">Cantidad</th>
-                            <th scope="col" style="width: 15%;">Unidad</th>
-                            <th scope="col" style="width: 20%;">Entregado</th>
+                            <th scope="col" style="width: 10%;background-color: #0b0a0a">ID</th>
+                            <th scope="col" style="width: 40%;background-color: #0b0a0a">Producto</th>
+                            <th scope="col" style="width: 15%;background-color: #0b0a0a">Cantidad</th>
+                            <th scope="col" style="width: 15%;background-color: #0b0a0a">Unidad</th>
+                            <th scope="col" style="width: 20%;background-color: #0b0a0a">Entregado</th>
                         </tr>
                         </thead>
                         <tbody id="tablaDetallesProductos">

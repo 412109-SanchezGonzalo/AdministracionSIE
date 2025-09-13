@@ -4,28 +4,81 @@ document.addEventListener('DOMContentLoaded', async function () {
     const navbarMenu = document.querySelector('.navbar-menu');
     const saludoSpan = document.querySelector('.navbar-saludo');
 
-
     let tareaSeleccionada = [];
     let idPedidoSeleccionado;
-
 
     const btnPendingTasks = document.getElementById('btnTareasPendientes');
     const btnPedidos = document.getElementById('btnPedidos');
 
+    // Base URL para la API
+    const BASE_URL = 'https://administracionsie.onrender.com/api/SIE';
+
+    // Función para manejar errores de fetch
+    async function safeFetch(url, options = {}) {
+        try {
+            console.log(`🔄 Realizando petición a: ${url}`);
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return response;
+        } catch (error) {
+            console.error(`❌ Error en fetch a ${url}:`, error);
+            throw error;
+        }
+    }
+
     // 🔐 Autenticación y bienvenida
     try {
         const password = localStorage.getItem('user_password');
-        const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(password)
-        });
-        saludoSpan.textContent = response.ok
-            ? `Hola, ${await response.text()} !`
-            : 'Hola, Usuario !';
+        if (!password) {
+            console.warn('⚠️ No se encontró password en localStorage');
+            saludoSpan.textContent = 'Hola, Usuario !';
+        } else {
+            const response = await safeFetch(`${BASE_URL}/Obtener-nombre-de-usuario-por-contrasena`, {
+                method: 'POST',
+                body: JSON.stringify(password)
+            });
+
+            const userName = await response.text();
+            saludoSpan.textContent = `Hola, ${userName} !`;
+        }
     } catch (error) {
         console.error('⚠️ Error en autenticación:', error);
         saludoSpan.textContent = 'Hola, Usuario !';
+        // Mostrar mensaje de error al usuario
+        showErrorMessage('Error de conexión. Verificando servidor...');
+    }
+
+    // Función para mostrar mensajes de error
+    function showErrorMessage(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show';
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '20px';
+        errorDiv.style.right = '20px';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(errorDiv);
+
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+            }
+        }, 5000);
     }
 
     navbarToggle.addEventListener('click', () => {
@@ -39,25 +92,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function verTareas() {
         try {
             const password = localStorage.getItem('user_password');
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-id-usuario-por-contrasena', {
+            if (!password) {
+                throw new Error('No se encontró la contraseña del usuario');
+            }
+
+            const response = await safeFetch(`${BASE_URL}/Obtener-id-usuario-por-contrasena`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(password)
             });
+
             const employeeId = await response.text();
             await openModalVerTask(employeeId);
         } catch (error) {
             console.error('Error al obtener ID de usuario:', error);
-            alert('Error al cargar tareas.');
+            showErrorMessage('Error al cargar tareas. Verificando conexión...');
         }
     }
 
     async function openModalVerTask(employeeId) {
         try {
-            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            const response = await safeFetch(`${BASE_URL}/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
             const data = await response.json();
             const modalVerTask = document.getElementById('modal-VerTask');
 
@@ -74,11 +128,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 modalVerTask.style.display = 'flex';
             } else {
-                alert('No tienes tareas asignadas.');
+                showErrorMessage('No tienes tareas asignadas en este momento.');
             }
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
-            alert('Error al cargar las tareas del empleado: ' + error.message);
+            showErrorMessage('Error al cargar las tareas. Verifica tu conexión.');
         }
     }
 
@@ -205,13 +259,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         lista.innerHTML = `<li class="list-group-item text-muted">Cargando pedidos...</li>`;
 
         try {
+            console.log('🔄 Cargando pedidos...');
+
             const [respPedidosProductos, respPedidos] = await Promise.all([
-                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
-                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos")
+                safeFetch(`${BASE_URL}/Obtener-todos-los-pedidoxproducto`),
+                safeFetch(`${BASE_URL}/Obtener-todos-los-pedidos`)
             ]);
 
             const pedidosProductos = await respPedidosProductos.json();
             const pedidos = await respPedidos.json();
+
+            console.log('✅ Pedidos cargados:', { pedidosProductos, pedidos });
 
             lista.innerHTML = "";
 
@@ -276,14 +334,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                     if (pedidoDetalle) {
                         mostrarDetallesPedido(pedidoDetalle);
                     } else {
-                        alert('Error: No se pudo cargar el detalle del pedido');
+                        showErrorMessage('Error: No se pudo cargar el detalle del pedido');
                     }
                 });
             });
 
         } catch (error) {
-            console.error("Error cargando pedidos:", error);
-            lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
+            console.error("❌ Error cargando pedidos:", error);
+            lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos. Verifica tu conexión.</li>`;
+            showErrorMessage('Error al cargar pedidos. Verificando servidor...');
         }
     }
 
@@ -294,11 +353,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     function mostrarDetallesPedido(pedido) {
         idPedidoSeleccionado = pedido.id;
         let modalDetalles = document.getElementById('modalDetallesPedido');
-
-        // Código para crear el modal si no existe (ya lo tienes en tu HTML, por lo que esto no se ejecutará)
-        if (!modalDetalles) {
-            // Este bloque se omite porque el modal ya está en el HTML
-        }
 
         let fechaFormateada = pedido.fechaEntrega ? new Date(pedido.fechaEntrega).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : "Sin fecha";
 
@@ -341,7 +395,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
         }
 
-        // 🚨 Obtén el campo de observaciones desde el HTML, ya que no se crea dinámicamente aquí
         const observacionesExtras = document.getElementById('observacionesExtras');
         if (observacionesExtras) {
             observacionesExtras.value = pedido.observaciones || '';
@@ -367,49 +420,49 @@ document.addEventListener('DOMContentLoaded', async function () {
         modalPedidos.show();
     });
 
-    // 🚨 Este event listener ya no es necesario si se usa el botón de volver en el modal de detalles
-    // const btnVolverAVerPedidos = document.getElementById('btnVolverAPedidosRegistrados');
-    // btnVolverAVerPedidos.addEventListener('click', async function () {
-    //     verPedidosRegistrados();
-    //     const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
-    //     modalPedidos.show();
-    // });
-
     const btnVolverAVerPedidos = document.getElementById('btnVolverAPedidosRegistrados');
-    btnVolverAVerPedidos.addEventListener('click', () => {
-        const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
-        if (modalDetalles) modalDetalles.hide();
+    if (btnVolverAVerPedidos) {
+        btnVolverAVerPedidos.addEventListener('click', () => {
+            const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
+            if (modalDetalles) modalDetalles.hide();
 
-        setTimeout(() => {
-            const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
-            modalPedidos.show();
-        }, 300);
-    });
+            setTimeout(() => {
+                const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
+                modalPedidos.show();
+            }, 300);
+        });
+    }
 
     const btnConfirmarEntrega = document.getElementById('btnConfirmarEntrega');
-    btnConfirmarEntrega.addEventListener('click', () => {
-        const productosAEntregar = [];
-        document.querySelectorAll(".entregado-checkbox").forEach(chk => {
-            if (chk.checked && !chk.disabled) {
-                productosAEntregar.push({
-                    idProducto: parseInt(chk.getAttribute("data-producto-id"))
-                });
-            }
+    if (btnConfirmarEntrega) {
+        btnConfirmarEntrega.addEventListener('click', () => {
+            const productosAEntregar = [];
+            document.querySelectorAll(".entregado-checkbox").forEach(chk => {
+                if (chk.checked && !chk.disabled) {
+                    productosAEntregar.push({
+                        idProducto: parseInt(chk.getAttribute("data-producto-id"))
+                    });
+                }
+            });
+
+            const observacionesNuevas = document.getElementById('observacionesExtras')?.value || '';
+            actualizarEstadoProductos(productosAEntregar, idPedidoSeleccionado, observacionesNuevas);
         });
-
-        // ⭐ La corrección del error
-        const observacionesNuevas = document.getElementById('observacionesExtras').value;
-
-        actualizarEstadoProductos(productosAEntregar, idPedidoSeleccionado, observacionesNuevas);
-    });
+    }
 
     async function actualizarEstadoProductos(productosSeleccionados, idPedido, observaciones) {
         if (!productosSeleccionados || productosSeleccionados.length === 0) {
-            alert("No hay productos seleccionados para actualizar.");
+            showErrorMessage("No hay productos seleccionados para actualizar.");
             return;
         }
 
         let todosActualizadosConExito = true;
+
+        // Mostrar indicador de carga
+        const btnConfirmar = document.getElementById('btnConfirmarEntrega');
+        const textoOriginal = btnConfirmar.textContent;
+        btnConfirmar.textContent = 'Procesando...';
+        btnConfirmar.disabled = true;
 
         for (const producto of productosSeleccionados) {
             const datosFetch = {
@@ -420,54 +473,63 @@ document.addEventListener('DOMContentLoaded', async function () {
             };
 
             try {
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-pedidoxproducto', {
+                const response = await safeFetch(`${BASE_URL}/Editar-pedidoxproducto`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosFetch)
                 });
 
-                if (!response.ok) {
-                    todosActualizadosConExito = false;
-                    const errorText = await response.text();
-                    console.error(`❌ Error al actualizar el producto #${producto.idProducto}:`, errorText);
-                    alert(`❌ Error al actualizar un producto.`);
-                } else {
-                    console.log(`✅ Producto #${producto.idProducto} del pedido #${idPedido} actualizado.`);
-                }
+                console.log(`✅ Producto #${producto.idProducto} del pedido #${idPedido} actualizado.`);
             } catch (error) {
                 todosActualizadosConExito = false;
-                console.error(`❌ Fallo en la conexión para el producto #${producto.idProducto}:`, error);
+                console.error(`❌ Error al actualizar el producto #${producto.idProducto}:`, error);
+                showErrorMessage(`Error al actualizar producto #${producto.idProducto}`);
             }
         }
+
+        // Restaurar botón
+        btnConfirmar.textContent = textoOriginal;
+        btnConfirmar.disabled = false;
 
         if (todosActualizadosConExito) {
             try {
-                const responsePedidoEstado = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-estado-pedido', {
+                const responsePedidoEstado = await safeFetch(`${BASE_URL}/Editar-estado-pedido`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(idPedido)
                 });
 
-                if (responsePedidoEstado.ok) {
-                    alert("✅ ¡Entrega Confirmada!");
-                    console.log(`✅ Estado del Pedido #${idPedido} actualizado correctamente.`);
-                    // Opcional: Recargar la lista de pedidos después de la confirmación
-                    const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
-                    if (modalDetalles) modalDetalles.hide();
+                showErrorMessage("✅ ¡Entrega Confirmada!", 'success');
+                console.log(`✅ Estado del Pedido #${idPedido} actualizado correctamente.`);
+
+                // Cerrar modal y recargar lista
+                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
+                if (modalDetalles) modalDetalles.hide();
+
+                setTimeout(async () => {
                     await verPedidosRegistrados();
                     const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
                     modalPedidos.show();
-                } else {
-                    const errorText = await responsePedidoEstado.text();
-                    console.error(`❌ Error al actualizar el estado del pedido #${idPedido}:`, errorText);
-                    alert("❌ Ocurrió un error al confirmar la entrega del pedido.");
-                }
+                }, 500);
+
             } catch (error) {
-                console.error(`❌ Fallo en la conexión al actualizar el estado del pedido #${idPedido}:`, error);
-                alert("❌ Fallo en la conexión al actualizar el estado del pedido.");
+                console.error(`❌ Error al actualizar el estado del pedido #${idPedido}:`, error);
+                showErrorMessage("Error al confirmar la entrega del pedido.");
             }
         } else {
-            alert("⚠️ Algunos productos no pudieron ser actualizados. Por favor, revisa la consola.");
+            showErrorMessage("Algunos productos no pudieron ser actualizados. Revisa la consola para más detalles.");
         }
     }
+
+    // Verificar conectividad al cargar la página
+    async function verificarConectividad() {
+        try {
+            const response = await fetch(`${BASE_URL}/test`, { method: 'HEAD' });
+            console.log('✅ Servidor disponible');
+        } catch (error) {
+            console.warn('⚠️ Problemas de conectividad con el servidor:', error);
+            showErrorMessage('Problemas de conectividad. Algunas funciones pueden no estar disponibles.');
+        }
+    }
+
+    // Ejecutar verificación de conectividad
+    verificarConectividad();
 });

@@ -1,13 +1,86 @@
+/* Reset y base */
+html {
+    height: 100%;
+}
 
-/* === CONTENIDO PRINCIPAL === */
-.main-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: linear-gradient(#141e30, #243b55);
+    font-size: 14px;
+    min-height: 100vh;
+}
+
+/* === MODALES === */
+.modal-overlay,
+.modal-overlay-profile,
+.modal-overlay-history,
+.modal-overlay-newTask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
     justify-content: center;
-    padding: 2rem 1rem;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.modal-overlay,
+.modal-overlay-profile,
+.modal-overlay-history {
+    background-color: rgb(255, 255, 255);
+}
+
+.modal-content {
+    background-color: rgb(255, 255, 255);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: left;
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content-location {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    max-width: 500px;
+    width: 100%;
+    text-align: left;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h3,
+.modal-content-location h3 {
     text-align: center;
-    min-height: calc(100vh - 140px);
+    margin-top: 0;
+    color: #0b0a0a;
+}
+
+.modal-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
 }
 
 /* === NAVBAR === */
@@ -112,6 +185,77 @@
     transform: scaleY(1);
 }
 
+/* === NAVBAR BOOTSTRAP FIXES === */
+.navbar-brand {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10;
+}
+
+.navbar .container-fluid {
+    position: relative;
+}
+
+.navbar-brand img {
+    height: 50px;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    text-align: center;
+    min-height: calc(100vh - 140px);
+}
+
+/* === BUSCADOR === */
+.search-container {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 2rem auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-box {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex: 1;
+    min-width: 200px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.search-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: 40px;
+    background-color: rgba(255,157,60,0.87);
+    cursor: pointer;
+    white-space: nowrap;
+}
 
 /* === PANEL DERECHO === */
 .right-panel {
@@ -133,18 +277,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     margin-bottom: 1rem;
     overflow-x: auto;
-}
-
-
-/* === DROPDOWN === */
-#menuEdificios .dropdown-menu {
-    max-height: 250px;
-    overflow-y: auto;
-}
-
-.form-control-sm {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.875rem;
 }
 
 /* === TABLAS === */
@@ -198,86 +330,10 @@
     text-align: center;
 }
 
-
-/* === MODAL REGISTRAR PEDIDO === */
-.modal-dialog-centered {
-    display: flex !important;
-    align-items: center !important;
-    min-height: calc(100vh - 1rem) !important;
-    margin: 0.5rem auto !important;
-}
-
-
-
-.unidad-medida {
-    color: #6c757d;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.cantidad-cell {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-
-
-
-/* === BUSCADOR === */
-.search-container {
-    background: white;
-    padding: 1rem;
-    border-radius: 6px;
-    margin: 2rem auto;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    max-width: 600px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.search-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-}
-
-.search-box {
-    padding: 8px 12px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    flex: 1;
-    min-width: 200px;
-    height: 40px;
-    box-sizing: border-box;
-}
-
-.search-button {
-    padding: 8px 16px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    height: 40px;
-    background-color: rgba(255,157,60,0.87);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.search-checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.search-all-text {
-    font-size: 16px;
-    color: #333;
-    margin: 0;
+/* === DROPDOWN === */
+#menuEdificios .dropdown-menu {
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 /* === LOADING Y ERRORES === */
@@ -304,230 +360,106 @@
     line-height: 1.2;
 }
 
-.form-control-sm {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.875rem;
+/* Menú lateral */
+.offcanvas {
+    width: 250px;
 }
 
-.badge-xs {
-    font-size: 0.7em;
-    padding: 0.25em 0.4em;
+.offcanvas-header {
+    background-color: #f8f9fa;
+    padding: 10px;
 }
 
-/* Móviles */
-@media (max-width: 480px) {
-    body {
-        font-size: 12px;
-    }
+.offcanvas-body {
+    background-color: #fff;
+}
 
-    .navbar {
-        padding: 0.5rem;
-        min-height: 45px;
-    }
+.offcanvas-title {
+    font-size: 1.25rem;
+}
 
-    .logo {
-        height: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-    }
+.list-group-item {
+    font-size: 1rem;
+}
 
+/* Ocultar el menú hamburguesa en pantallas grandes */
+@media (min-width: 768px) {
+    .navbar-toggler {
+        display: none;
+    }
+}
+
+/* Ajustes solo en dispositivos móviles */
+@media (max-width: 768px) {
+    /* Navbar Saludo */
     .navbar-saludo {
-        font-size: 0.75rem;
-        margin-right: 0.25rem;
+        display: block; /* Asegura que sea visible */
+        font-size: 0.2rem; /* Ajusta el tamaño de la fuente */
+        margin-left: 1rem;
+        margin-right: -2rem;
+        font-weight: bold;
+        color: #333;
     }
 
-    .navbar-toggle {
-        padding: 0.25rem;
-    }
-
-    .navbar-toggle::before {
-        width: 20px;
-        height: 20px;
-    }
-
-    .main-content {
-        padding: 1rem 0.5rem;
-        min-height: calc(100vh - 120px);
-    }
-
-    .modal-content,
-    .modal-content-location {
-        padding: 1rem;
-        margin: 0.5rem;
-        border-radius: 8px;
-    }
-
-    .modal-content h3,
-    .modal-content-location h3 {
-        font-size: 1.2rem;
-    }
-
-    .modal-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
-
+    /* Contenedor de búsqueda */
     .search-container {
-        margin: 0.5rem;
-        padding: 0.5rem;
-    }
-
-    .search-box,
-    .search-button {
-        font-size: 14px;
-        height: 35px;
-        padding: 6px 10px;
-    }
-
-    .search-all-text {
-        font-size: 14px;
-    }
-
-    .btn-add-task {
+        background: white;
+        padding: 0.5rem; /* Mantén un padding cómodo */
+        border-radius: 6px;
+        margin: 1rem auto;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        max-width: 600px; /* Un tamaño razonable para móviles */
         width: 100%;
-        max-width: 250px;
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
-        margin: 0.5rem auto;
-        min-width: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
-    .right-panel {
-        top: 50px;
-        height: calc(100vh - 50px);
-        padding: 0.25rem;
+    /* Asegura que los botones de búsqueda tengan suficiente espacio */
+    .search-container button {
+        font-size: 0.85rem; /* Tamaño de fuente más grande */
+        padding: 0.5rem; /* Aumenta el tamaño de los botones */
     }
 
-    .table-container {
-        padding: 0.5rem;
-        margin-bottom: 0.5rem;
+    /* Ajustes en las columnas dentro del contenedor de búsqueda */
+    .search-container .row.g-2 {
+        flex-direction: column; /* Los botones irán en una columna */
     }
 
-    .table {
-        min-width: 400px;
-        font-size: 0.8rem;
+    .search-container .col-6, .search-container .col-3 {
+        width: 100%; /* Los botones ocuparán el 100% del ancho */
+        margin-bottom: 1rem; /* Añade espacio entre los botones */
     }
 
-    .table th,
-    .table td {
-        padding: 0.5rem 0.25rem;
+    /* Navbar Toggler */
+    .navbar-toggler {
+        display: block; /* Asegura que el botón hamburguesa sea visible */
+        margin-left: -1rem;
     }
 
-    .compact-table {
-        font-size: 0.75rem;
-    }
-
-    .compact-table th,
-    .compact-table td {
-        padding: 0.25rem 0.15rem;
-    }
-
-    .footer {
-        padding: 0.5rem;
-    }
-
-    .footer p {
-        font-size: 0.8rem;
-    }
-
-    .developer-credit {
-        font-size: 0.6rem;
-    }
-}
-
-
-
-
-/* Pantallas muy pequeñas */
-@media (max-width: 320px) {
-    .navbar {
-        padding: 0.25rem;
-    }
-
+    /* El logo estará centrado solo en pantallas pequeñas */
     .logo {
-        height: 1.5rem;
+        max-width: 80px; /* Reduce el tamaño del logo en móviles */
     }
 
+    /* Menú lateral en móviles */
+    .offcanvas {
+        width: 80%; /* Asegura que el menú lateral no ocupe todo el ancho */
+    }
+
+    /* Ajustes en el saludo de la navbar */
     .navbar-saludo {
-        font-size: 0.7rem;
-    }
-
-    .modal-content,
-    .modal-content-location {
-        padding: 0.75rem;
-        margin: 0.25rem;
-    }
-
-    .table {
-        min-width: 350px;
-    }
-
-    .btn-add-task {
-        font-size: 0.8rem;
-        min-width: auto;
+        margin-left: auto;
+        margin-right: -2rem;
+        font-size: 1rem;
     }
 }
 
-/* Landscape en móviles */
-@media (max-width: 768px) and (orientation: landscape) {
-    .navbar {
-        min-height: 40px;
-        padding: 0.25rem 0.5rem;
-    }
-
-    .logo {
-        height: 1.8rem;
-    }
-
-    .main-content {
-        padding: 0.5rem;
-        min-height: calc(100vh - 100px);
-    }
-
-    .modal-content,
-    .modal-content-location {
-        max-height: 85vh;
-    }
-
-    .footer {
-        padding: 0.5rem;
-    }
+/* Estilo del botón hamburguesa */
+.navbar-toggler-icon {
+    width: 30px;
+    height: 30px;
+    background-image: url('../Images/menu.png'); /* Opcional: cambiar la imagen del icono */
+    background-size: cover;
 }
 
-/* Pantallas grandes */
-@media (min-width: 1200px) {
-    .navbar {
-        padding: 1.5rem 3rem;
-    }
-
-    .logo {
-        height: 4rem;
-    }
-
-    .main-content {
-        padding: 3rem 2rem;
-    }
-
-    .search-container {
-        max-width: 800px;
-    }
-
-    .modal-content {
-        max-width: 500px;
-    }
-
-    .modal-content-location {
-        max-width: 600px;
-    }
-
-    .right-panel {
-        top: 80px;
-        height: calc(100vh - 80px);
-        padding: 2rem;
-    }
-}
-/* 🔹 Forzar títulos blancos en tabla de detalles del modal */
-#modalDetallesPedido thead th {
-    color: #fff !important;
-    background-color: #000 !important;
-}
