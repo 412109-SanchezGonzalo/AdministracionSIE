@@ -49,6 +49,7 @@ namespace JobOclock_BackEnd.Services
         IEnumerable<UsuarioXServicio> GetByUsuarioXActividad(int idUsuario);
         int AddUsuarioXActividad(UsuarioXServicio registro);
         void UpdateUsuarioXActividad(int idServicioXUsuario, int idServicio,int idEdificio,DateTime fecha , string? observaciones);
+        void UpdateObservaciones(string observaciones, int idServicioXUsuario);
         void DeleteServicioXUsuario(int idServicioXUsuario);
 
     }

@@ -400,6 +400,24 @@ namespace JobOclock_BackEnd.Controllers
             }
         }
 
+        [HttpPut("Editar-observaciones-servicioxusuario")]
+        public ActionResult UpdateObservacionesServicioXUsuario([FromBody]UpdateObservacionesServicioXUsuario updateObservacionesServicioXUsuario )
+        {
+            try
+            {
+                _service.UpdateObservaciones(updateObservacionesServicioXUsuario.Observaciones,updateObservacionesServicioXUsuario.IdServicioXUsuario);
+                return Ok("Tarea Editada con exito !");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
         [HttpDelete("Eliminar-servicioxusuario")]
         public ActionResult DeleteServicioXUsuario([FromBody] int idUsuario)
         {

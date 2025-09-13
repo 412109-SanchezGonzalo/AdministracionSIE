@@ -113,6 +113,21 @@ namespace JobOclock_BackEnd.Data.Repositories
             }
         }
 
+        public void UpdateObservaciones(string observaciones, int idServicioXUsuario)
+        {
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(
+                "UPDATE ServicioXUsuario SET observaciones = @observaciones " +
+                "WHERE id_servicioxactividad = @idServicioXUsuario", conn))
+            {
+                cmd.Parameters.AddWithValue("@observaciones", observaciones);
+                cmd.Parameters.AddWithValue("@idServicioXUsuario", idServicioXUsuario);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public void Delete(int idServicioXUsuario)
         {
             using (var conn = new MySqlConnection(_connectionString))

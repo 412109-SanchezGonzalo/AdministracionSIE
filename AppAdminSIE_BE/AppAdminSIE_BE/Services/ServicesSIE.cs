@@ -152,6 +152,11 @@ namespace JobOclock_BackEnd.Services
         {
             _usuarioXActividadRepository.Update(idServicioXUsuario,idServicio,idEdificio,fecha,observaciones);
         }
+
+        public void UpdateObservaciones(string observaciones, int idServicioXUsuario)
+        {
+            _usuarioXActividadRepository.UpdateObservaciones(observaciones, idServicioXUsuario);
+        }
         public void DeleteServicioXUsuario(int idServicioXUsuario)
         {
             _usuarioXActividadRepository.Delete(idServicioXUsuario);
