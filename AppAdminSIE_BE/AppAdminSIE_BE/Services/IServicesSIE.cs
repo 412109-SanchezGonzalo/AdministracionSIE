@@ -26,6 +26,7 @@ namespace JobOclock_BackEnd.Services
         // PEDIDO X PRODUCTO
 
         IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
+        IEnumerable<PedidoXProducto> GetAllPedidoXProductosSinFacturar();
 
         void AddPedidoXProducto(PedidoXProducto pedidoxproducto);
 

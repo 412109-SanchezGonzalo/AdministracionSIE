@@ -76,6 +76,10 @@ namespace JobOclock_BackEnd.Services
         {
             return _pedidoXProductoRepository.GetAllPedidoXProductos();
         }
+        public IEnumerable<PedidoXProducto> GetAllPedidoXProductosSinFacturar()
+        {
+            return _pedidoXProductoRepository.GetAllPedidoXProductosSinFacturar();
+        }
         public void AddPedidoXProducto(PedidoXProducto pedidoxproducto)
         {
             _pedidoXProductoRepository.AddPedidoXProducto(pedidoxproducto);

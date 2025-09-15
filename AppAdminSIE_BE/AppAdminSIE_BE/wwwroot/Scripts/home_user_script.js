@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log('🔄 Cargando pedidos...');
 
             const [respPedidosProductos, respPedidos] = await Promise.all([
-                safeFetch(`${BASE_URL}/Obtener-todos-los-pedidoxproducto`),
+                safeFetch(`${BASE_URL}/Obtener-todos-los-pedidoxproducto-sin-facturar`),
                 safeFetch(`${BASE_URL}/Obtener-todos-los-pedidos`)
             ]);
 

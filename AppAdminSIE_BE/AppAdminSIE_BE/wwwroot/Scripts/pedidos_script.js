@@ -638,6 +638,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Editar-estado-pedido`, {
                 method: 'PUT',
+                // 🆕 Agregamos el encabezado Content-Type
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
 

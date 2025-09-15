@@ -136,6 +136,20 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         // PEDIDO X PRODUCTO
+        [HttpGet("Obtener-todos-los-pedidoxproducto-sin-facturar")]
+        public ActionResult<List<PedidoXProducto>> GetPedidosSinFacturar()
+        {
+            try
+            {
+                var lista = _service.GetAllPedidoXProductosSinFacturar();
+                if (lista != null)
+                {
+                    return Ok(lista);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
         [HttpGet("Obtener-todos-los-pedidoxproducto")]
         public ActionResult<List<PedidoXProducto>> GetPedidos()
         {
