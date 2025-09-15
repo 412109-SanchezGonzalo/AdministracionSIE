@@ -1,12 +1,9 @@
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando pedidos_script.js...');
 
-
-
     // Arrays globales
     let productosSeleccionados = [];
     let productosGlobal = [];
-    // 🔹 Array global para almacenar edificios
     let edificiosDisponibles = [];
     let edificioSeleccionadoId = null;
 
@@ -20,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const errorDetails = document.getElementById('error-details');
     const userCount = document.getElementById('products-count');
     const searchProductInput = document.getElementById('search-product');
-    const tabla = document.getElementById("tablaBody");
 
     // Botones
     const btnSearch = document.getElementById('btnSearch');
@@ -29,33 +25,71 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnVerPedidos = document.getElementById('btnVerPedidos');
     const btnConfirmarPedidos = document.getElementById('btnConfirmarPedidos');
 
-    // Modal
-    const formProducto = document.getElementById("formProducto");
-    const modalNewPedido = document.getElementById("miModal");
-
     // 🔹 Estado inicial
     searchProductInput.disabled = true;
 
+    // 🎨 Funciones de estado
+    function obtenerEstadoHtml(estadoPedido) {
+        let texto = '';
+        let claseColor = '';
 
+        switch (estadoPedido) {
+            case 'Entregado':
+                texto = 'Entregado - Sin Facturar';
+                claseColor = 'bg-warning';
+                break;
+            case 'No Entregado':
+                texto = 'No entregado';
+                claseColor = 'bg-danger';
+                break;
+            case 'Facturado':
+                texto = 'Entregado - Facturado';
+                claseColor = 'bg-success';
+                break;
+            default:
+                texto = estadoPedido;
+                claseColor = 'bg-secondary';
+        }
+        return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
+    }
+
+    function obtenerEstadoProductoHtml(estadoProducto) {
+        let texto = '';
+        let claseColor = '';
+
+        switch (estadoProducto) {
+            case 'Entregado':
+                texto = 'Sí';
+                claseColor = 'bg-success';
+                break;
+            case 'Facturado':
+                texto = 'Sí';
+                claseColor = 'bg-success';
+                break;
+            case 'No Entregado':
+            default:
+                texto = 'No';
+                claseColor = 'bg-danger';
+        }
+        return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
+    }
+
+    // 🌐 Lógica de autenticación
     try {
         const password = localStorage.getItem('admin_password');
-        console.log('🔐 Admin password:', password);
-
         const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(password)
         });
 
-        saludoSpan.textContent = response.ok
-            ? `Hola, ${await response.text()} !`
-            : 'Hola, Usuario !';
+        saludoSpan.textContent = response.ok ? `Hola, ${await response.text()} !` : 'Hola, Usuario !';
     } catch (error) {
         console.log('⚠️ Error en autenticación admin:', error);
         saludoSpan.textContent = 'Hola, Usuario !';
     }
 
-    // 📌 Funciones UI
+    // 📌 Funciones de UI
     function showLoading() {
         loadingElement.classList.remove('d-none');
         errorElement.classList.add('d-none');
@@ -89,18 +123,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function limpiarSeleccionProductos() {
         productosSeleccionados = [];
-
-        // Resetear checkboxes
         const checks = tableBody.querySelectorAll('input[type="checkbox"]');
         checks.forEach(chk => chk.checked = false);
-
-        // Resetear cantidades
         const inputs = tableBody.querySelectorAll('input[type="number"]');
         inputs.forEach(inp => inp.value = 1);
-
         console.log("✅ Productos desmarcados correctamente");
     }
-
 
     // ✅ Cargar todos los productos desde API
     async function loadAllProducts() {
@@ -108,9 +136,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-productos');
             const productos = await response.json();
-
             if (!Array.isArray(productos)) throw new Error('Formato inválido');
-
             searchProductInput.disabled = false;
             productosGlobal = productos;
             renderTable(productosGlobal);
@@ -122,27 +148,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ Renderizar tabla de productos de la API
     function renderTable(productos) {
         tableBody.innerHTML = '';
-
         if (productos.length === 0) {
             showNoData();
             return;
         }
-
         productos.forEach(producto => {
             const tr = document.createElement('tr');
-
             tr.innerHTML = `
-        <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-        <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-        <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-        <td class="cantidad-cell"></td>
-        <td class="acciones-cell"></td>
-    `;
+                <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
+                <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
+                <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
+                <td class="cantidad-cell"></td>
+                <td class="acciones-cell"></td>
+            `;
 
-            // Buscar si el producto ya está seleccionado
             const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
-
-            // Input de cantidad
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
             cantidadInput.value = seleccionado ? seleccionado.cantidad : 1;
@@ -153,8 +173,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             cantidadInput.addEventListener('input', () => {
                 producto.cantidad = parseFloat(cantidadInput.value);
-                const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
-                if (seleccionado) seleccionado.cantidad = producto.cantidad;
+                const sel = productosSeleccionados.find(p => p.id === producto.id);
+                if (sel) sel.cantidad = producto.cantidad;
             });
 
             const cantidadCell = tr.querySelector('.cantidad-cell');
@@ -165,11 +185,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             unidadSpan.textContent = producto.unidadMedida || 'Sin unidad';
             cantidadCell.appendChild(unidadSpan);
 
-            // Checkbox
             const check = document.createElement('input');
             check.type = 'checkbox';
             check.className = 'form-check-input';
-            check.checked = !!seleccionado; // 🔹 Mantener marcado si ya estaba seleccionado
+            check.checked = !!seleccionado;
 
             check.addEventListener('change', () => {
                 if (check.checked) {
@@ -187,159 +206,90 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const accionesCell = tr.querySelector('.acciones-cell');
             accionesCell.appendChild(check);
-
             tableBody.appendChild(tr);
         });
-
         showTable(productos.length);
     }
-
 
     // 🔍 Buscar producto en memoria
     function searchByName() {
         const nombre = searchProductInput.value.trim().toLowerCase();
-        if (!nombre) {
+
+        // Si el campo de búsqueda está vacío, muestra todos los productos
+        if (nombre === '') {
             renderTable(productosGlobal);
             return;
         }
 
-        const resultados = productosGlobal.filter(p =>
-            p.nombre.toLowerCase().includes(nombre)
-        );
+        // Filtra los productos que coincidan con la búsqueda
+        const resultados = productosGlobal.filter(p => p.nombre.toLowerCase().includes(nombre));
 
-        if (resultados.length === 0) {
+        // Renderiza la tabla con los resultados
+        if (resultados.length > 0) {
+            renderTable(resultados);
+        } else {
             showError("Producto no encontrado");
             tableBody.innerHTML = '';
-            return;
         }
-
-        renderTable(resultados);
     }
 
-
-
-
-    // 🔹 Función para llenar el dropdown de edificios
+    // 🔹 Funciones de Edificios
     function llenarDropdownEdificios(edificios) {
-        console.log('🔄 Llenando dropdown con edificios:', edificios);
-
-        // CORREGIDO: Buscar específicamente el dropdown de edificios
         const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
-
         if (!dropdown) {
             console.error('❌ No se encontró el dropdown de edificios');
-            console.log('🔍 Elementos disponibles:', {
-                modal: document.getElementById('modal-NewTask'),
-                menuEdificios: document.getElementById('menuEdificios'),
-                dropdownMenu: document.querySelector('#menuEdificios .dropdown-menu')
-            });
             return;
         }
-
-        console.log('✅ Dropdown de edificios encontrado:', dropdown);
-
-        // Limpiar opciones existentes
         dropdown.innerHTML = '';
-
-        // Agregar edificios como <li> con <button> dentro
-        edificios.forEach((edificio, index) => {
-            console.log(`➕ Agregando edificio ${index + 1}:`, edificio);
-
+        edificios.forEach(edificio => {
             const li = document.createElement('li');
             const button = document.createElement('button');
             button.className = 'dropdown-item';
             button.type = 'button';
             button.textContent = edificio.nombre;
             button.setAttribute('data-value', edificio.id_Edificio);
-
             button.addEventListener('click', () => {
                 seleccionarEdificio(edificio.id_Edificio, edificio.nombre);
             });
-
             li.appendChild(button);
             dropdown.appendChild(li);
         });
-
-        console.log('✅ Dropdown de edificios poblado exitosamente con', edificios.length, 'edificios');
     }
 
-    // Funcion para seleccionar un Edificio del Dropdown
     function seleccionarEdificio(id, nombre) {
-        console.log('🎯 Edificio seleccionado:', { id, nombre });
-
-        // Guardar el ID en variable global
         edificioSeleccionadoId = id;
-
         const botonDropdown = document.getElementById('edificioSelected');
-
         if (botonDropdown) {
             botonDropdown.textContent = nombre;
             botonDropdown.setAttribute('data-selected', id);
-            console.log('✅ Botón dropdown de edificios actualizado y ID guardado:', id);
-
-            // Cerrar el dropdown después de seleccionar
-            try {
-                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
-                if (dropdown) {
-                    dropdown.hide();
-                }
-            } catch (e) {
-                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
-            }
-        } else {
-            console.error('❌ No se encontró el botón edificioSelected');
         }
     }
 
-    // Función para obtener el ID (usa la variable global)
     function obtenerIdEdificio() {
-        console.log('🏢 ID Edificio obtenido:', edificioSeleccionadoId);
         return edificioSeleccionadoId;
     }
 
-    // 🔹 Función corregida para cargar edificios desde la API
     async function cargarEdificios() {
-        console.log('🔄 Cargando edificios desde la API...');
-
         try {
-            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios';
-            console.log('📡 URL completa:', url);
-
-            const response = await fetch(url);
-
-            console.log('📊 Response status:', response.status);
-            console.log('📊 Response ok:', response.ok);
-
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Error response body:', errorText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             const edificios = await response.json();
-            console.log('✅ Edificios obtenidos:', edificios);
-
-            // Verificar que sea un array
             if (!Array.isArray(edificios)) {
-                console.error('❌ Los edificios no son un array:', typeof edificios);
                 throw new Error('Formato de edificios inválido');
             }
-
-            // Guardar los edificios globalmente
             edificiosDisponibles = edificios;
-
-            // Llenar el dropdown inmediatamente
             llenarDropdownEdificios(edificios);
-
         } catch (error) {
             console.error('❌ Error al cargar edificios:', error);
             alert('Error al cargar edificios: ' + error.message);
         }
     }
 
-
-
-    async function ConfirmarPedido(){
+    // 📝 Funciones de Pedidos
+    async function ConfirmarPedido() {
         try {
             const fechaEntrega = document.getElementById('fechaEntrega').value;
             const fechaISO = new Date(fechaEntrega).toISOString();
@@ -350,42 +300,30 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            // 1. Crear el pedido principal
             const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fechaISO)
             });
-
-            if (!responsePedido.ok) {
-                throw new Error(`Error al crear pedido: ${responsePedido.status}`);
-            }
-
+            if (!responsePedido.ok) throw new Error(`Error al crear pedido: ${responsePedido.status}`);
             const pedidoId = await responsePedido.json();
 
-            // 2. Obtener información del edificio seleccionado
             const edificioId = obtenerIdEdificio();
             const edificioNombre = document.getElementById('edificioSelected').textContent;
 
-            // 3. Crear los PedidoXProducto con TODOS los campos requeridos
             for (const producto of productosSeleccionados) {
                 const bodyPedidoProducto = {
-                    // Campos que usa tu SQL
                     idPedido: pedidoId,
                     idProducto: producto.id,
                     cantidad: producto.cantidad,
                     idEdificio: edificioId,
                     observaciones: observaciones || "",
-
-                    // Campos requeridos por el modelo pero no en SQL
                     edificio: edificioNombre || "Sin especificar",
                     estadoPedido: "No Entregado",
                     nombreProducto: producto.nombre || "Sin nombre",
                     unidadMedidaProducto: producto.unidadMedida || "Sin unidad",
                     estadoProducto: "No Entregado"
                 };
-
-                console.log('Enviando:', bodyPedidoProducto);
 
                 const responsePedidoProducto = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedidoxproducto', {
                     method: 'POST',
@@ -402,87 +340,76 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             alert("Pedido creado exitosamente");
-
-            // Limpiar formulario
             const modal = bootstrap.Modal.getInstance(document.getElementById("miModal"));
             modal.hide();
             document.getElementById('fechaEntrega').value = '';
             document.getElementById('observaciones').value = '';
-
-            // 🔹 Limpio seleccionados y la tabla
             limpiarSeleccionProductos();
             renderTable(productosGlobal);
-
         } catch (error) {
             console.error('Error al crear pedido:', error);
             alert("Error al crear el pedido: " + error.message);
         }
     }
 
-
-    function ValidarCampos()
-    {
-        console.log('Validando formulario de nuevo pedido...');
-
+    function ValidarCampos() {
         const errores = [];
-
         const edificioButton = document.getElementById('edificioSelected');
         const edificioSeleccionado = edificioButton ? edificioButton.getAttribute('data-selected') : null;
-
         if (!edificioSeleccionado || edificioButton.textContent.trim() === 'Seleccione un edificio') {
             errores.push('Debe seleccionar un edificio');
-            console.log('Error: No se seleccionó edificio');
-        } else {
-            console.log('Edificio seleccionado:', edificioSeleccionado);
         }
 
-        // 3. Validar que la fecha no sea menor a la fecha actual
         const fechaInput = document.getElementById('fechaEntrega');
         const fechaSeleccionada = fechaInput ? fechaInput.value : '';
-
         if (!fechaSeleccionada) {
             errores.push('Debe seleccionar una fecha');
-            console.log('Error: No se seleccionó fecha');
         } else {
-            // Obtener fecha actual sin hora (solo YYYY-MM-DD)
             const fechaActual = new Date();
             const fechaActualString = fechaActual.toISOString().split('T')[0];
-
-            // Comparar fechas
             if (fechaSeleccionada < fechaActualString) {
                 errores.push('La fecha no puede ser anterior a la fecha actual');
-                console.log('Error: Fecha anterior a hoy. Seleccionada:', fechaSeleccionada, 'Actual:', fechaActualString);
-            } else {
-                console.log('Fecha válida:', fechaSeleccionada);
             }
         }
 
-        // Mostrar resultados
         if (errores.length > 0) {
-            console.log('Errores encontrados:', errores);
-
-            // Mostrar alert con todos los errores
-            const mensajeError = 'Por favor corrija los siguientes errores:\n\n' +
-                errores.map((error, index) => `${index + 1}. ${error}`).join('\n');
+            const mensajeError = 'Por favor corrija los siguientes errores:\n\n' + errores.map((error, index) => `${index + 1}. ${error}`).join('\n');
             alert(mensajeError);
-
-            return false; // Formulario inválido
+            return false;
         }
-
-        console.log('Formulario válido - todos los campos están correctos');
-        return true; // Formulario válido
+        return true;
     }
 
-    // Mostrar Modal Para Ver Pedidos Registrados
+    // 🆕 Funciones para mostrar y ocultar el spinner de carga de pedidos
+    function showLoadingPedidos() {
+        const loadingPedidos = document.getElementById('loadingPedidos');
+        if (loadingPedidos) {
+            loadingPedidos.classList.remove('d-none');
+        }
+        const listaPedidos = document.getElementById('listaPedidos');
+        if (listaPedidos) {
+            listaPedidos.classList.add('d-none');
+        }
+    }
 
+    function hideLoadingPedidos() {
+        const loadingPedidos = document.getElementById('loadingPedidos');
+        if (loadingPedidos) {
+            loadingPedidos.classList.add('d-none');
+        }
+        const listaPedidos = document.getElementById('listaPedidos');
+        if (listaPedidos) {
+            listaPedidos.classList.remove('d-none');
+        }
+    }
 
-    async function verPedidosRegistrados(){
+    async function verPedidosRegistrados() {
         const lista = document.getElementById("listaPedidos");
+        lista.innerHTML = "";
+
+        showLoadingPedidos();
 
         try {
-            // Obtener datos de ambas tablas
-            console.log("Obteniendo datos de ambas tablas...");
-
             const [respPedidosProductos, respPedidos] = await Promise.all([
                 fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
                 fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos")
@@ -491,31 +418,21 @@ document.addEventListener('DOMContentLoaded', async function () {
             const pedidosProductos = await respPedidosProductos.json();
             const pedidos = await respPedidos.json();
 
-            console.log("PedidosXProductos:", pedidosProductos);
-            console.log("Pedidos:", pedidos);
-
-            lista.innerHTML = ""; // limpiar lista antes de renderizar
-
             if (!pedidosProductos || pedidosProductos.length === 0) {
                 lista.innerHTML = `<li class="list-group-item text-muted">📭 No hay pedidos registrados</li>`;
                 return;
             }
 
-            // CREAR un mapa de pedidos por ID para acceso rápido a las fechas
             const pedidosMap = {};
             pedidos.forEach(pedido => {
                 pedidosMap[pedido.idPedido] = pedido;
             });
 
-            // AGRUPAR PedidosXProductos por idPedido
             const pedidosAgrupados = {};
-
             pedidosProductos.forEach(pedidoProducto => {
                 const idPedido = pedidoProducto.idPedido;
-
                 if (!pedidosAgrupados[idPedido]) {
                     const pedidoPrincipal = pedidosMap[idPedido];
-
                     pedidosAgrupados[idPedido] = {
                         id: idPedido,
                         fechaEntrega: pedidoPrincipal ? pedidoPrincipal.fechaEntrega : null,
@@ -524,76 +441,80 @@ document.addEventListener('DOMContentLoaded', async function () {
                         productos: []
                     };
                 }
-
                 pedidosAgrupados[idPedido].productos.push(pedidoProducto);
             });
 
-            console.log("Pedidos agrupados con fechas:", pedidosAgrupados);
-
-            // RENDERIZAR cada pedido agrupado
             Object.values(pedidosAgrupados).forEach(pedido => {
-                const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
-                const estadoBadge = todosEntregados
-                    ? `<span class="badge rounded-pill bg-success">Entregado</span>`
-                    : `<span class="badge rounded-pill bg-danger">Pendiente</span>`;
+                let estadoGeneral = 'No Entregado';
+                const todosFacturados = pedido.productos.every(p => p.estadoPedido === 'Facturado');
+                const todosEntregados = pedido.productos.every(p => p.estadoPedido === 'Entregado');
+
+                if (todosFacturados) {
+                    estadoGeneral = 'Facturado';
+                } else if (todosEntregados) {
+                    estadoGeneral = 'Entregado';
+                }
+
+                let colorBorde;
+                switch (estadoGeneral) {
+                    case 'Entregado':
+                        colorBorde = '#ffc107';
+                        break;
+                    case 'Facturado':
+                        colorBorde = '#198754';
+                        break;
+                    case 'No Entregado':
+                    default:
+                        colorBorde = '#dc3545';
+                        break;
+                }
 
                 const cantidadProductos = pedido.productos.length;
-
-                // Formatear fecha correctamente
                 let fechaFormateada = "Sin fecha";
                 if (pedido.fechaEntrega) {
                     try {
                         const fecha = new Date(pedido.fechaEntrega);
-                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                        });
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     } catch (e) {
                         fechaFormateada = pedido.fechaEntrega;
                     }
                 }
 
+                const estadoHtml = obtenerEstadoHtml(estadoGeneral);
+
+                // 🆕 SE HA AÑADIDO `flex-wrap` A LA LISTA
                 let item = `
-                <li class="list-group-item d-flex justify-content-between align-items-start pedido-item" 
-                    data-pedido-id="${pedido.id}" 
-                    style="cursor: pointer; border-left: 4px solid ${todosEntregados ? '#198754' : '#dc3545'};">
-                    <div class="ms-2 me-auto">
-                        <div class="fw-bold">Pedido #${pedido.id}</div>
-                        <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
-                        <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
-                        <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
-                        <br>
-                        <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
-                    </div>
-                    <div class="text-end">
-                        ${estadoBadge}
-                        <br>
-                    </div>
-                </li>
-            `;
+                    <li class="list-group-item d-flex justify-content-between align-items-start pedido-item flex-wrap"
+                        data-pedido-id="${pedido.id}"
+                        data-estado-general="${estadoGeneral}"
+                        style="cursor: pointer; border-left: 4px solid ${colorBorde};">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Pedido #${pedido.id}</div>
+                            <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                            <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                            <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
+                            <br>
+                            <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
+                        </div>
+                        <div class="text-end">
+                            ${estadoHtml}
+                            <br>
+                        </div>
+                    </li>
+                `;
                 lista.innerHTML += item;
             });
 
-            // ⭐ AGREGAR event listeners para mostrar detalles al hacer clic
             document.querySelectorAll('.pedido-item').forEach(item => {
                 item.addEventListener('click', async function() {
                     const pedidoId = this.getAttribute('data-pedido-id');
-                    console.log('Clic en pedido ID:', pedidoId);
-
-                    try {
-                        // Buscar el pedido específico en los datos ya cargados
-                        const pedidoDetalle = Object.values(pedidosAgrupados).find(p => p.id == pedidoId);
-
-                        if (pedidoDetalle) {
-                            mostrarDetallesPedido(pedidoDetalle);
-                        } else {
-                            console.error('No se encontró el pedido con ID:', pedidoId);
-                            alert('Error: No se pudo cargar el detalle del pedido');
-                        }
-                    } catch (error) {
-                        console.error('Error al mostrar detalles del pedido:', error);
-                        alert('Error al cargar detalles del pedido');
+                    const estadoGeneral = this.getAttribute('data-estado-general');
+                    const pedidoDetalle = Object.values(pedidosAgrupados).find(p => p.id == pedidoId);
+                    if (pedidoDetalle) {
+                        mostrarDetallesPedido(pedidoDetalle, estadoGeneral);
+                    } else {
+                        console.error('No se encontró el pedido con ID:', pedidoId);
+                        alert('Error: No se pudo cargar el detalle del pedido');
                     }
                 });
             });
@@ -601,248 +522,159 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (error) {
             console.error("Error cargando pedidos:", error);
             lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
+        } finally {
+            hideLoadingPedidos();
         }
     }
 
-
-    // 🔹 AGREGAR esta nueva función después de verPedidosRegistrados():
-
-    function mostrarDetallesPedido(pedido) {
-        console.log('Mostrando detalles del pedido:', pedido);
-
-        // Buscar modal existente o crearlo
-        let modalDetalles = document.getElementById('modalDetallesPedido');
-
-        if (!modalDetalles) {
-            // Crear modal si no existe
-            modalDetalles = document.createElement('div');
-            modalDetalles.className = 'modal fade';
-            modalDetalles.id = 'modalDetallesPedido';
-            modalDetalles.setAttribute('tabindex', '-1');
-            modalDetalles.innerHTML = `
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header" style="background-color: #212529; color: white;">
-                        <h5 class="modal-title" id="modalDetallesTitle">📦 Detalles del Pedido</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="detallesPedidoInfo" class="mb-4"></div>
-                        <h6 class="fw-bold mb-3">📋 Productos del Pedido:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover compact-table">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col" style="width: 15%;">ID</th>
-                                        <th scope="col" style="width: 40%;">Producto</th>
-                                        <th scope="col" style="width: 15%;">Cantidad</th>
-                                        <th scope="col" style="width: 20%;">Unidad</th>
-                                        <th scope="col" style="width: 40%;">Entregado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaDetallesProductos">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            ← Volver
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-            document.body.appendChild(modalDetalles);
+    function mostrarDetallesPedido(pedido, estadoGeneral) {
+        // CERRAR EL MODAL DE PEDIDOS
+        const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
+        if (modalPedidos) {
+            modalPedidos.hide();
         }
 
-        // Formatear fecha
+        const modalDetalles = document.getElementById('modalDetallesPedido');
+        if (!modalDetalles) {
+            console.error("El modal de detalles no existe.");
+            return;
+        }
+
+        const titleElement = document.getElementById('modalDetallesPedidoLabel');
+        const infoDiv = document.getElementById('detallesPedidoInfo');
+        const tablaBody = document.getElementById('tablaDetallesProductos');
+        const modalFooter = modalDetalles.querySelector('.modal-footer');
+
+        // Limpiar el footer y recrear el botón volver
+        modalFooter.innerHTML = '';
+        const btnVolver = document.createElement('button');
+        btnVolver.type = 'button';
+        btnVolver.className = 'btn btn-secondary';
+        btnVolver.textContent = '← Volver';
+        btnVolver.addEventListener('click', () => {
+            const modalDetallesInstance = bootstrap.Modal.getInstance(modalDetalles);
+            if (modalDetallesInstance) modalDetallesInstance.hide();
+
+            setTimeout(() => {
+                const modalPedidosInstance = new bootstrap.Modal(document.getElementById('modalPedidos'));
+                modalPedidosInstance.show();
+            }, 300);
+        });
+        modalFooter.appendChild(btnVolver);
+
         let fechaFormateada = "Sin fecha";
         if (pedido.fechaEntrega) {
             try {
                 const fecha = new Date(pedido.fechaEntrega);
-                fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+                fechaFormateada = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
             } catch (e) {
                 fechaFormateada = pedido.fechaEntrega;
             }
         }
 
-        // CORREGIR: Buscar el título DESPUÉS de asegurar que el modal existe
-        const titleElement = document.getElementById('modalDetallesTitle');
-        if (titleElement) {
-            titleElement.textContent = `📦 Pedido #${pedido.id}`;
-        } else {
-            console.error('❌ Elemento modalDetallesTitle no encontrado después de crear el modal');
-        }
-
-        // Actualizar información general
-        const infoDiv = document.getElementById('detallesPedidoInfo');
+        if (titleElement) titleElement.textContent = `📦 Pedido #${pedido.id}`;
         if (infoDiv) {
-            const todosEntregados = pedido.productos.every(p => p.estadoPedido === "Entregado");
-            const estadoGeneral = todosEntregados ?
-                `<span class="badge bg-success fs-6">Completado</span>` :
-                `<span class="badge bg-danger fs-6">Pendiente</span>`;
-
+            const estadoGeneralHTML = obtenerEstadoHtml(estadoGeneral);
             infoDiv.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
-                            <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
-                            <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneral}</p>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                                <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                                <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneralHTML}</p>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
         }
 
-        // Llenar tabla de productos
-        const tablaBody = document.getElementById('tablaDetallesProductos');
         if (tablaBody) {
             tablaBody.innerHTML = '';
-
             pedido.productos.forEach(producto => {
-                const estadoBadge = producto.estadoProducto === "Entregado"
-                    ? `<span class="badge bg-success">Sí</span>`
-                    : `<span class="badge bg-danger">No</span>`;
-
+                const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
-                <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
-                <td>${producto.cantidad || 'N/A'}</td>
-                <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-                <td>${estadoBadge}</td>
-            `;
+                    <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+                    <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+                    <td>${producto.cantidad || 'N/A'}</td>
+                    <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+                    <td>${estadoBadge}</td>
+                `;
                 tablaBody.appendChild(row);
             });
         }
 
-        // Cerrar modal de pedidos si está abierto
-        const modalPedidosElement = document.getElementById('modalPedidos');
-        if (modalPedidosElement) {
-            const modalPedidos = bootstrap.Modal.getInstance(modalPedidosElement);
-            if (modalPedidos) {
-                modalPedidos.hide();
-            }
+        if (estadoGeneral === 'Entregado') {
+            const btnFacturar = document.createElement('button');
+            btnFacturar.type = 'button';
+            btnFacturar.className = 'btn btn-success ms-2';
+            btnFacturar.textContent = 'FACTURAR';
+            btnFacturar.addEventListener('click', () => {
+                if (confirm("¿Estás seguro de que deseas facturar este pedido?")) {
+                    facturarPedido(pedido.id);
+                }
+            });
+            modalFooter.appendChild(btnFacturar);
         }
 
-        // Mostrar modal de detalles con un pequeño delay para asegurar que el modal anterior se cierre
-        setTimeout(() => {
-            const modal = new bootstrap.Modal(modalDetalles);
-            modal.show();
-        }, 300);
+        const modalInstance = new bootstrap.Modal(modalDetalles);
+        modalInstance.show();
     }
 
+    // 🚀 Función para facturar un pedido
+    async function facturarPedido(pedidoId) {
+        try {
+            const data = {
+                idPedido: pedidoId,
+                nuevoEstado: 'Facturado'
+            }
+            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Editar-estado-pedido`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
 
-
-
-
-    // ✅ Eventos
-    if (btnSearch) btnSearch.addEventListener('click', loadAllProducts);
-    btnNewPedido.addEventListener("click", function () {
-        console.table(productosSeleccionados);
-        const tablaBody = document.getElementById("tablaProductosBody");
-        tablaBody.innerHTML = ""; // limpiar antes de cargar
-
-        if (productosSeleccionados.length === 0) {
-            alert("⚠️ No hay productos seleccionados.");
-            return;
+            if (response.ok) {
+                alert(`✅ Pedido #${pedidoId} facturado correctamente.`);
+                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
+                if(modalDetalles) modalDetalles.hide();
+                await verPedidosRegistrados();
+            } else {
+                const errorText = await response.text();
+                alert(`❌ Error al facturar pedido: ${errorText}`);
+                console.error('Error al facturar pedido:', response.status, errorText);
+            }
+        } catch (error) {
+            alert('❌ Error de conexión al intentar facturar el pedido.');
+            console.error('Error de conexión:', error);
         }
+    }
 
-        productosSeleccionados.forEach(prod => {
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-            <td>${prod.id}</td>
-            <td>${prod.nombre}</td>
-            <td>${prod.cantidad ?? 1}</td>
-            <td>${prod.unidadMedida ?? "-"}</td>
-            <td>-</td>
-        `;
-
-            tablaBody.appendChild(tr);
-        });
-
-        const edificioButton = document.getElementById('edificioSelected');
-        if (edificioButton) {
-            edificioButton.textContent = 'Seleccione un edificio';
-            edificioButton.removeAttribute('data-selected');
-        }
-        // Limpiar fecha
-        const fechaInput = document.getElementById('fechaEntrega');
-        if (fechaInput) {
-            fechaInput.value = '';
-        }
-
-        // Limpiar observaciones
-        const observacionesTextPedido = document.getElementById('observaciones');
-        if (observacionesTextPedido) {
-            observacionesTextPedido.value = '';
-        }
-
-        // Mostrar modal
-        const modal = new bootstrap.Modal(document.getElementById("miModal"));
-        modal.show();
-        // Cargar las actividades Y edificios después de mostrar el modal
-        setTimeout(async () => {
-            await cargarEdificios();
-        },100);
+    // 🔌 Eventos
+    searchProductInput.addEventListener('input', searchByName);
+    btnRetry.addEventListener('click', loadAllProducts);
+    btnNewPedido.addEventListener('click', () => {
+        cargarEdificios();
+        limpiarSeleccionProductos();
     });
-
-    searchProductInput.addEventListener("input", () => {
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(searchByName, 300);
+    btnVerPedidos.addEventListener('click', () => {
+        const myModal = new bootstrap.Modal(document.getElementById('modalPedidos'));
+        myModal.show();
+        verPedidosRegistrados();
     });
-
-
-    btnConfirmarPedidos.addEventListener("click", function () {
-        console.table(productosSeleccionados);
-        const isValid = ValidarCampos();
-        if(isValid)
-        {
-            console.log('Formulario válido - procediendo con el envío...');
+    btnConfirmarPedidos.addEventListener('click', () => {
+        if (ValidarCampos()) {
             ConfirmarPedido();
         }
-
-    })
-
-    btnVerPedidos.addEventListener("click", function () {
-        verPedidosRegistrados();
-
-        // abrir modal después de cargar lista
-        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
-        modalPedidos.show();
-    })
-
-    const btnVolverAVerPedidos = document.getElementById('btnVolverAPedidosRegistrados');
-    btnVolverAVerPedidos.addEventListener('click', async function () {
-        verPedidosRegistrados();
-
-        // abrir modal después de cargar lista
-        const modalPedidos = new bootstrap.Modal(document.getElementById("modalPedidos"));
-        modalPedidos.show();
-    })
-
-
-    // Selecciono el botón de la X (cerrar modal)
-    const btnCerrar = document.querySelector('#miModal .btn-close');
-
-    btnCerrar.addEventListener('click', () => {
-        limpiarSeleccionProductos();
-        renderTable(productosGlobal); // refrescar tabla para sacar los checks
     });
 
+    // Iniciar la carga de productos al cargar la página
+    loadAllProducts();
 });

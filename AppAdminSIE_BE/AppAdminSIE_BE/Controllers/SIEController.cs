@@ -125,11 +125,11 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         [HttpPut("Editar-estado-pedido")]
-        public ActionResult UpdateEstadoPedido([FromBody] int idPedido)
+        public ActionResult UpdateEstadoPedido([FromBody] UpdateStatusPedido updateStatusPedido)
         {
             try
             {
-                _service.UpdateEstado(idPedido);
+                _service.UpdateEstado(updateStatusPedido.IdPedido, updateStatusPedido.NuevoEstado);
                 return Ok("Estado Actualizado !");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
@@ -168,7 +168,7 @@ namespace JobOclock_BackEnd.Controllers
             try
             {
                 _service.UpdateObservacionesPedidoXProducto(updatePedidoxproducto.IdPedido, updatePedidoxproducto.ObservacionesExtras);
-                _service.UpdateEstadoProductoPedidoXProducto(updatePedidoxproducto.IdPedido,updatePedidoxproducto.IdProducto,updatePedidoxproducto.nuevoEstadoProducto);
+                _service.UpdateEstadoProductoPedidoXProducto(updatePedidoxproducto.IdPedido,updatePedidoxproducto.IdProducto,updatePedidoxproducto.NuevoEstadoProducto);
                 return Ok("PedidoXProducto Actualizado !");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

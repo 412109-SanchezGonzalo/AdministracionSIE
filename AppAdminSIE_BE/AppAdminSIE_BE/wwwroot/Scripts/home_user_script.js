@@ -750,9 +750,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         if (todosActualizadosConExito) {
             try {
+                const data = {
+                    idPedido: idPedido,
+                    nuevoEstado: 'Entregado'
+                }
                 const responsePedidoEstado = await safeFetch(`${BASE_URL}/Editar-estado-pedido`, {
                     method: 'PUT',
-                    body: JSON.stringify(idPedido)
+                    body: JSON.stringify(data)
                 });
 
                 showErrorMessage("✅ ¡Entrega Confirmada!", 'success');

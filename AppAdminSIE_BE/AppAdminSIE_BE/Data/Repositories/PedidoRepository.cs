@@ -2,6 +2,7 @@
 using AppAdminSIE_BE.Models;
 using JobOclock_BackEnd.Models;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Asn1;
 
 namespace AppAdminSIE_BE.Data.Repositories
 {
@@ -60,14 +61,15 @@ namespace AppAdminSIE_BE.Data.Repositories
             }
         }
 
-        public void UpdateEstado(int idPedido)
+        public void UpdateEstado(int idPedido, string nuevoEstado)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "UPDATE Pedidos SET Estado = 'Entregado' " +
+                "UPDATE Pedidos SET Estado = @nuevoEstado " +
                 "WHERE id_pedido = @idPedido", conn))
             {
                 cmd.Parameters.AddWithValue("@idPedido", idPedido);
+                cmd.Parameters.AddWithValue("@nuevoEstado", nuevoEstado);
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

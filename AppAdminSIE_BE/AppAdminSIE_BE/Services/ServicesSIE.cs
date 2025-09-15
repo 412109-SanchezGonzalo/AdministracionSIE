@@ -65,9 +65,9 @@ namespace JobOclock_BackEnd.Services
         {
             return _pedidoRepository.AddPedido(fechaEntrega);
         }
-        public void UpdateEstado(int idPedido)
+        public void UpdateEstado(int idPedido, string nuevoEstado)
         {
-            _pedidoRepository.UpdateEstado(idPedido);
+            _pedidoRepository.UpdateEstado(idPedido, nuevoEstado);
         }
 
         // PEDIDO X PRODUCTO

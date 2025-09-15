@@ -6,6 +6,6 @@ namespace AppAdminSIE_BE.Data.Interfaces
     {
         IEnumerable<Pedido> GetAllPedidos();
         int AddPedido(DateTime fechaEntrega);
-        void UpdateEstado(int idPedido);
+        void UpdateEstado(int idPedido, string nuevoEstado);
     }
 }
