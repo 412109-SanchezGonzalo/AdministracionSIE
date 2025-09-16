@@ -93,7 +93,7 @@ namespace JobOclock_BackEnd.Data.Repositories
                             NombreEdificio = reader.GetString(ordNameEdificio),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             Fecha = reader.GetDateTime(ordFecha),
-                            FechaFinalizacion = reader.GetDateTime(ordFechaFinalizacion),
+                            FechaFinalizacion = reader.IsDBNull(ordFechaFinalizacion) ? null : reader.GetDateTime(ordFechaFinalizacion),
                             Estado = reader.GetString(ordEstado)
                         });
                     }

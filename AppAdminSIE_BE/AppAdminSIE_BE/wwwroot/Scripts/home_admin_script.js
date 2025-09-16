@@ -1219,7 +1219,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                         idEdificio: obtenerIdEdificio(),
                         nombreEdificio: obtenerNombreEdificio(),
                         observaciones: observacionesNuevaTarea.value.trim(),
-                        fecha: fechaNuevaTarea.value // Ya está en formato YYYY-MM-DD si es input type="date"
+                        fecha: fechaNuevaTarea.value,
+                        fechaFinalizacion: null,
+                        estado: 'Pendiente'
                     };
 
                     console.log(`📤 Datos para empleado ${i + 1}:`, datos);
