@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     // LOADING
     // Lista de IDs de botones que deben tener loading automático
     const buttonIds = [
-        'btnSearch',
         'btnNewTask',
         'btnClear',
         'btnVerTask',
@@ -156,12 +155,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     searchNameInput.disabled = true;
 
-    const btnSearch = document.getElementById('btnSearch');
     const btnAll = document.getElementById('btnAll');
     const btnClear = document.getElementById('btnClear');
     const btnRetry = document.getElementById('btnRetry');
     const btnNewTask = document.getElementById('btnNewTask');
     const btnVerTask = document.getElementById('btnVerTask');
+    const btnVerMisTasks = document.getElementById('btnVerMisTasks');
     const btnConfirm = document.getElementById('btnConfirmar');
     const btnEditar = document.getElementById('btnEditar');
     const btnEliminar = document.getElementById('btnEliminar');
@@ -194,6 +193,31 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
         console.log('⚠️ Error en autenticación admin:', error);
         saludoSpan.textContent = 'Hola, Usuario !';
+    }
+
+    function showLoadingTareas() {
+        const loadingTareas = document.getElementById('loadingTareas');
+        if (loadingTareas) {
+            loadingTareas.classList.remove('d-none');
+        }
+
+        // Ocultar contenido de tareas mientras carga
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (listGroupContainer) {
+            listGroupContainer.style.display = 'none';
+        }
+
+        const formContainer = document.getElementById('formContainer');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+    }
+
+    function hideLoadingTareas() {
+        const loadingTareas = document.getElementById('loadingTareas');
+        if (loadingTareas) {
+            loadingTareas.classList.add('d-none');
+        }
     }
 
     // 📌 Funciones de UI
@@ -624,6 +648,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function openModalVerTask(employeeId, nombreEmpleado) {
         console.log('Abriendo modal Ver Tareas para:', { employeeId, nombreEmpleado });
 
+        const modalVerTask = document.getElementById('modal-VerTask');
+        const inputUser = document.getElementById('verTareaByUser');
+
+        if (!modalVerTask || !inputUser) {
+            console.error('Modal o input no encontrado');
+            return;
+        }
+
+        // Rellenar el input con el nombre del empleado
+        inputUser.value = nombreEmpleado;
+        inputUser.disabled = true;
+
+        // Mostrar el modal primero
+        modalVerTask.style.display = 'flex';
+
+        // Mostrar loading mientras se cargan los datos
+        showLoadingTareas();
+
         try {
             console.log('Realizando consulta para empleado ID:', employeeId);
 
@@ -636,26 +678,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             const data = await response.json();
             console.log('Datos obtenidos de la API:', data);
 
-            const modalVerTask = document.getElementById('modal-VerTask');
-            const inputUser = document.getElementById('verTareaByUser');
-
-            if (!modalVerTask || !inputUser) {
-                console.error('Modal o input no encontrado');
-                return;
-            }
-
-            // Rellenar el input con el nombre del empleado
-            inputUser.value = nombreEmpleado;
-            inputUser.disabled = true;
+            // Ocultar loading
+            hideLoadingTareas();
 
             // Procesar los datos de la API
             if (Array.isArray(data) && data.length > 0) {
                 console.log(`Empleado tiene ${data.length} tarea(s) asignada(s)`);
 
                 mostrarListGroupTareas(data, nombreEmpleado);
-
-                // Mostrar el modal
-                modalVerTask.style.display = 'flex';
                 console.log('Modal Ver Tareas abierto correctamente');
 
             } else {
@@ -663,12 +693,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                 console.log('No se encontraron tareas asignadas para este empleado');
 
                 if (confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿Desea asignarle una?`)) {
+                    modalVerTask.style.display = 'none';
                     openModalNewTask(empleadosSeleccionados);
                 }
             }
 
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
+            hideLoadingTareas();
             alert('Error al cargar las tareas del empleado: ' + error.message);
         }
     }
@@ -774,15 +806,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log('Contenedor creado e insertado');
         }
 
-        // Crear el HTML del list group
+        // Crear el HTML del list group con estilo de pedidos
         listGroupContainer.innerHTML = `
-        <label class="form-label"><strong>Tareas Asignadas (${tareas.length})</strong></label>
-        <div class="list-group" id="tareasListGroup"></div>
+        <h6 class="fw-bold">Tareas Asignadas (${tareas.length})</h6>
+        <ol class="list-group list-group-numbered mt-3" id="tareasListGroup"></ol>
     `;
 
         listGroupContainer.style.display = 'block';
 
-        // Ahora sí buscar el list group (que acabamos de crear)
+        // Buscar el list group que acabamos de crear
         const listGroup = document.getElementById('tareasListGroup');
 
         if (!listGroup) {
@@ -792,28 +824,68 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         console.log('List group encontrado, agregando tareas...');
 
-        // Crear elementos del list group
+        // Crear elementos del list group con el estilo de pedidos
         tareas.forEach((tarea, index) => {
-            const listItem = document.createElement('a');
-            listItem.href = '#';
-            listItem.className = 'list-group-item list-group-item-action';
+            // Determinar el estado y color de borde basado en el estado de la tarea
+            let estadoTarea = tarea.estado || 'Pendiente';
+            let colorBorde;
+            let estadoHtml;
+
+            switch (estadoTarea) {
+                case 'Completado':
+                case 'Finalizado':
+                    colorBorde = '#198754'; // Verde
+                    estadoHtml = '<span class="badge rounded-pill bg-success">Completado</span>';
+                    break;
+                case 'En Progreso':
+                    colorBorde = '#ffc107'; // Amarillo
+                    estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                    break;
+                case 'Pendiente':
+                default:
+                    colorBorde = '#dc3545'; // Rojo
+                    estadoHtml = '<span class="badge rounded-pill bg-danger">Pendiente</span>';
+                    break;
+            }
 
             // Formatear fecha
             let fechaFormateada = 'Sin fecha';
             if (tarea.fecha) {
-                const fecha = new Date(tarea.fecha);
-                if (!isNaN(fecha.getTime())) {
-                    fechaFormateada = fecha.toLocaleDateString('es-ES');
+                try {
+                    const fecha = new Date(tarea.fecha);
+                    if (!isNaN(fecha.getTime())) {
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+                    }
+                } catch (e) {
+                    fechaFormateada = tarea.fecha;
                 }
             }
 
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item d-flex justify-content-between align-items-start tarea-item flex-wrap';
+            listItem.setAttribute('data-tarea-id', tarea.idUsuarioXActividad || index);
+            listItem.setAttribute('data-estado-tarea', estadoTarea);
+            listItem.style.cursor = 'pointer';
+            listItem.style.borderLeft = `4px solid ${colorBorde}`;
+
+            // Estructura similar a la de pedidos
             listItem.innerHTML = `
-            <div class="d-flex w-100 justify-content-between">
-                <h6 class="mb-1">${tarea.nombreServicio || 'Actividad sin nombre'}</h6>
-                <small class="text-muted">${fechaFormateada}</small>
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Tarea #${tarea.idUsuarioXActividad || (index + 1)}</div>
+                <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                <div><strong>🏢 Edificio:</strong> ${tarea.nombreEdificio || "Sin edificio"}</div>
+                <small class="text-muted">🔧 ${tarea.nombreServicio || 'Actividad sin nombre'}</small>
+                <br>
+                <small class="text-muted">📝 ${tarea.observaciones || "Sin observaciones"}</small>
             </div>
-            <p class="mb-1"><strong>Edificio:</strong> ${tarea.nombreEdificio || 'Sin edificio'}</p>
-            <small class="text-muted">${tarea.observaciones || 'Sin observaciones'}</small>
+            <div class="text-end">
+                ${estadoHtml}
+                <br>
+            </div>
         `;
 
             // Agregar event listener para abrir el detalle de la tarea
@@ -824,6 +896,30 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             listGroup.appendChild(listItem);
         });
+    }
+
+// Updated function to get task status HTML (similar to pedidos)
+    function obtenerEstadoTareaHtml(estadoTarea) {
+        let texto = '';
+        let claseColor = '';
+
+        switch (estadoTarea) {
+            case 'Completado':
+            case 'Finalizado':
+                texto = 'Completado';
+                claseColor = 'bg-success';
+                break;
+            case 'En Progreso':
+                texto = 'En Progreso';
+                claseColor = 'bg-warning';
+                break;
+            case 'Pendiente':
+            default:
+                texto = 'Pendiente';
+                claseColor = 'bg-danger';
+        }
+
+        return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
     }
 
 // Función para abrir el detalle de una tarea específica
@@ -1467,7 +1563,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // 🎯 Eventos
-    if (btnSearch) btnSearch.addEventListener('click', loadAllUsers);
     if (btnAll) btnAll.addEventListener('click', loadAllUsers);
     if (btnClear) btnClear.addEventListener('click', clearTable);
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
@@ -1551,6 +1646,95 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     }
 
+
+    async function misTareas()
+    {
+        try {
+            const password = localStorage.getItem('admin_password');
+            console.log('Admin password:', password);
+
+            // First API call - get user by password
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-contrasena', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(password)
+            });
+
+            if (!response.ok) {
+                alert("No tienes tareas asignadas");
+                return;
+            }
+
+            // Read the response once and store the data
+            const userData = await response.json();
+
+            const empleadoInfo = {
+                id: userData.idUsuario || 'N/A',
+                nombre: userData.nombre || 'Sin nombre',
+                dni: userData.nicknameDni || 'Sin DNI'
+            };
+
+            // Clear and add to selected employees
+            empleadosSeleccionados = [];
+            empleadosSeleccionados.push(empleadoInfo);
+
+            const empleadoSeleccionado = empleadosSeleccionados[0];
+
+            const modalVerTask = document.getElementById('modal-VerTask');
+            const inputUser = document.getElementById('verTareaByUser');
+
+            if (!modalVerTask || !inputUser) {
+                console.error('Modal o input no encontrado');
+                return;
+            }
+
+            // Fill the input with employee name
+            inputUser.value = empleadoSeleccionado.nombre;
+            inputUser.disabled = true;
+
+            // Show modal first
+            modalVerTask.style.display = 'flex';
+
+            // Show loading while fetching tasks
+            showLoadingTareas();
+
+            // Second API call - get tasks for this user
+            const response2 = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${empleadoSeleccionado.id}`);
+
+            if (!response2.ok) {
+                throw new Error(`HTTP error! status: ${response2.status}`);
+            }
+
+            // Read the second response
+            const taskData = await response2.json();
+            console.log('Datos de tareas obtenidos de la API:', taskData);
+
+            // Hide loading
+            hideLoadingTareas();
+
+            // Process the API data
+            if (Array.isArray(taskData) && taskData.length > 0) {
+                console.log(`Empleado tiene ${taskData.length} tarea(s) asignada(s)`);
+
+                mostrarListGroupTareas(taskData, empleadoSeleccionado.nombre);
+                console.log('Modal Ver Tareas abierto correctamente');
+
+            } else {
+                // No assigned tasks
+                console.log('No se encontraron tareas asignadas para este empleado');
+                alert("No tienes tareas asignadas");
+                empleadosSeleccionados = [];
+            }
+
+        } catch (error) {
+            console.error('Error en misTareas:', error);
+            hideLoadingTareas();
+            alert('Error al cargar tus tareas: ' + error.message);
+        }
+    }
+
+
+
     // Agregar FUERA del evento btnEditar, junto con los otros event listeners
     if (btnConfirmEdit) {
         btnConfirmEdit.addEventListener('click', async () => {
@@ -1571,6 +1755,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             btnConfirmEdit.style.visibility = 'hidden';
         });
     }
+
+    btnVerMisTasks.addEventListener('click', async () => {
+        await misTareas()
+
+    })
 
 
     btnNewTask.addEventListener('click', async () => {
@@ -1597,6 +1786,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             filtrarUsuariosPorNombre(e.target.value);
         });
     }
+
+    loadAllUsers();
 });
 // ===================================
 // FUNCIONES ESPECÍFICAS PARA LA APLICACIÓN
@@ -1605,14 +1796,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 /**
  * Maneja el loading del botón de búsqueda
  */
-async function handleSearchButton() {
-    await executeWithLoading('btnSearch', async () => {
-        // Aquí va tu lógica de búsqueda
-        console.log('Buscando empleados...');
-        // Simular llamada a API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-    }, 'Buscando...');
-}
+
 
 /**
  * Maneja el loading del botón de nueva tarea

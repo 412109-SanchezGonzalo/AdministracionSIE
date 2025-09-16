@@ -66,11 +66,8 @@
                 <label for="search-name" class="form-label small">Ingrese un empleado :</label>
                 <input type="text" class="form-control form-control-sm" id="search-name" placeholder="Nombre...">
             </div>
-            <div class="col-3">
-                <button class="btn btn-primary btn-sm w-100" id="btnSearch">Todos los Empleados</button>
-            </div>
-            <div class="col-3">
-                <button class="btn btn-success btn-sm w-100" id="btnNewTask" style="background-color: #dc6900">Asignar Tarea</button>
+            <div class="col-6">
+                <button class="btn btn-success btn-sm w-100" id="btnNewTask" style="background-color: #dc6900;">Asignar Tarea</button>
             </div>
 
 
@@ -87,6 +84,9 @@
             </div>
             <div class="col-3">
                 <button class="btn btn-success btn-sm w-100" id="btnVerTask" style="background-color: #78b638">Ver Tareas Asignadas</button>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-success btn-sm w-100" id="btnVerMisTasks" style="background-color: #005488">Mis Tareas Asignadas</button>
             </div>
 
         </div>
@@ -169,7 +169,7 @@
     </div>
 </div>
 
-<!-- Modal de Ver Tarea Asignada - ACTUALIZADO -->
+<!-- Modal de Ver Tarea Asignada - CON LOADING AGREGADO -->
 <div class="modal-overlay-newTask" id="modal-VerTask">
     <div class="modal-content-location">
         <div class="modal-header-container">
@@ -181,6 +181,14 @@
         <div class="mb-3">
             <label for="verTareaByUser" class="form-label">Empleado</label>
             <input type="input" class="form-control" id="verTareaByUser" aria-describedby="username">
+        </div>
+
+        <!-- NUEVO: Loading spinner para las tareas -->
+        <div id="loadingTareas" class="loading d-none text-center mt-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 small">Cargando tareas...</p>
         </div>
 
         <!-- El contenedor para List Group se creará dinámicamente aquí -->
