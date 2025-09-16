@@ -18,8 +18,8 @@ namespace JobOclock_BackEnd.Data.Repositories
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "INSERT INTO ServicioXUsuario (id_usuario, id_servicio, id_edificio, observaciones, fecha) " +
-                "VALUES (@idUsuario, @idServicio, @idEdificio, @observaciones, @fecha); " +
+                "INSERT INTO ServicioXUsuario (id_usuario, id_servicio, id_edificio, observaciones, fecha, fechaFinalizacion , estado) " +
+                "VALUES (@idUsuario, @idServicio, @idEdificio, @observaciones, @fecha,@fechaFinalizacion,@estado); " +
                 "SELECT LAST_INSERT_ID();", conn))
             {
                 cmd.Parameters.AddWithValue("@idUsuario", registro.IdUsuario);
@@ -27,6 +27,8 @@ namespace JobOclock_BackEnd.Data.Repositories
                 cmd.Parameters.AddWithValue("@idEdificio", registro.IdEdificio);
                 cmd.Parameters.AddWithValue("@observaciones", registro.Observaciones);
                 cmd.Parameters.AddWithValue("@fecha", registro.Fecha);
+                cmd.Parameters.AddWithValue("@fechaFinalizacion",registro.FechaFinalizacion);
+                cmd.Parameters.AddWithValue("@estado",registro.Estado);
                 
                 conn.Open();
                 
@@ -56,7 +58,9 @@ namespace JobOclock_BackEnd.Data.Repositories
                                         e.id_edificio,
                                         e.nombre as Edificio,
                                         CONCAT(e.calle, ' ', e.numeracion) as Direccion,
-                                        uax.fecha as Fecha_de_Inicio 
+                                        uax.fecha as Fecha_de_Inicio,
+                                        uax.fechaFinalizacion as Fecha_de_Finalizacion,
+                                        uax.estado as Estado
                                     FROM ServicioXUsuario uax 
                                     JOIN Servicio s ON s.id_servicio = uax.id_servicio 
                                     JOIN Edificio e ON e.id_edificio = uax.id_edificio 
@@ -74,6 +78,8 @@ namespace JobOclock_BackEnd.Data.Repositories
                     var ordNameEdificio = reader.GetOrdinal("Edificio");
                     var ordObservaciones = reader.GetOrdinal("Observaciones");
                     var ordFecha = reader.GetOrdinal("Fecha_de_Inicio");
+                    var ordFechaFinalizacion = reader.GetOrdinal("Fecha_de_Finalizacion");
+                    var ordEstado = reader.GetOrdinal("Estado");
 
                     while (reader.Read())
                     {
@@ -86,7 +92,9 @@ namespace JobOclock_BackEnd.Data.Repositories
                             IdEdificio = reader.GetInt32(ordIdEdificio),
                             NombreEdificio = reader.GetString(ordNameEdificio),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
-                            Fecha = reader.GetDateTime(ordFecha)
+                            Fecha = reader.GetDateTime(ordFecha),
+                            FechaFinalizacion = reader.GetDateTime(ordFechaFinalizacion),
+                            Estado = reader.GetString(ordEstado)
                         });
                     }
                 }
