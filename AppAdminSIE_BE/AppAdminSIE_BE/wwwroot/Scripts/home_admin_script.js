@@ -652,13 +652,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (Array.isArray(data) && data.length > 0) {
                 console.log(`Empleado tiene ${data.length} tarea(s) asignada(s)`);
 
-                if (data.length === 1) {
-                    // Una sola tarea - mostrar directamente en el modal (comportamiento actual)
-                    mostrarTareaEnModal(data[0]);
-                } else {
-                    // Múltiples tareas - mostrar list group
-                    mostrarListGroupTareas(data, nombreEmpleado);
-                }
+                mostrarListGroupTareas(data, nombreEmpleado);
 
                 // Mostrar el modal
                 modalVerTask.style.display = 'flex';

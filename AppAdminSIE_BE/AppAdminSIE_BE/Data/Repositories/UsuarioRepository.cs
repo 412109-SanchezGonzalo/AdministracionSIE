@@ -45,7 +45,7 @@ namespace JobOclock_BackEnd.Data.Repositories
         {
             var list = new List<Usuario>();
             using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand("SELECT id_usuario,CONCAT(apellido, ' ', nombre) as 'FullName',Nickname_dni FROM Usuario WHERE Rol = 'Usuario'", conn);
+            using var cmd = new MySqlCommand("SELECT id_usuario,CONCAT(apellido, ' ', nombre) as 'FullName',Nickname_dni FROM Usuario", conn);
             conn.Open();
             using var reader = cmd.ExecuteReader();
 
