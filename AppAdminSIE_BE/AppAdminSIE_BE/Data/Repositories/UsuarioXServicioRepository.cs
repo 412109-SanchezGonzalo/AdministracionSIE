@@ -102,6 +102,124 @@ namespace JobOclock_BackEnd.Data.Repositories
             return actividades;
         }
 
+
+        public IEnumerable<UsuarioXServicio> GetByFecha(DateTime fecha)
+        {
+            var actividades = new List<UsuarioXServicio>();
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(@"
+                                    SELECT 
+                                        uax.id_servicioxactividad,
+                                        uax.id_usuario,
+                                        s.id_servicio,
+                                        s.descripcion as Servicio,
+                                        uax.observaciones as Observaciones,
+                                        e.id_edificio,
+                                        e.nombre as Edificio,
+                                        CONCAT(e.calle, ' ', e.numeracion) as Direccion,
+                                        uax.fecha as Fecha_de_Inicio,
+                                        uax.fechaFinalizacion as Fecha_de_Finalizacion,
+                                        uax.estado as Estado
+                                    FROM ServicioXUsuario uax 
+                                    JOIN Servicio s ON s.id_servicio = uax.id_servicio 
+                                    JOIN Edificio e ON e.id_edificio = uax.id_edificio 
+                                    WHERE uax.fecha = @fecha", conn))
+            {
+                cmd.Parameters.AddWithValue("@fecha", fecha);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var ordIdUsuarioXActividad = reader.GetOrdinal("id_servicioxactividad");
+                    var ordIdUsuario = reader.GetOrdinal("id_usuario");
+                    var ordIdServicio = reader.GetOrdinal("id_servicio");
+                    var ordNameServicio = reader.GetOrdinal("Servicio");
+                    var ordIdEdificio = reader.GetOrdinal("id_edificio");
+                    var ordNameEdificio = reader.GetOrdinal("Edificio");
+                    var ordObservaciones = reader.GetOrdinal("Observaciones");
+                    var ordFecha = reader.GetOrdinal("Fecha_de_Inicio");
+                    var ordFechaFinalizacion = reader.GetOrdinal("Fecha_de_Finalizacion");
+                    var ordEstado = reader.GetOrdinal("Estado");
+
+                    while (reader.Read())
+                    {
+                        actividades.Add(new UsuarioXServicio
+                        {
+                            IdUsuarioXActividad = reader.GetInt32(ordIdUsuarioXActividad),
+                            IdUsuario = reader.GetInt32(ordIdUsuario),
+                            IdServicio = reader.GetInt32(ordIdServicio),
+                            NombreServicio = reader.GetString(ordNameServicio),
+                            IdEdificio = reader.GetInt32(ordIdEdificio),
+                            NombreEdificio = reader.GetString(ordNameEdificio),
+                            Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
+                            Fecha = reader.GetDateTime(ordFecha),
+                            FechaFinalizacion = reader.IsDBNull(ordFechaFinalizacion) ? null : reader.GetDateTime(ordFechaFinalizacion),
+                            Estado = reader.GetString(ordEstado)
+                        });
+                    }
+                }
+            }
+            return actividades;
+        }
+
+        public IEnumerable<UsuarioXServicio> GetByEstado(string estado)
+        {
+            var actividades = new List<UsuarioXServicio>();
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(@"
+                                    SELECT 
+                                        uax.id_servicioxactividad,
+                                        uax.id_usuario,
+                                        s.id_servicio,
+                                        s.descripcion as Servicio,
+                                        uax.observaciones as Observaciones,
+                                        e.id_edificio,
+                                        e.nombre as Edificio,
+                                        CONCAT(e.calle, ' ', e.numeracion) as Direccion,
+                                        uax.fecha as Fecha_de_Inicio,
+                                        uax.fechaFinalizacion as Fecha_de_Finalizacion,
+                                        uax.estado as Estado
+                                    FROM ServicioXUsuario uax 
+                                    JOIN Servicio s ON s.id_servicio = uax.id_servicio 
+                                    JOIN Edificio e ON e.id_edificio = uax.id_edificio 
+                                    WHERE uax.estado = @estado", conn))
+            {
+                cmd.Parameters.AddWithValue("@estado", estado);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var ordIdUsuarioXActividad = reader.GetOrdinal("id_servicioxactividad");
+                    var ordIdUsuario = reader.GetOrdinal("id_usuario");
+                    var ordIdServicio = reader.GetOrdinal("id_servicio");
+                    var ordNameServicio = reader.GetOrdinal("Servicio");
+                    var ordIdEdificio = reader.GetOrdinal("id_edificio");
+                    var ordNameEdificio = reader.GetOrdinal("Edificio");
+                    var ordObservaciones = reader.GetOrdinal("Observaciones");
+                    var ordFecha = reader.GetOrdinal("Fecha_de_Inicio");
+                    var ordFechaFinalizacion = reader.GetOrdinal("Fecha_de_Finalizacion");
+                    var ordEstado = reader.GetOrdinal("Estado");
+
+                    while (reader.Read())
+                    {
+                        actividades.Add(new UsuarioXServicio
+                        {
+                            IdUsuarioXActividad = reader.GetInt32(ordIdUsuarioXActividad),
+                            IdUsuario = reader.GetInt32(ordIdUsuario),
+                            IdServicio = reader.GetInt32(ordIdServicio),
+                            NombreServicio = reader.GetString(ordNameServicio),
+                            IdEdificio = reader.GetInt32(ordIdEdificio),
+                            NombreEdificio = reader.GetString(ordNameEdificio),
+                            Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
+                            Fecha = reader.GetDateTime(ordFecha),
+                            FechaFinalizacion = reader.IsDBNull(ordFechaFinalizacion) ? null : reader.GetDateTime(ordFechaFinalizacion),
+                            Estado = reader.GetString(ordEstado)
+                        });
+                    }
+                }
+            }
+            return actividades;
+        }
+
+
         public void Update(int idServicioXUsuario, int idServicio,int idEdificio, DateTime fecha, string? observaciones)
         {
             using (var conn = new MySqlConnection(_connectionString))

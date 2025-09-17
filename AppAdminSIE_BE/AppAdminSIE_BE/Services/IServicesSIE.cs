@@ -26,7 +26,8 @@ namespace JobOclock_BackEnd.Services
         // PEDIDO X PRODUCTO
 
         IEnumerable<PedidoXProducto> GetAllPedidoXProductos();
-        IEnumerable<PedidoXProducto> GetAllPedidoXProductosSinFacturar();
+        IEnumerable<PedidoXProducto> GetAllPedidoXProductosPorFecha(DateTime fecha);
+        IEnumerable<PedidoXProducto> GetAllPedidoXProductosPorEstado(string estado);
 
         void AddPedidoXProducto(PedidoXProducto pedidoxproducto);
 
@@ -48,6 +49,8 @@ namespace JobOclock_BackEnd.Services
 
         // USUARIO X Servicio
         IEnumerable<UsuarioXServicio> GetByUsuarioXActividad(int idUsuario);
+        IEnumerable<UsuarioXServicio> GetByFecha(DateTime fecha);
+        IEnumerable<UsuarioXServicio> GetByEstado(string estado);
         int AddUsuarioXActividad(UsuarioXServicio registro);
         void UpdateUsuarioXActividad(int idServicioXUsuario, int idServicio,int idEdificio,DateTime fecha , string? observaciones);
         void UpdateObservaciones(string observaciones, int idServicioXUsuario);

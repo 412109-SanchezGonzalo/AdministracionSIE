@@ -76,9 +76,13 @@ namespace JobOclock_BackEnd.Services
         {
             return _pedidoXProductoRepository.GetAllPedidoXProductos();
         }
-        public IEnumerable<PedidoXProducto> GetAllPedidoXProductosSinFacturar()
+        public IEnumerable<PedidoXProducto> GetAllPedidoXProductosPorFecha(DateTime fecha)
         {
-            return _pedidoXProductoRepository.GetAllPedidoXProductosSinFacturar();
+            return _pedidoXProductoRepository.GetAllPedidoXProductosPorFecha(fecha);
+        }
+        public IEnumerable<PedidoXProducto> GetAllPedidoXProductosPorEstado(string estado)
+        {
+            return _pedidoXProductoRepository.GetAllPedidoXProductosPorEstado(estado);
         }
         public void AddPedidoXProducto(PedidoXProducto pedidoxproducto)
         {
@@ -147,6 +151,14 @@ namespace JobOclock_BackEnd.Services
         public IEnumerable<UsuarioXServicio> GetByUsuarioXActividad(int idUsuario)
         {
             return _usuarioXActividadRepository.GetByUsuario(idUsuario);
+        }
+        public IEnumerable<UsuarioXServicio> GetByFecha(DateTime fecha)
+        {
+            return _usuarioXActividadRepository.GetByFecha(fecha);
+        }
+        public IEnumerable<UsuarioXServicio> GetByEstado(string estado)
+        {
+            return _usuarioXActividadRepository.GetByEstado(estado);
         }
         public int AddUsuarioXActividad(UsuarioXServicio registro)
         {

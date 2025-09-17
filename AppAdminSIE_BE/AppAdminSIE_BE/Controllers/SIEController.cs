@@ -136,12 +136,13 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         // PEDIDO X PRODUCTO
-        [HttpGet("Obtener-todos-los-pedidoxproducto-sin-facturar")]
-        public ActionResult<List<PedidoXProducto>> GetPedidosSinFacturar()
+        
+        [HttpGet("Obtener-todos-los-pedidoxproducto")]
+        public ActionResult<List<PedidoXProducto>> GetPedidos()
         {
             try
             {
-                var lista = _service.GetAllPedidoXProductosSinFacturar();
+                var lista = _service.GetAllPedidoXProductos();
                 if (lista != null)
                 {
                     return Ok(lista);
@@ -150,12 +151,28 @@ namespace JobOclock_BackEnd.Controllers
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
-        [HttpGet("Obtener-todos-los-pedidoxproducto")]
-        public ActionResult<List<PedidoXProducto>> GetPedidos()
+
+        [HttpGet("Obtener-todos-los-pedidoxproducto-por-fecha")]
+        public ActionResult<List<PedidoXProducto>> GetPedidosPorFecha([FromBody] DateTime fecha)
         {
             try
             {
-                var lista = _service.GetAllPedidoXProductos();
+                var lista = _service.GetAllPedidoXProductosPorFecha(fecha);
+                if (lista != null)
+                {
+                    return Ok(lista);
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpGet("Obtener-todos-los-pedidoxproducto-por-estado")]
+        public ActionResult<List<PedidoXProducto>> GetPedidosPorEstado([FromBody] string estado)
+        {
+            try
+            {
+                var lista = _service.GetAllPedidoXProductosPorEstado(estado);
                 if (lista != null)
                 {
                     return Ok(lista);
@@ -374,6 +391,27 @@ namespace JobOclock_BackEnd.Controllers
             try
             {
                 return Ok(_service.GetByUsuarioXActividad(userId));
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpGet("Obtener-servicioXusuario-por-fecha")]
+        public ActionResult<string> GetActividadXUsuarioPorFecha([FromQuery] DateTime fecha)
+        {
+            try
+            {
+                return Ok(_service.GetByFecha(fecha));
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+
+        [HttpGet("Obtener-servicioXusuario-por-estado")]
+        public ActionResult<string> GetActividadXUsuarioPorEstado([FromQuery] string estado)
+        {
+            try
+            {
+                return Ok(_service.GetByEstado(estado));
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
