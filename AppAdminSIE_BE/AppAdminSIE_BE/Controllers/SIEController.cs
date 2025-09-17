@@ -153,7 +153,7 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         [HttpGet("Obtener-todos-los-pedidoxproducto-por-fecha")]
-        public ActionResult<List<PedidoXProducto>> GetPedidosPorFecha([FromBody] DateTime fecha)
+        public ActionResult<List<PedidoXProducto>> GetPedidosPorFecha([FromQuery] DateTime fecha)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         [HttpGet("Obtener-todos-los-pedidoxproducto-por-estado")]
-        public ActionResult<List<PedidoXProducto>> GetPedidosPorEstado([FromBody] string estado)
+        public ActionResult<List<PedidoXProducto>> GetPedidosPorEstado([FromQuery] string estado)
         {
             try
             {
