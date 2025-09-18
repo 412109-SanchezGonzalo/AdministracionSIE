@@ -43,7 +43,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                 "SELECT LAST_INSERT_ID();", conn))
             {
                 cmd.Parameters.AddWithValue("@FechaEntrega",fechaEntrega);
-                cmd.Parameters.AddWithValue("@Estado", "Pendiente");
+                cmd.Parameters.AddWithValue("@Estado", "Pendiente - Preparar");
                 DateTime fechaCreacion = DateTime.Now;
                 cmd.Parameters.AddWithValue("@fechaCreacion", fechaCreacion);
 

@@ -30,53 +30,12 @@
     </nav>
     <!-- Home Screen -->
     <div class="col-12 d-flex flex-column justify-content-center align-items-center gap-3 vh-100">
-        <button class="btn btn-primary btn-sm" style="width: 250px;" id="btnTareasPendientes">Ver Tareas Pendientes</button>
-        <button class="btn btn-primary btn-sm" style="width: 250px;" id="btnPedidos">Pedidos</button>
+        <button class="btn btn-primary btn-sm" style="width: 250px;" id="btnPedidos">Cargar Nuevo Pedido</button>
     </div>
 
-    <!-- Modal Tareas Pendientes -->
-    <!-- Modal de Ver Tarea Asignada - ACTUALIZADO -->
-    <div class="modal-overlay-newTask" id="modal-VerTask">
-        <div class="modal-content-location">
-            <div class="modal-header-container">
-                <h2>📝 Planificación</h2>
-                <button type="button" class="btn-close" id="closeVerTaskModalBtn" aria-label="Close"></button>
-            </div>
-            <!-- El contenedor para List Group se creará dinámicamente aquí -->
+    <!-- Modal Cargar Pedido -->
 
-            <!-- Formulario original (se muestra para tarea individual o detalle) -->
-            <div id="formContainer">
-                <div class="mb-3">
-                    <label for="VerMenuActivities" class="form-label">Actividad</label>
-                    <div class="input-group mb-3" id="VerMenuActivities">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="activitySelectedByUser"></button>
-                        <ul class="dropdown-menu">
-                        </ul>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="VerMenuEdificios" class="form-label">Edificio</label>
-                    <div class="input-group mb-3" id="VerMenuEdificios">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelectedByUser"></button>
-                        <ul class="dropdown-menu">
-                        </ul>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="VerDateActivityByUser" class="form-label d-block">Fecha de Actividad</label>
-                    <input type="date" class="form-control-sm" id="verDateActivityByUser">
-                </div>
-                <div class="mb-3">
-                    <label for="VerCommentsByUser" class="form-label">Observaciones</label>
-                    <textarea class="form-control" id="VerCommentsByUser" rows="3"></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Modal Ver Pedidos Registrados -->
-    <div class="modal fade" id="modalPedidos" tabindex="-1" aria-labelledby="modalPedidosLabel" aria-hidden="true">
+    <div class="modal fade" id="modalRegistrarPedido" tabindex="-1" aria-labelledby="modalRegistrarPedido" aria-hidden="true">
         <div class="modal-dialog modal-xl"
              style="display: flex !important;
                 align-items: center !important;
@@ -84,29 +43,85 @@
                 min-height: calc(100vh - 1rem) !important;
                 margin: 0.5rem auto !important;">
             <div class="modal-content">
-
-                <!-- Encabezado -->
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalPedidosLabel">
-                        📋 Pedidos
-                    </h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Búsqueda de Productos y Pedidos</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <!-- Cuerpo -->
                 <div class="modal-body">
-                    <h6 class="fw-bold">Pedidos Activos</h6>
+                    <div class="search-container">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-6">
+                                <label for="search-product" class="form-label small">Ingrese un producto :</label>
+                                <input type="text" class="form-control form-control-sm" id="search-product" placeholder="Producto...">
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-1">
+                            <div class="col-6">
+                                <div class="w-100">
+                                    <small class="text-muted">Productos:
+                                        <span id="products-count" class="badge bg-primary badge-xs">0</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <ol class="list-group list-group-numbered mt-3" id="listaPedidos">
-                        <!-- Aquí se cargan dinámicamente los pedidos -->
-                    </ol>
+                    <div class="table-container">
+                        <div id="loading" class="loading d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2 small">Cargando...</p>
+                        </div>
+                        <div id="error-message" class="error-message d-none">
+                            <h6>❌ Error</h6>
+                            <p class="small" id="error-details"></p>
+                            <button class="btn btn-outline-primary btn-sm" id="btnRetry">🔄 Reintentar</button>
+                        </div>
+                        <div id="no-data-message" class="text-center p-3 d-none">
+                            <h6 class="text-muted">📭 Sin datos</h6>
+                            <p class="small text-muted">No se encontraron productos.</p>
+                        </div>
+                        <div id="table-wrapper" class="d-none">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover compact-table">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" style="width: 15%;background-color: black;">ID</th>
+                                        <th scope="col" style="width: 40%;background-color: black;">Producto</th>
+                                        <th scope="col" style="width: 15%;background-color: black;">IVA</th>
+                                        <th scope="col" style="width: 20%;background-color: black;">Cantidad</th>
+                                        <th scope="col" style="width: 40%;background-color: black;">Acciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="table-body">
+                                    <tr>
+                                        <td>123</td>
+                                        <td>Producto de Ejemplo</td>
+                                        <td>21%</td>
+                                        <td>5 Unidades</td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetallesPedido">
+                                                Ver Detalles
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnContinuarRegistro">Continuar</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modalDetallesPedido" tabindex="-1" aria-labelledby="modalDetallesPedidoLabel" aria-hidden="true">
+    <!-- Modal Confirmar Registro de Pedido -->
+
+    <div class="modal fade" id="miModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl"
              style="display: flex !important;
                 align-items: center !important;
@@ -114,59 +129,72 @@
                 min-height: calc(100vh - 1rem) !important;
                 margin: 0.5rem auto !important;">
             <div class="modal-content" style="width: 100%; max-width: 1140px;">
-                <!-- Encabezado -->
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalDetallesPedidoLabel">
-                        📦 Detalles del Pedido
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Nuevo Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-
-                <!-- Cuerpo -->
                 <div class="modal-body">
-                    <!-- Información general del pedido -->
-                    <div id="detallesPedidoInfo" class="mb-4">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-
-                    <!-- Tabla de productos -->
-                    <h6 class="fw-bold mb-3">Productos del Pedido</h6>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
+                    <div class="table-responsive mb-3">
+                        <table class="table table-striped" id="tablaProductos">
+                            <thead>
                             <tr>
-                                <th scope="col" style="width: 10%;">ID</th>
-                                <th scope="col" style="width: 40%;">Producto</th>
-                                <th scope="col" style="width: 15%;">Cantidad</th>
-                                <th scope="col" style="width: 15%;">Unidad</th>
-                                <th scope="col" style="width: 20%;">Entregado</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
                             </tr>
                             </thead>
-                            <tbody id="tablaDetallesProductos">
-                            <!-- Se llena dinámicamente -->
+                            <tbody id="tablaProductosBody">
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                <!-- Observaciones -->
-                <div class="mb-3">
-                    <label for="observacionesExtras" class="form-label">Agregar Observaciones :</label>
-                    <textarea class="form-control" id="observacionesExtras" rows="3"></textarea>
-                </div>
+                    <div class="mb-3">
+                        <label for="menuEdificios" class="form-label">Entregar en Edificio</label>
+                        <div class="input-group mb-3" id="menuEdificios">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelected">Seleccione un edificio</button>
+                            <ul class="dropdown-menu">
+                            </ul>
+                        </div>
+                    </div>
 
-                <!-- Pie -->
+                    <div class="mb-3">
+                        <label for="fechaEntrega" class="form-label">Fecha de Entrega</label>
+                        <div class="col-md-4 col-sm-6">
+                            <input type="date" class="form-control form-control-sm" id="fechaEntrega">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" rows="3"></textarea>
+                    </div>
+                </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnVolverAPedidosRegistrados">
-                        <i class="bi bi-arrow-left"></i> ← Volver
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnVolver">← Volver</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarPedidos">Confirmar</button>
                 </div>
-                <button type="button" class="btn btn-primary" id="btnConfirmarEntrega" style="background-color: green">Confirmar Entrega</button>
             </div>
         </div>
     </div>
 
+
+<div id="loadingSpinner" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 2000;">
+    <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Cargando ...</span>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-message">
+                <!-- El mensaje se setea desde JS -->
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+</body>
     <!-- Scripts de Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script type="module" src="../Scripts/home_user_script.js"></script>
