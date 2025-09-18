@@ -1854,9 +1854,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         estadoContainer.innerHTML = `
         <div class="mb-2">
             <strong>Estado de la tarea:</strong><br>
-            ${estadoHtml}
+            <span id="estadoTarea">${estadoHtml}</span>
         </div>
-    `;
+        `;
 
         // Llenar los campos con los datos de la tarea
         const activityButton = document.getElementById('activitySelectedByMe');
@@ -1954,132 +1954,191 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-// NUEVA función para configurar el botón según el estado de la tarea
+// Configura los botones y el campo observaciones según el estado
+    // Configura los botones y el campo observaciones según el estado
     function configurarBotonSegunEstado(estadoTarea) {
         const btnConfirmarCambios = document.getElementById('btnConfirmarCambios');
+        const observacionesInput = document.getElementById('VerCommentsByMe');
 
-        if (!btnConfirmarCambios) return;
+        if (!btnConfirmarCambios || !observacionesInput) return;
 
-        // Limpiar cualquier event listener previo
-        const newButton = btnConfirmarCambios.cloneNode(true);
-        btnConfirmarCambios.parentNode.replaceChild(newButton, btnConfirmarCambios);
+        // 🔹 Id correcto de la tarea seleccionada
+        const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
 
+        // Reset contenedor de botones
+        let btnsContainer = document.getElementById('misBtnsContainer');
+        if (!btnsContainer) {
+            btnsContainer = document.createElement('div');
+            btnsContainer.id = 'misBtnsContainer';
+            btnsContainer.className = 'd-flex flex-wrap justify-content-between gap-2 mt-3';
+
+            btnConfirmarCambios.parentNode.insertBefore(btnsContainer, btnConfirmarCambios);
+            btnsContainer.appendChild(btnConfirmarCambios);
+        }
+        btnsContainer.innerHTML = ""; // limpiar botones
+
+        // --- ESTADO: PENDIENTE ---
         if (estadoTarea === 'Pendiente') {
-            // Configurar como botón "Comenzar Tarea"
-            newButton.textContent = 'Comenzar Tarea';
-            newButton.style.backgroundColor = '#ffc107'; // Amarillo
-            newButton.style.borderColor = '#ffc107';
+            observacionesInput.disabled = true;
 
-            // Event listener para comenzar tarea
-            newButton.addEventListener('click', async () => {
-                await iniciarTarea();
+            const btnComenzar = document.createElement('button');
+            btnComenzar.textContent = "Comenzar Tarea";
+            btnComenzar.className = "btn btn-warning";
+            btnComenzar.addEventListener("click", async () => {
+                try {
+                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: idServicioXUsuario, newStatus: "En Progreso" })
+                    });
+
+                    if (!response.ok) throw new Error("Error al actualizar estado");
+
+                    tareaSeleccionada[0].estado = "En Progreso";
+
+                    // 🔹 Refresco badge
+                    const spanEstado = document.getElementById("estadoTarea");
+                    if (spanEstado) {
+                        spanEstado.innerHTML = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                    }
+
+                    configurarBotonSegunEstado("En Progreso");
+                    mostrarMisListGroupTareas([tareaSeleccionada[0]], "");
+                } catch (error) {
+                    console.error("❌ Error:", error);
+                }
             });
 
-        } else {
-            // Configurar como botón "Confirmar Cambios" normal
-            newButton.textContent = 'Confirmar Cambios';
-            newButton.style.backgroundColor = '#005288'; // Color original
-            newButton.style.borderColor = '#005288';
+            btnsContainer.appendChild(btnComenzar);
 
-            // Event listener para confirmar cambios
-            newButton.addEventListener('click', async () => {
+            // --- ESTADO: EN PROGRESO ---
+        } else if (estadoTarea === 'En Progreso') {
+            observacionesInput.disabled = false;
+
+            btnConfirmarCambios.textContent = "Confirmar Cambios";
+            btnConfirmarCambios.className = "btn btn-primary";
+            btnConfirmarCambios.disabled = false;
+            btnConfirmarCambios.onclick = async () => {
                 await confirmarCambiosMisTareas();
+            };
+
+            // Botón finalizar tarea
+            const btnFinalizar = document.createElement('button');
+            btnFinalizar.textContent = "Finalizar Tarea";
+            btnFinalizar.className = "btn btn-success";
+            btnFinalizar.addEventListener("click", async () => {
+                try {
+                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: idServicioXUsuario, newStatus: "Completado" })
+                    });
+
+                    if (!response.ok) throw new Error("Error al actualizar estado");
+
+                    tareaSeleccionada[0].estado = "Completado";
+
+                    // 🔹 Refresco badge
+                    const spanEstado = document.getElementById("estadoTarea");
+                    if (spanEstado) {
+                        spanEstado.innerHTML = '<span class="badge rounded-pill bg-success">Completado</span>';
+                    }
+
+                    configurarBotonSegunEstado("Completado");
+                    mostrarMisListGroupTareas([tareaSeleccionada[0]], "");
+                } catch (error) {
+                    console.error("❌ Error:", error);
+                }
             });
+
+
+            btnsContainer.appendChild(btnConfirmarCambios);
+            btnsContainer.appendChild(btnFinalizar);
+
+            // --- ESTADO: FINALIZADO ---
+        } else if (estadoTarea === 'Finalizado') {
+            observacionesInput.disabled = true;
+
+            btnConfirmarCambios.textContent = "Confirmar Cambios";
+            btnConfirmarCambios.className = "btn btn-primary";
+            btnConfirmarCambios.disabled = true;
+
+            btnsContainer.appendChild(btnConfirmarCambios);
         }
     }
 
-// NUEVA función para iniciar tarea (cambiar estado a "En Progreso")
+
+    // Inicia la tarea → cambia estado a "En Proceso"
     async function iniciarTarea() {
         try {
-            console.log("🔄 Iniciando tarea...");
-
-            if (!tareaSeleccionada[0]) {
-                throw new Error("No hay tarea seleccionada");
-            }
-
+            if (!tareaSeleccionada[0]) throw new Error("No hay tarea seleccionada");
             const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-            const observacionesInput = document.getElementById('VerCommentsByMe');
 
-            const datos = {
-                idServicioXActividad: idServicioXUsuario,
-                idServicio: tareaSeleccionada[0].idServicio,
-                idEdificio: tareaSeleccionada[0].idEdificio,
-                fecha: tareaSeleccionada[0].fecha,
-                observaciones: observacionesInput.value.trim(),
-                estado: 'En Progreso' // Cambiar estado
-            };
-
-            console.log("📤 Iniciando tarea con datos:", datos);
-
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+            const datos = { id: idServicioXUsuario, newStatus: "En Proceso" };
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
             });
 
             if (!response.ok) throw new Error(`Error: ${response.status}`);
+            tareaSeleccionada[0].estado = "En Proceso";
 
-            const result = await response.text();
-            console.log("✅ Tarea iniciada:", result);
-
-            // Actualizar el estado localmente
-            tareaSeleccionada[0].estado = 'En Progreso';
-
-            // Actualizar la interfaz
             abrirDetalleMiTarea(tareaSeleccionada[0], 0, '');
+            alert("✅ Tarea iniciada y ahora está en proceso.");
+        } catch (err) {
+            console.error("❌ Error al iniciar tarea:", err);
+            alert("Error al iniciar tarea: " + err.message);
+        }
+    }
+    // Confirma cambios de observaciones
+    async function confirmarCambiosMisTareas() {
+        try {
+            if (!tareaSeleccionada[0]) throw new Error("No hay tarea seleccionada");
+            const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
+            const observacionesInput = document.getElementById('VerCommentsByMe');
 
-            alert("Tarea iniciada correctamente. Ahora está en progreso.");
+            const datos = {
+                idServicioXUsuario: idServicioXUsuario,
+                observaciones: observacionesInput.value.trim()
+            };
 
-        } catch (error) {
-            console.error("❌ Error al iniciar tarea:", error);
-            alert("Error al iniciar tarea: " + error.message);
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-observaciones-servicioxusuario', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+            alert("✅ Observaciones actualizadas correctamente.");
+        } catch (err) {
+            console.error("❌ Error al confirmar cambios:", err);
+            alert("Error al confirmar cambios: " + err.message);
         }
     }
 
-// NUEVA función separada para confirmar cambios (reutiliza la lógica anterior)
-    async function confirmarCambiosMisTareas() {
+    // Finaliza la tarea → cambia estado a "Finalizado"
+    async function finalizarTarea() {
         try {
-            console.log("🔍 Confirmando cambios de mis tareas...");
-
-            if (!tareaSeleccionada[0]) {
-                throw new Error("No hay tarea seleccionada");
-            }
-
+            if (!tareaSeleccionada[0]) throw new Error("No hay tarea seleccionada");
             const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-            const observacionesInput = document.getElementById('VerCommentsByMe');
 
-            // Solo enviamos las observaciones ya que es lo único que se puede editar
-            const datos = {
-                idServicioXActividad: idServicioXUsuario,
-                idServicio: tareaSeleccionada[0].idServicio, // Mantener valores originales
-                idEdificio: tareaSeleccionada[0].idEdificio, // Mantener valores originales
-                fecha: tareaSeleccionada[0].fecha, // Mantener valores originales
-                observaciones: observacionesInput.value.trim() // Solo esto cambia
-            };
-
-            console.log("📤 Enviando solo cambio de observaciones:", datos);
-
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+            const datos = { id: idServicioXUsuario, newStatus: "Finalizado" };
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
             });
 
             if (!response.ok) throw new Error(`Error: ${response.status}`);
+            tareaSeleccionada[0].estado = "Finalizado";
 
-            const result = await response.text();
-            console.log("✅ Observaciones actualizadas:", result);
-
-            // Cerrar modal después de confirmar
-            document.getElementById('modal-VerMisTasks').style.display = "none";
-            alert("Tus observaciones han sido actualizadas exitosamente");
-
-        } catch (error) {
-            console.error("❌ Error al actualizar observaciones:", error);
-            alert("Error al actualizar observaciones: " + error.message);
+            abrirDetalleMiTarea(tareaSeleccionada[0], 0, '');
+            alert("✅ Tarea finalizada correctamente.");
+        } catch (err) {
+            console.error("❌ Error al finalizar tarea:", err);
+            alert("Error al finalizar tarea: " + err.message);
         }
-
-        tareaSeleccionada = [];
     }
 
 // MODIFICAR la función misTareas() existente para usar el modal correcto:
@@ -2172,54 +2231,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-// Event listener para el botón "Confirmar Cambios" en "Mis Tareas"
-    const btnConfirmarCambios = document.getElementById('btnConfirmarCambios');
-    if (btnConfirmarCambios) {
-        btnConfirmarCambios.addEventListener('click', async () => {
-            try {
-                console.log("🔍 Confirmando cambios de mis tareas...");
 
-                if (!tareaSeleccionada[0]) {
-                    throw new Error("No hay tarea seleccionada");
-                }
-
-                const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-                const observacionesInput = document.getElementById('VerCommentsByMe');
-
-                // Solo enviamos las observaciones ya que es lo único que se puede editar
-                const datos = {
-                    idServicioXActividad: idServicioXUsuario,
-                    idServicio: tareaSeleccionada[0].idServicio, // Mantener valores originales
-                    idEdificio: tareaSeleccionada[0].idEdificio, // Mantener valores originales
-                    fecha: tareaSeleccionada[0].fecha, // Mantener valores originales
-                    observaciones: observacionesInput.value.trim() // Solo esto cambia
-                };
-
-                console.log("📤 Enviando solo cambio de observaciones:", datos);
-
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
-
-                if (!response.ok) throw new Error(`Error: ${response.status}`);
-
-                const result = await response.text();
-                console.log("✅ Observaciones actualizadas:", result);
-
-                // Cerrar modal después de confirmar
-                document.getElementById('modal-VerMisTasks').style.display = "none";
-                alert("Tus observaciones han sido actualizadas exitosamente");
-
-            } catch (error) {
-                console.error("❌ Error al actualizar observaciones:", error);
-                alert("Error al actualizar observaciones: " + error.message);
-            }
-
-            tareaSeleccionada = [];
-        });
-    }
 
 
 
