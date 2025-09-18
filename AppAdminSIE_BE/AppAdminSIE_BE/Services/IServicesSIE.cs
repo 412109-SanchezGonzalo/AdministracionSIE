@@ -54,6 +54,7 @@ namespace JobOclock_BackEnd.Services
         int AddUsuarioXActividad(UsuarioXServicio registro);
         void UpdateUsuarioXActividad(int idServicioXUsuario, int idServicio,int idEdificio,DateTime fecha , string? observaciones);
         void UpdateObservaciones(string observaciones, int idServicioXUsuario);
+        void ChangeStatus(int idServicioXUsuario, string nuevoEstado);
         void DeleteServicioXUsuario(int idServicioXUsuario);
 
     }

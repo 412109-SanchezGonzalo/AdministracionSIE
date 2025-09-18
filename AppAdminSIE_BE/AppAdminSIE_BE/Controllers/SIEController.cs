@@ -470,6 +470,26 @@ namespace JobOclock_BackEnd.Controllers
             }
         }
 
+
+        [HttpPut("Editar-estado-servicioxusuario")]
+        public ActionResult UpdateStatusServicioXUsuario([FromBody] UpdateStatusServicioXUsuario updateStatusServicioXUsuario)
+        {
+            try
+            {
+                _service.ChangeStatus(updateStatusServicioXUsuario.Id, updateStatusServicioXUsuario.NewStatus);
+                return Ok("Estado Actualizado con exito !");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
         [HttpDelete("Eliminar-servicioxusuario")]
         public ActionResult DeleteServicioXUsuario([FromBody] int idUsuario)
         {

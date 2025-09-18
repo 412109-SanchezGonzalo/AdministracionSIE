@@ -254,6 +254,21 @@ namespace JobOclock_BackEnd.Data.Repositories
             }
         }
 
+        public void ChangeStatus(int idServicioXUsuario, string nuevoEstado)
+        {
+            using (var conn = new MySqlConnection(_connectionString))
+            using (var cmd = new MySqlCommand(
+                "UPDATE ServicioXUsuario SET estado = @estado " +
+                "WHERE id_servicioxactividad = @idServicioXUsuario", conn))
+            {
+                cmd.Parameters.AddWithValue("@estado", nuevoEstado);
+                cmd.Parameters.AddWithValue("@idServicioXUsuario", idServicioXUsuario);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public void Delete(int idServicioXUsuario)
         {
             using (var conn = new MySqlConnection(_connectionString))

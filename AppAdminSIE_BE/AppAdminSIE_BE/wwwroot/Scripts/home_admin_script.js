@@ -1647,13 +1647,448 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-    async function misTareas()
-    {
+    // Agregar estas funciones después de la función misTareas() existente
+
+    // Función específica para mostrar loading en modal "Mis Tareas"
+    function showLoadingMisTareas() {
+        const loadingMisTareas = document.getElementById('loadingMisTareas');
+        if (loadingMisTareas) {
+            loadingMisTareas.classList.remove('d-none');
+        }
+
+        // Ocultar contenido mientras carga
+        const miFormContainer = document.getElementById('miFormContainer');
+        if (miFormContainer) {
+            miFormContainer.style.display = 'none';
+        }
+
+        // Ocultar list group si existe
+        const miListGroupContainer = document.getElementById('miListGroupContainer');
+        if (miListGroupContainer) {
+            miListGroupContainer.style.display = 'none';
+        }
+    }
+
+// Función específica para ocultar loading en modal "Mis Tareas"
+    function hideLoadingMisTareas() {
+        const loadingMisTareas = document.getElementById('loadingMisTareas');
+        if (loadingMisTareas) {
+            loadingMisTareas.classList.add('d-none');
+        }
+    }
+
+// Función para mostrar el list group de "Mis Tareas"
+    function mostrarMisListGroupTareas(tareas, nombreEmpleado) {
+        console.log('Mostrando mis tareas list group con', tareas.length, 'tareas');
+
+        // Ocultar el formulario original
+        const miFormContainer = document.getElementById('miFormContainer');
+        if (miFormContainer) {
+            miFormContainer.style.display = 'none';
+        }
+
+        // Buscar o crear el contenedor del list group para "Mis Tareas"
+        let miListGroupContainer = document.getElementById('miListGroupContainer');
+
+        if (!miListGroupContainer) {
+            console.log('Creando contenedor de mis tareas list group...');
+
+            // Crear el contenedor
+            miListGroupContainer = document.createElement('div');
+            miListGroupContainer.id = 'miListGroupContainer';
+            miListGroupContainer.className = 'mb-3';
+
+            // Buscar dónde insertarlo (después del input del usuario)
+            const userInputDiv = document.getElementById('verMiTareaByUser').parentNode;
+            const modalContent = userInputDiv.parentNode;
+
+            // Insertar después del div del input del usuario
+            modalContent.insertBefore(miListGroupContainer, userInputDiv.nextSibling);
+        }
+
+        // Crear el HTML del list group
+        miListGroupContainer.innerHTML = `
+        <h6 class="fw-bold">Mis Tareas Asignadas (${tareas.length})</h6>
+        <ol class="list-group list-group-numbered mt-3" id="misTareasListGroup"></ol>
+    `;
+
+        miListGroupContainer.style.display = 'block';
+
+        // Buscar el list group que acabamos de crear
+        const listGroup = document.getElementById('misTareasListGroup');
+
+        if (!listGroup) {
+            console.error('Error: No se pudo crear el elemento misTareasListGroup');
+            return;
+        }
+
+        // Crear elementos del list group
+        tareas.forEach((tarea, index) => {
+            // Determinar el estado y color de borde
+            let estadoTarea = tarea.estado || 'Pendiente';
+            let colorBorde;
+            let estadoHtml;
+
+            switch (estadoTarea) {
+                case 'Completado':
+                case 'Finalizado':
+                    colorBorde = '#198754';
+                    estadoHtml = '<span class="badge rounded-pill bg-success">Completado</span>';
+                    break;
+                case 'En Progreso':
+                    colorBorde = '#ffc107';
+                    estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                    break;
+                case 'Pendiente':
+                default:
+                    colorBorde = '#dc3545';
+                    estadoHtml = '<span class="badge rounded-pill bg-danger">Pendiente</span>';
+                    break;
+            }
+
+            // Formatear fecha
+            let fechaFormateada = 'Sin fecha';
+            if (tarea.fecha) {
+                try {
+                    const fecha = new Date(tarea.fecha);
+                    if (!isNaN(fecha.getTime())) {
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+                    }
+                } catch (e) {
+                    fechaFormateada = tarea.fecha;
+                }
+            }
+
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item d-flex justify-content-between align-items-start tarea-item flex-wrap';
+            listItem.setAttribute('data-tarea-id', tarea.idUsuarioXActividad || index);
+            listItem.setAttribute('data-estado-tarea', estadoTarea);
+            listItem.style.cursor = 'pointer';
+            listItem.style.borderLeft = `4px solid ${colorBorde}`;
+
+            listItem.innerHTML = `
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Mi Tarea #${tarea.idUsuarioXActividad || (index + 1)}</div>
+                <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                <div><strong>🏢 Edificio:</strong> ${tarea.nombreEdificio || "Sin edificio"}</div>
+                <small class="text-muted">🔧 ${tarea.nombreServicio || 'Actividad sin nombre'}</small>
+                <br>
+                <small class="text-muted">📝 ${tarea.observaciones || "Sin observaciones"}</small>
+            </div>
+            <div class="text-end">
+                ${estadoHtml}
+                <br>
+            </div>
+        `;
+
+            // IMPORTANTE: Cambiar el event listener para abrir el modal correcto
+            listItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                abrirDetalleMiTarea(tarea, index, nombreEmpleado);
+            });
+
+            listGroup.appendChild(listItem);
+        });
+    }
+
+// Función para abrir el detalle de MI tarea específica
+    function abrirDetalleMiTarea(tarea, index, nombreEmpleado) {
+        console.log('Abriendo detalle de mi tarea:', tarea);
+
+        // ✅ CAMBIO IMPORTANTE: Limpiar y guardar la tarea seleccionada
+        tareaSeleccionada = [];
+        tareaSeleccionada.push(tarea);
+
+        // Ocultar el list group
+        const miListGroupContainer = document.getElementById('miListGroupContainer');
+        if (miListGroupContainer) {
+            miListGroupContainer.style.display = 'none';
+        }
+
+        // Mostrar el formulario de "Mis Tareas"
+        const miFormContainer = document.getElementById('miFormContainer');
+        if (miFormContainer) {
+            miFormContainer.style.display = 'block';
+        }
+
+        // Determinar el estado de la tarea y configurar el badge
+        let estadoTarea = tarea.estado || 'Pendiente';
+        let colorBorde;
+        let estadoHtml;
+
+        switch (estadoTarea) {
+            case 'Completado':
+            case 'Finalizado':
+                colorBorde = '#198754'; // Verde
+                estadoHtml = '<span class="badge rounded-pill bg-success">Completado</span>';
+                break;
+            case 'En Progreso':
+                colorBorde = '#ffc107'; // Amarillo
+                estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                break;
+            case 'Pendiente':
+            default:
+                colorBorde = '#dc3545'; // Rojo
+                estadoHtml = '<span class="badge rounded-pill bg-danger">Pendiente</span>';
+                break;
+        }
+
+        // Buscar o crear el contenedor del estado
+        let estadoContainer = document.getElementById('miEstadoContainer');
+        if (!estadoContainer) {
+            estadoContainer = document.createElement('div');
+            estadoContainer.id = 'miEstadoContainer';
+            estadoContainer.className = 'mb-3 text-center';
+
+            // Insertar después del input del empleado
+            const userInputDiv = document.getElementById('verMiTareaByUser').parentNode;
+            const modalContent = userInputDiv.parentNode;
+            modalContent.insertBefore(estadoContainer, userInputDiv.nextSibling);
+        }
+
+        // Actualizar el contenido del estado
+        estadoContainer.innerHTML = `
+        <div class="mb-2">
+            <strong>Estado de la tarea:</strong><br>
+            ${estadoHtml}
+        </div>
+    `;
+
+        // Llenar los campos con los datos de la tarea
+        const activityButton = document.getElementById('activitySelectedByMe');
+        const edificioButton = document.getElementById('edificioSelectedByMe');
+        const fechaInput = document.getElementById('verDateActivityByMe');
+        const observacionesInput = document.getElementById('VerCommentsByMe');
+
+        if (activityButton) {
+            activityButton.textContent = tarea.nombreServicio || 'Sin actividad asignada';
+            activityButton.setAttribute('data-selected', tarea.idServicio || '');
+            activityButton.disabled = true; // SOLO LECTURA
+        }
+
+        if (edificioButton) {
+            edificioButton.textContent = tarea.nombreEdificio || 'Sin edificio asignado';
+            edificioButton.setAttribute('data-selected', tarea.idEdificio || '');
+            edificioButton.disabled = true; // SOLO LECTURA
+        }
+
+        if (fechaInput && tarea.fecha) {
+            const fecha = new Date(tarea.fecha);
+            if (!isNaN(fecha.getTime())) {
+                fechaInput.value = fecha.toISOString().split('T')[0];
+            }
+            fechaInput.disabled = true; // SOLO LECTURA
+        }
+
+        if (observacionesInput) {
+            observacionesInput.value = tarea.observaciones || '';
+            observacionesInput.disabled = false; // SOLO ESTE CAMPO SE PUEDE EDITAR
+        }
+
+        // Configurar el botón según el estado de la tarea
+        configurarBotonSegunEstado(estadoTarea);
+
+        // NO cargar dropdowns ya que no se pueden editar los otros campos
+
+        // Agregar botón para volver a la lista
+        let btnVolverMisLista = document.getElementById('btnVolverMisLista');
+        if (!btnVolverMisLista) {
+            // Contenedor para botones si no existe
+            let btnsContainer = document.getElementById('misBtnsContainer');
+            if (!btnsContainer) {
+                btnsContainer = document.createElement('div');
+                btnsContainer.id = 'misBtnsContainer';
+                btnsContainer.className = 'd-flex flex-wrap justify-content-between gap-2 mt-3';
+
+                const btnConfirmarCambios = document.getElementById('btnConfirmarCambios');
+                btnConfirmarCambios.parentNode.insertBefore(btnsContainer, btnConfirmarCambios);
+                btnsContainer.appendChild(btnConfirmarCambios); // mover confirm dentro del contenedor
+            }
+
+            // Crear botón volver
+            btnVolverMisLista = document.createElement('button');
+            btnVolverMisLista.id = 'btnVolverMisLista';
+            btnVolverMisLista.type = 'button';
+            btnVolverMisLista.className = 'btn btn-secondary';
+            btnVolverMisLista.innerHTML = '← Volver a Mis Tareas';
+
+            btnsContainer.insertBefore(btnVolverMisLista, btnsContainer.firstChild);
+
+            btnVolverMisLista.addEventListener('click', () => {
+                volverAMisListaTareas();
+            });
+        }
+        btnVolverMisLista.style.display = 'inline-block';
+
+    }
+
+// Función para volver a mostrar la lista de "Mis Tareas"
+    function volverAMisListaTareas() {
+        // Ocultar formulario
+        const miFormContainer = document.getElementById('miFormContainer');
+        if (miFormContainer) {
+            miFormContainer.style.display = 'none';
+        }
+
+        // Mostrar list group
+        const miListGroupContainer = document.getElementById('miListGroupContainer');
+        if (miListGroupContainer) {
+            miListGroupContainer.style.display = 'block';
+        }
+
+        // Ocultar botón volver
+        const btnVolverMisLista = document.getElementById('btnVolverMisLista');
+        if (btnVolverMisLista) {
+            btnVolverMisLista.style.display = 'none';
+        }
+
+        // 🧹 Eliminar contenedor del estado
+        const estadoContainer = document.getElementById('miEstadoContainer');
+        if (estadoContainer) {
+            estadoContainer.remove();
+        }
+    }
+
+
+// NUEVA función para configurar el botón según el estado de la tarea
+    function configurarBotonSegunEstado(estadoTarea) {
+        const btnConfirmarCambios = document.getElementById('btnConfirmarCambios');
+
+        if (!btnConfirmarCambios) return;
+
+        // Limpiar cualquier event listener previo
+        const newButton = btnConfirmarCambios.cloneNode(true);
+        btnConfirmarCambios.parentNode.replaceChild(newButton, btnConfirmarCambios);
+
+        if (estadoTarea === 'Pendiente') {
+            // Configurar como botón "Comenzar Tarea"
+            newButton.textContent = 'Comenzar Tarea';
+            newButton.style.backgroundColor = '#ffc107'; // Amarillo
+            newButton.style.borderColor = '#ffc107';
+
+            // Event listener para comenzar tarea
+            newButton.addEventListener('click', async () => {
+                await iniciarTarea();
+            });
+
+        } else {
+            // Configurar como botón "Confirmar Cambios" normal
+            newButton.textContent = 'Confirmar Cambios';
+            newButton.style.backgroundColor = '#005288'; // Color original
+            newButton.style.borderColor = '#005288';
+
+            // Event listener para confirmar cambios
+            newButton.addEventListener('click', async () => {
+                await confirmarCambiosMisTareas();
+            });
+        }
+    }
+
+// NUEVA función para iniciar tarea (cambiar estado a "En Progreso")
+    async function iniciarTarea() {
+        try {
+            console.log("🔄 Iniciando tarea...");
+
+            if (!tareaSeleccionada[0]) {
+                throw new Error("No hay tarea seleccionada");
+            }
+
+            const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
+            const observacionesInput = document.getElementById('VerCommentsByMe');
+
+            const datos = {
+                idServicioXActividad: idServicioXUsuario,
+                idServicio: tareaSeleccionada[0].idServicio,
+                idEdificio: tareaSeleccionada[0].idEdificio,
+                fecha: tareaSeleccionada[0].fecha,
+                observaciones: observacionesInput.value.trim(),
+                estado: 'En Progreso' // Cambiar estado
+            };
+
+            console.log("📤 Iniciando tarea con datos:", datos);
+
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+            const result = await response.text();
+            console.log("✅ Tarea iniciada:", result);
+
+            // Actualizar el estado localmente
+            tareaSeleccionada[0].estado = 'En Progreso';
+
+            // Actualizar la interfaz
+            abrirDetalleMiTarea(tareaSeleccionada[0], 0, '');
+
+            alert("Tarea iniciada correctamente. Ahora está en progreso.");
+
+        } catch (error) {
+            console.error("❌ Error al iniciar tarea:", error);
+            alert("Error al iniciar tarea: " + error.message);
+        }
+    }
+
+// NUEVA función separada para confirmar cambios (reutiliza la lógica anterior)
+    async function confirmarCambiosMisTareas() {
+        try {
+            console.log("🔍 Confirmando cambios de mis tareas...");
+
+            if (!tareaSeleccionada[0]) {
+                throw new Error("No hay tarea seleccionada");
+            }
+
+            const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
+            const observacionesInput = document.getElementById('VerCommentsByMe');
+
+            // Solo enviamos las observaciones ya que es lo único que se puede editar
+            const datos = {
+                idServicioXActividad: idServicioXUsuario,
+                idServicio: tareaSeleccionada[0].idServicio, // Mantener valores originales
+                idEdificio: tareaSeleccionada[0].idEdificio, // Mantener valores originales
+                fecha: tareaSeleccionada[0].fecha, // Mantener valores originales
+                observaciones: observacionesInput.value.trim() // Solo esto cambia
+            };
+
+            console.log("📤 Enviando solo cambio de observaciones:", datos);
+
+            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+            const result = await response.text();
+            console.log("✅ Observaciones actualizadas:", result);
+
+            // Cerrar modal después de confirmar
+            document.getElementById('modal-VerMisTasks').style.display = "none";
+            alert("Tus observaciones han sido actualizadas exitosamente");
+
+        } catch (error) {
+            console.error("❌ Error al actualizar observaciones:", error);
+            alert("Error al actualizar observaciones: " + error.message);
+        }
+
+        tareaSeleccionada = [];
+    }
+
+// MODIFICAR la función misTareas() existente para usar el modal correcto:
+    async function misTareas() {
         try {
             const password = localStorage.getItem('admin_password');
             console.log('Admin password:', password);
 
-            // First API call - get user by password
+            // Primera llamada API - obtener usuario por contraseña
             const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-contrasena', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1665,7 +2100,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            // Read the response once and store the data
             const userData = await response.json();
 
             const empleadoInfo = {
@@ -1674,63 +2108,117 @@ document.addEventListener('DOMContentLoaded', async function () {
                 dni: userData.nicknameDni || 'Sin DNI'
             };
 
-            // Clear and add to selected employees
             empleadosSeleccionados = [];
             empleadosSeleccionados.push(empleadoInfo);
 
             const empleadoSeleccionado = empleadosSeleccionados[0];
 
-            const modalVerTask = document.getElementById('modal-VerTask');
-            const inputUser = document.getElementById('verTareaByUser');
+            // ✅ CAMBIO: Usar el modal correcto para "Mis Tareas"
+            const modalVerMisTasks = document.getElementById('modal-VerMisTasks');
+            const inputUser = document.getElementById('verMiTareaByUser');
 
-            if (!modalVerTask || !inputUser) {
-                console.error('Modal o input no encontrado');
+            if (!modalVerMisTasks || !inputUser) {
+                console.error('Modal Mis Tareas o input no encontrado');
                 return;
             }
 
-            // Fill the input with employee name
             inputUser.value = empleadoSeleccionado.nombre;
             inputUser.disabled = true;
 
-            // Show modal first
-            modalVerTask.style.display = 'flex';
+            // Mostrar el modal correcto
+            modalVerMisTasks.style.display = 'flex';
 
-            // Show loading while fetching tasks
-            showLoadingTareas();
+            // Mostrar loading específico
+            showLoadingMisTareas();
 
-            // Second API call - get tasks for this user
+            // Segunda llamada API - obtener tareas
             const response2 = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${empleadoSeleccionado.id}`);
 
             if (!response2.ok) {
                 throw new Error(`HTTP error! status: ${response2.status}`);
             }
 
-            // Read the second response
             const taskData = await response2.json();
-            console.log('Datos de tareas obtenidos de la API:', taskData);
+            console.log('Datos de mis tareas obtenidos:', taskData);
 
-            // Hide loading
-            hideLoadingTareas();
+            hideLoadingMisTareas();
 
-            // Process the API data
             if (Array.isArray(taskData) && taskData.length > 0) {
-                console.log(`Empleado tiene ${taskData.length} tarea(s) asignada(s)`);
+                console.log(`Tienes ${taskData.length} tarea(s) asignada(s)`);
 
-                mostrarListGroupTareas(taskData, empleadoSeleccionado.nombre);
-                console.log('Modal Ver Tareas abierto correctamente');
+                // ✅ CAMBIO: Usar función específica para "Mis Tareas"
+                mostrarMisListGroupTareas(taskData, empleadoSeleccionado.nombre);
 
             } else {
-                // No assigned tasks
-                console.log('No se encontraron tareas asignadas para este empleado');
+                console.log('No se encontraron tareas asignadas');
                 alert("No tienes tareas asignadas");
                 empleadosSeleccionados = [];
             }
 
         } catch (error) {
             console.error('Error en misTareas:', error);
-            hideLoadingTareas();
+            hideLoadingMisTareas();
             alert('Error al cargar tus tareas: ' + error.message);
         }
+    }
+
+// Agregar event listener para cerrar el modal "Mis Tareas"
+    const closeVerMisTaskModalBtn = document.getElementById('closeVerMisTaskModalBtn');
+    if (closeVerMisTaskModalBtn) {
+        closeVerMisTaskModalBtn.addEventListener('click', () => {
+            tareaSeleccionada = [];
+            empleadosSeleccionados = [];
+            document.getElementById('modal-VerMisTasks').style.display = "none";
+        });
+    }
+
+// Event listener para el botón "Confirmar Cambios" en "Mis Tareas"
+    const btnConfirmarCambios = document.getElementById('btnConfirmarCambios');
+    if (btnConfirmarCambios) {
+        btnConfirmarCambios.addEventListener('click', async () => {
+            try {
+                console.log("🔍 Confirmando cambios de mis tareas...");
+
+                if (!tareaSeleccionada[0]) {
+                    throw new Error("No hay tarea seleccionada");
+                }
+
+                const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
+                const observacionesInput = document.getElementById('VerCommentsByMe');
+
+                // Solo enviamos las observaciones ya que es lo único que se puede editar
+                const datos = {
+                    idServicioXActividad: idServicioXUsuario,
+                    idServicio: tareaSeleccionada[0].idServicio, // Mantener valores originales
+                    idEdificio: tareaSeleccionada[0].idEdificio, // Mantener valores originales
+                    fecha: tareaSeleccionada[0].fecha, // Mantener valores originales
+                    observaciones: observacionesInput.value.trim() // Solo esto cambia
+                };
+
+                console.log("📤 Enviando solo cambio de observaciones:", datos);
+
+                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+                const result = await response.text();
+                console.log("✅ Observaciones actualizadas:", result);
+
+                // Cerrar modal después de confirmar
+                document.getElementById('modal-VerMisTasks').style.display = "none";
+                alert("Tus observaciones han sido actualizadas exitosamente");
+
+            } catch (error) {
+                console.error("❌ Error al actualizar observaciones:", error);
+                alert("Error al actualizar observaciones: " + error.message);
+            }
+
+            tareaSeleccionada = [];
+        });
     }
 
 

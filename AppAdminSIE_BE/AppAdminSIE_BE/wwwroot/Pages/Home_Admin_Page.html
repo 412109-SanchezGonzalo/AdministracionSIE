@@ -228,6 +228,63 @@
     </div>
 </div>
 
+<!-- Modal de Ver MIS Tarea Asignada - CON LOADING AGREGADO -->
+<div class="modal-overlay-newTask" id="modal-VerMisTasks">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>📝 Tarea asignada</h2>
+            <button type="button" class="btn-close" id="closeVerMisTaskModalBtn" aria-label="Close"></button>
+        </div>
+
+        <!-- Input del empleado (siempre visible) -->
+        <div class="mb-3">
+            <label for="verMiTareaByUser" class="form-label">Empleado</label>
+            <input type="input" class="form-control" id="verMiTareaByUser" aria-describedby="username">
+        </div>
+
+        <!-- NUEVO: Loading spinner para las tareas -->
+        <div id="loadingMisTareas" class="loading d-none text-center mt-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 small">Cargando tareas...</p>
+        </div>
+
+        <!-- El contenedor para List Group se creará dinámicamente aquí -->
+
+        <!-- Formulario original (se muestra para tarea individual o detalle) -->
+        <div id="miFormContainer">
+            <div class="mb-3">
+                <label for="VerMiMenuActivities" class="form-label">Actividad</label>
+                <div class="input-group mb-3" id="VerMiMenuActivities">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="activitySelectedByMe"></button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="VerMiMenuEdificios" class="form-label">Edificio</label>
+                <div class="input-group mb-3" id="VerMiMenuEdificios">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="edificioSelectedByMe"></button>
+                    <ul class="dropdown-menu">
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="VerDateActivityByMe" class="form-label d-block">Fecha de Actividad</label>
+                <input type="date" class="form-control-sm" id="verDateActivityByMe">
+            </div>
+            <div class="mb-3">
+                <label for="VerCommentsByMe" class="form-label">Observaciones</label>
+                <textarea class="form-control" id="VerCommentsByMe" rows="3"></textarea>
+            </div>
+
+            <!-- Botones de acción -->
+            <button type="button" class="btn btn-primary" style="background-color: #005288" id="btnConfirmarCambios">✏️ Confirmar Cambios</button>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>
