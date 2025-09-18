@@ -1,5 +1,783 @@
+// ===================================
+// VARIABLES GLOBALES DE FILTROS
+// ===================================
+let currentFilterType = null; // 'fecha' | 'estado' | null
+let originalPedidos = []; // Para guardar los pedidos originales
+
+// ===================================
+// FUNCIONES GLOBALES DE FILTROS Y UTILIDADES
+// ===================================
+
+
+// Función para mostrar Toast con tipo (success, error, warning, info)
+function showToast(message, type = "info") {
+    const toastLive = document.getElementById('liveToast');
+    const toastBody = document.getElementById('toast-message');
+
+    if (toastBody && toastLive) {
+        toastBody.innerHTML = message;
+
+        // Resetear clases de color
+        toastLive.className = "toast align-items-center border-0";
+
+        // Aplicar color según el tipo
+        switch (type) {
+            case "success":
+                toastLive.classList.add("text-bg-success");
+                break;
+            case "error":
+                toastLive.classList.add("text-bg-danger");
+                break;
+            case "warning":
+                toastLive.classList.add("text-bg-warning");
+                break;
+            default:
+                toastLive.classList.add("text-bg-dark");
+                break;
+        }
+
+        const toast = new bootstrap.Toast(toastLive, {
+            autohide: true,
+            delay: 3000
+        });
+
+        toast.show();
+    }
+}
+
+
+
+// Función GLOBAL para limpiar todos los filtros
+function limpiarFiltros() {
+    console.log('🗑️ Limpiando filtros...');
+
+    const fechaInput = document.getElementById('fechaFiltrada');
+    const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
+
+    if (!fechaInput || !estadoDropdown) {
+        console.error('❌ No se encontraron los elementos de filtro');
+        return;
+    }
+
+    fechaInput.value = '';
+    estadoDropdown.textContent = 'Seleccionar Estado';
+    enableFechaInput();
+    enableEstadoDropdown();
+    currentFilterType = null;
+    mostrarTodosPedidos();
+
+    console.log('✅ Filtros limpiados correctamente');
+}
+
+// Funciones de habilitación/deshabilitación
+function enableEstadoDropdown() {
+    const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
+    const estadoDropdownItems = document.querySelectorAll('#modalPedidos .dropdown-menu a');
+
+    if (estadoDropdown) {
+        estadoDropdown.disabled = false;
+        estadoDropdown.classList.remove('disabled');
+        estadoDropdown.style.pointerEvents = 'auto';
+        estadoDropdown.style.opacity = '1';
+    }
+
+    estadoDropdownItems.forEach(item => {
+        item.style.pointerEvents = 'auto';
+        item.style.opacity = '1';
+    });
+}
+
+function enableFechaInput() {
+    const fechaInput = document.getElementById('fechaFiltrada');
+    if (fechaInput) {
+        fechaInput.disabled = false;
+        fechaInput.classList.remove('disabled');
+        fechaInput.style.pointerEvents = 'auto';
+        fechaInput.style.opacity = '1';
+    }
+}
+
+function disableEstadoDropdown() {
+    const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
+    const estadoDropdownItems = document.querySelectorAll('#modalPedidos .dropdown-menu a');
+
+    if (estadoDropdown) {
+        estadoDropdown.disabled = true;
+        estadoDropdown.classList.add('disabled');
+        estadoDropdown.style.pointerEvents = 'none';
+        estadoDropdown.style.opacity = '0.5';
+    }
+
+    estadoDropdownItems.forEach(item => {
+        item.style.pointerEvents = 'none';
+        item.style.opacity = '0.5';
+    });
+}
+
+function disableFechaInput() {
+    const fechaInput = document.getElementById('fechaFiltrada');
+    if (fechaInput) {
+        fechaInput.disabled = true;
+        fechaInput.classList.add('disabled');
+        fechaInput.style.pointerEvents = 'none';
+        fechaInput.style.opacity = '0.5';
+    }
+}
+
+// Funciones de estado (movidas fuera para uso global)
+// Funciones de estado (movidas fuera para uso global)
+function obtenerEstadoHtml(estadoPedido) {
+    let texto = '';
+    let claseColor = '';
+
+    switch (estadoPedido) {
+        case 'Entregado - Sin Facturar': // Nuevo caso
+        case 'Entregado':
+            texto = 'Entregado - Sin Facturar';
+            claseColor = 'bg-warning';
+            break;
+        case 'Facturado':
+            texto = 'Facturado';
+            claseColor = 'bg-success';
+            break;
+        case 'Pendiente - Entregar': // Nuevo caso
+            texto = 'Pendiente - Entregar';
+            claseColor = 'bg-danger';
+            break;
+        case 'Pendiente - Preparar': // Nuevo caso
+            texto = 'Pendiente - Preparar';
+            claseColor = 'bg-info';
+            break;
+        default:
+            texto = estadoPedido; // O un valor por defecto
+            claseColor = 'bg-secondary';
+    }
+    return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
+}
+
+function obtenerEstadoProductoHtml(estadoProducto) {
+    let texto = '';
+    let claseColor = '';
+
+    switch (estadoProducto) {
+        case 'Entregado':
+            texto = 'Sí';
+            claseColor = 'bg-success';
+            break;
+        case 'Facturado':
+            texto = 'Sí';
+            claseColor = 'bg-success';
+            break;
+        case 'No Entregado':
+        default:
+            texto = 'No';
+            claseColor = 'bg-danger';
+    }
+    return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
+}
+
+// Funciones de filtrado
+async function filtrarPorFecha(fecha) {
+    const loadingElement = document.getElementById('loadingPedidos');
+    const listaPedidos = document.getElementById('listaPedidos');
+
+    try {
+        if (loadingElement) loadingElement.classList.remove('d-none');
+        if (listaPedidos) listaPedidos.innerHTML = '';
+
+        console.log('🔍 Filtrando por fecha:', fecha);
+
+        const [respPedidosProductos, respPedidos] = await Promise.all([
+            fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto-por-fecha?fecha=${encodeURIComponent(fecha)}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            }),
+            fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+        ]);
+
+        if (!respPedidosProductos.ok) throw new Error(`HTTP error! status: ${respPedidosProductos.status}`);
+        if (!respPedidos.ok) throw new Error(`HTTP error! status: ${respPedidos.status}`);
+
+        const pedidosProductos = await respPedidosProductos.json();
+        const pedidos = await respPedidos.json();
+
+        const pedidosMap = {};
+        pedidos.forEach(pedido => {
+            pedidosMap[pedido.idPedido] = pedido;
+        });
+
+        const pedidosProductosConFecha = pedidosProductos.map(pedidoProducto => {
+            const pedidoInfo = pedidosMap[pedidoProducto.idPedido];
+            return {
+                ...pedidoProducto,
+                fechaEntrega: pedidoInfo ? pedidoInfo.fechaEntrega : null,
+                fechaActividad: pedidoInfo ? pedidoInfo.fechaEntrega : null
+            };
+        });
+
+        console.log('✅ Pedidos obtenidos por fecha:', pedidosProductosConFecha);
+
+        if (loadingElement) loadingElement.classList.add('d-none');
+        mostrarPedidosFiltrados(pedidosProductosConFecha);
+
+    } catch (error) {
+        console.error('❌ Error al filtrar por fecha:', error);
+        if (loadingElement) loadingElement.classList.add('d-none');
+        mostrarErrorFiltrado('Error al cargar pedidos por fecha: ' + error.message);
+    }
+}
+
+async function filtrarPorEstado(estado) {
+    const loadingElement = document.getElementById('loadingPedidos');
+    const listaPedidos = document.getElementById('listaPedidos');
+
+    try {
+        if (loadingElement) loadingElement.classList.remove('d-none');
+        if (listaPedidos) listaPedidos.innerHTML = '';
+
+        console.log('🔍 Filtrando por estado:', estado);
+
+        const [respPedidosProductos, respPedidos] = await Promise.all([
+            fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto-por-estado?estado=${encodeURIComponent(estado)}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            }),
+            fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+        ]);
+
+        if (!respPedidosProductos.ok) throw new Error(`HTTP error! status: ${respPedidosProductos.status}`);
+        if (!respPedidos.ok) throw new Error(`HTTP error! status: ${respPedidos.status}`);
+
+        const pedidosProductos = await respPedidosProductos.json();
+        const pedidos = await respPedidos.json();
+
+        const pedidosMap = {};
+        pedidos.forEach(pedido => {
+            pedidosMap[pedido.idPedido] = pedido;
+        });
+
+        const pedidosProductosConFecha = pedidosProductos.map(pedidoProducto => {
+            const pedidoInfo = pedidosMap[pedidoProducto.idPedido];
+            return {
+                ...pedidoProducto,
+                fechaEntrega: pedidoInfo ? pedidoInfo.fechaEntrega : null,
+                fechaActividad: pedidoInfo ? pedidoInfo.fechaEntrega : null
+            };
+        });
+
+        console.log('✅ Pedidos obtenidos por estado:', pedidosProductosConFecha);
+
+        if (loadingElement) loadingElement.classList.add('d-none');
+        mostrarPedidosFiltrados(pedidosProductosConFecha);
+
+    } catch (error) {
+        console.error('❌ Error al filtrar por estado:', error);
+        if (loadingElement) loadingElement.classList.add('d-none');
+        mostrarErrorFiltrado('Error al cargar pedidos por estado: ' + error.message);
+    }
+}
+
+function mostrarPedidosFiltrados(pedidos) {
+    console.log("🔍 Datos recibidos en mostrarPedidosFiltrados:", pedidos);
+    console.log("🔍 Tipo de datos:", typeof pedidos);
+    console.log("🔍 Es array:", Array.isArray(pedidos));
+    if (pedidos && pedidos.length > 0) {
+        console.log("🔍 Primer elemento:", pedidos[0]);
+        console.log("🔍 Propiedades del primer elemento:", Object.keys(pedidos[0]));
+    }
+
+    const listaPedidos = document.getElementById('listaPedidos');
+
+    if (!listaPedidos) {
+        console.error('❌ No se encontró el elemento listaPedidos');
+        return;
+    }
+
+    if (!pedidos || pedidos.length === 0) {
+        listaPedidos.innerHTML = `
+            <div class="text-center p-4">
+                <h6 class="text-muted">📭 Sin resultados</h6>
+                <p class="small text-muted">No se encontraron pedidos con los filtros aplicados.</p>
+            </div>
+        `;
+        return;
+    }
+
+    listaPedidos.innerHTML = '';
+
+    const pedidosAgrupados = {};
+    pedidos.forEach(pedidoProducto => {
+        const idPedido = pedidoProducto.idPedido;
+        if (!pedidosAgrupados[idPedido]) {
+            pedidosAgrupados[idPedido] = {
+                id: idPedido,
+                fechaEntrega: pedidoProducto.fechaEntrega || pedidoProducto.fechaActividad,
+                edificio: pedidoProducto.edificio,
+                observaciones: pedidoProducto.observaciones,
+                productos: []
+            };
+
+            console.log("🔍 Debug - Objeto creado para pedido", idPedido, ":", pedidosAgrupados[idPedido]);
+            console.log("🔍 Debug - pedidoProducto original:", pedidoProducto);
+        }
+        pedidosAgrupados[idPedido].productos.push(pedidoProducto);
+    });
+
+    Object.values(pedidosAgrupados).forEach(pedido => {
+        let estadoGeneral = 'Pendiente - Preparar';
+        const todosFacturados = pedido.productos.every(p => p.estadoPedido === 'Facturado' || p.estado === 'Facturado');
+        const todosEntregadosSinFacturar = pedido.productos.every(p => p.estadoPedido === 'Entregado - Sin Facturar' || p.estado === 'Entregado');
+        const todosPendientesEntregar = pedido.productos.every(p => p.estadoPedido === 'Pendiente - Entregar' || p.estado === 'No Entregado');
+        const todosPendientesPreparar = pedido.productos.every(p => p.estadoPedido === 'Pendiente - Preparar' || p.estado === 'No Preparado');
+
+        if (todosFacturados) {
+            estadoGeneral = 'Facturado';
+        } else if (todosEntregadosSinFacturar) {
+            estadoGeneral = 'Entregado - Sin Facturar';
+        } else if (todosPendientesPreparar) {
+            estadoGeneral = 'Pendiente - Preparar';
+        } else if (todosPendientesEntregar) {
+            estadoGeneral = 'Pendiente - Entregar';
+        }
+
+        let colorBorde;
+        let badgeColor;
+        switch (estadoGeneral) {
+            case 'Entregado - Sin Facturar':
+                colorBorde = '#ffc107';
+                badgeColor = 'bg-warning';
+                break;
+            case 'Facturado':
+                colorBorde = '#198754';
+                badgeColor = 'bg-success';
+                break;
+            case 'Pendiente - Entregar':
+                colorBorde = '#dc3545';
+                badgeColor = 'bg-danger';
+                break;
+            case 'Pendiente - Preparar':
+            default:
+                colorBorde = '#005488';
+                badgeColor = 'bg-info';
+                break;
+        }
+
+        const cantidadProductos = pedido.productos.length;
+        const fechaDelPedido = pedido.fechaEntrega;
+        console.log("🔍 Debug - Objeto pedido completo:", pedido);
+        console.log("🔍 Debug - fechaEntrega específico:", pedido.fechaEntrega);
+        console.log("🔍 Debug - tipo de fechaEntrega:", typeof pedido.fechaEntrega);
+
+        let fechaFormateada = "Sin fecha";
+        if (fechaDelPedido && typeof fechaDelPedido === "string") {
+            try {
+                const dateObj = new Date(fechaDelPedido);
+                if (!isNaN(dateObj)) {
+                    fechaFormateada = dateObj.toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit"
+                    });
+                }
+            } catch (e) {
+                console.error("Error al parsear fecha:", e);
+                fechaFormateada = fechaDelPedido;
+            }
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-start pedido-item flex-wrap';
+        listItem.setAttribute('data-pedido-id', pedido.id);
+        listItem.setAttribute('data-estado-general', estadoGeneral);
+        listItem.style.cursor = 'pointer';
+        listItem.style.borderLeft = `4px solid ${colorBorde}`;
+
+        listItem.innerHTML = `
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">Pedido #${pedido.id}</div>
+                <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
+                <br>
+                <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
+            </div>
+            <div class="text-end">
+                <span class="badge ${badgeColor} rounded-pill">${estadoGeneral}</span>
+                <br>
+            </div>
+        `;
+
+        listItem.addEventListener('click', function() {
+            if (pedido && mostrarDetallesPedido) {
+                mostrarDetallesPedido(pedido, estadoGeneral);
+                console.log('✅ Abriendo detalle para pedido:', pedido.id);
+            } else {
+                console.error('❌ No se encontró el pedido con ID:', pedido.id);
+                console.error('❌ Objeto pedido:', pedido);
+                console.error('❌ Función disponible:', !!mostrarDetallesPedido);
+                alert('Error: No se pudo cargar el detalle del pedido');
+            }
+        });
+
+        listaPedidos.appendChild(listItem);
+    });
+
+    console.log(`✅ Mostrados ${pedidos.length} pedidos filtrados`);
+}
+
+function mostrarDetallesPedido(pedido, estadoGeneral) {
+    console.log('🔍 INICIO mostrarDetallesPedido');
+    console.log('🔍 Pedido recibido:', pedido);
+    console.log('🔍 Estado general:', estadoGeneral);
+
+    const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
+    if (modalPedidos) {
+        console.log('🔍 Cerrando modal de pedidos');
+        modalPedidos.hide();
+    }
+
+    const modalDetalles = document.getElementById('modalDetallesPedido');
+    console.log('🔍 Modal de detalles encontrado:', !!modalDetalles);
+
+    if (!modalDetalles) {
+        console.error("❌ El modal de detalles no existe en el DOM");
+        alert("Error: Modal de detalles no encontrado en la página");
+        return;
+    }
+
+    const titleElement = document.getElementById('modalDetallesPedidoLabel');
+    const infoDiv = document.getElementById('detallesPedidoInfo');
+    const tablaBody = document.getElementById('tablaDetallesProductos');
+    const modalFooter = modalDetalles.querySelector('.modal-footer');
+
+    console.log('🔍 Elementos encontrados:');
+    console.log('  - Title:', !!titleElement);
+    console.log('  - Info div:', !!infoDiv);
+    console.log('  - Tabla body:', !!tablaBody);
+    console.log('  - Modal footer:', !!modalFooter);
+
+    if (!titleElement || !infoDiv || !tablaBody || !modalFooter) {
+        console.error("❌ Algunos elementos del modal no existen");
+        console.error("IDs esperados: modalDetallesPedidoLabel, detallesPedidoInfo, tablaDetallesProductos");
+        alert("Error: Elementos del modal no encontrados");
+        return;
+    }
+
+    modalFooter.innerHTML = '';
+    // Referencias globales
+    const loadingSpinner = window.spinner;
+    const btnVolver = document.createElement('button');
+    btnVolver.type = 'button';
+    btnVolver.className = 'btn btn-secondary';
+    btnVolver.textContent = '← Volver';
+
+    btnVolver.addEventListener('click', () => {
+        const modalDetallesInstance = bootstrap.Modal.getInstance(modalDetalles);
+        if (modalDetallesInstance) modalDetallesInstance.hide();
+
+        setTimeout(() => {
+            const modalPedidosInstance = new bootstrap.Modal(document.getElementById('modalPedidos'));
+            modalPedidosInstance.show();
+        }, 300);
+    });
+
+    modalFooter.appendChild(btnVolver);
+
+// --- BOTÓN PEDIDO ARMADO ---
+    if (estadoGeneral === 'Pendiente - Preparar') {
+        const btnPedidoArmado = document.createElement('button');
+        btnPedidoArmado.type = 'button';
+        btnPedidoArmado.className = 'btn btn-primary';
+        btnPedidoArmado.textContent = 'PEDIDO ARMADO';
+
+        btnPedidoArmado.addEventListener('click', async () => {
+            if (confirm("¿Confirmas que este pedido ha sido armado y está listo para entregar?")) {
+
+                // Mostrar spinner
+                if (window.spinner) {
+                    window.spinner.classList.remove('d-none');
+                }
+                btnPedidoArmado.disabled = true;
+
+                // Forzar espera para probar que aparece
+                await new Promise(r => setTimeout(r, 2000));
+
+                let resultado = await window.cambiarEstado(pedido.id, 'Pendiente - Entregar');
+
+                // Ocultar spinner
+                if (window.spinner) {
+                    window.spinner.classList.add('d-none');
+                }
+                btnPedidoArmado.disabled = false;
+
+                if (resultado) {
+                    showToast('📦 Pedido armado y listo para ser entregado !', "success");
+                } else {
+                    showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                }
+
+                // cerrar modal después de un ratito
+                setTimeout(() => {
+                    btnVolver.click();
+                }, 500);
+            }
+        });
+
+        modalFooter.appendChild(btnPedidoArmado);
+
+// --- BOTÓN FACTURAR ---
+    } else if (estadoGeneral === 'Entregado - Sin Facturar') {
+        const btnFacturar = document.createElement('button');
+        btnFacturar.type = 'button';
+        btnFacturar.className = 'btn btn-success';
+        btnFacturar.textContent = 'FACTURAR';
+
+        btnFacturar.addEventListener('click', async () => {
+            if (confirm("¿Estás seguro de que deseas facturar este pedido?")) {
+                // Mostrar spinner
+                if (window.spinner) {
+                    window.spinner.classList.remove('d-none');
+                }
+                btnFacturar.disabled = true;
+
+                // Forzar espera para probar que aparece
+                await new Promise(r => setTimeout(r, 2000));
+                let resultado = await window.cambiarEstado(pedido.id, 'Facturado');
+                // Ocultar spinner
+                if (window.spinner) {
+                    window.spinner.classList.add('d-none');
+                }
+                btnFacturar.disabled = false;
+                if (resultado) {
+                    showToast('🧾 Pedido Facturado !', "success");
+                } else {
+                    showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                }
+                // cerrar modal después de un ratito
+                setTimeout(() => {
+                    btnVolver.click();
+                }, 500);
+            }
+        });
+        modalFooter.appendChild(btnFacturar);
+
+// --- BOTÓN CONFIRMAR ENTREGA ---
+    } else if (estadoGeneral === 'Pendiente - Entregar') {
+        const btnPendienteEntrega = document.createElement('button');
+        btnPendienteEntrega.type = 'button';
+        btnPendienteEntrega.className = 'btn btn-warning';
+        btnPendienteEntrega.textContent = 'CONFIRMAR ENTREGA';
+
+        btnPendienteEntrega.addEventListener('click', async () => {
+            if (confirm("¿Confirmar entrega del pedido?")) {
+                // Mostrar spinner
+                if (window.spinner) {
+                    window.spinner.classList.remove('d-none');
+                }
+                btnPendienteEntrega.disabled = true;
+
+                // Forzar espera para probar que aparece
+                await new Promise(r => setTimeout(r, 2000));
+                let resultado = await window.cambiarEstado(pedido.id, 'Entregado - Sin Facturar');
+                // Ocultar spinner
+                if (window.spinner) {
+                    window.spinner.classList.add('d-none');
+                }
+                btnPendienteEntrega.disabled = false;
+                if (resultado) {
+                    showToast('✅ Entrega Confirmada !', "success");
+                } else {
+                    showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                }
+                // cerrar modal después de un ratito
+                setTimeout(() => {
+                    btnVolver.click();
+                }, 500);
+            }
+        });
+        modalFooter.appendChild(btnPendienteEntrega);
+    }
+
+
+
+    let fechaFormateada = "Sin fecha";
+    if (pedido.fechaEntrega) {
+        try {
+            const fecha = new Date(pedido.fechaEntrega);
+            fechaFormateada = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch (e) {
+            fechaFormateada = pedido.fechaEntrega;
+        }
+    }
+
+    console.log('🔍 Fecha formateada:', fechaFormateada);
+
+    if (titleElement) titleElement.textContent = `📦 Pedido #${pedido.id}`;
+    if (infoDiv) {
+        const estadoGeneralHTML =obtenerEstadoHtml(estadoGeneral);
+        infoDiv.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                            <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                            <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneralHTML}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (tablaBody) {
+        console.log('🔍 Llenando tabla con', pedido.productos.length, 'productos');
+        tablaBody.innerHTML = '';
+        pedido.productos.forEach(producto => {
+            const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+                <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+                <td>${producto.cantidad || 'N/A'}</td>
+                <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+                <td>${estadoBadge}</td>
+            `;
+            tablaBody.appendChild(row);
+        });
+    }
+
+    console.log('🔍 Intentando mostrar el modal...');
+    try {
+        const modalInstance = new bootstrap.Modal(modalDetalles);
+        modalInstance.show();
+        console.log('✅ Modal mostrado correctamente');
+    } catch (error) {
+        console.error('❌ Error al mostrar modal:', error);
+        alert('Error al abrir el modal: ' + error.message);
+    }
+}
+
+function mostrarErrorFiltrado(mensaje) {
+    const listaPedidos = document.getElementById('listaPedidos');
+    if (listaPedidos) {
+        listaPedidos.innerHTML = `
+            <div class="text-center p-4">
+                <h6 class="text-danger">❌ Error</h6>
+                <p class="small text-muted">${mensaje}</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="limpiarFiltros()">
+                    🔄 Reintentar
+                </button>
+            </div>
+        `;
+    }
+}
+
+function mostrarTodosPedidos() {
+    console.log('📋 Mostrando todos los pedidos...');
+    if (originalPedidos.length > 0) {
+        mostrarPedidosFiltrados(originalPedidos);
+    } else {
+        if (window.verPedidosRegistrados) {
+            window.verPedidosRegistrados();
+        }
+    }
+}
+
+function initializeFilters() {
+    console.log('🔧 Inicializando filtros...');
+
+    const fechaInput = document.getElementById('fechaFiltrada');
+    const estadoDropdownItems = document.querySelectorAll('#modalPedidos .dropdown-menu a');
+
+    if (!fechaInput) {
+        console.error('❌ No se encontró el input de fecha');
+        return;
+    }
+
+    if (estadoDropdownItems.length === 0) {
+        console.error('❌ No se encontraron los items del dropdown de estado');
+        return;
+    }
+
+    console.log(`✅ Elementos encontrados: input fecha, ${estadoDropdownItems.length} items de dropdown`);
+
+    fechaInput.addEventListener('change', function() {
+        if (this.value) {
+            disableEstadoDropdown();
+            currentFilterType = 'fecha';
+            filtrarPorFecha(this.value);
+        } else {
+            enableEstadoDropdown();
+            currentFilterType = null;
+            mostrarTodosPedidos();
+        }
+    });
+
+    estadoDropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
+            if (!estadoDropdown || estadoDropdown.disabled) {
+                console.log('🚫 Dropdown deshabilitado, ignorando click');
+                return;
+            }
+
+            const estado = this.textContent.trim();
+            console.log('🏷️ Estado seleccionado:', estado);
+
+            disableFechaInput();
+            estadoDropdown.textContent = estado;
+            currentFilterType = 'estado';
+            filtrarPorEstado(estado);
+        });
+    });
+
+    addClearFiltersButton();
+    console.log('✅ Filtros inicializados correctamente');
+}
+
+function addClearFiltersButton() {
+    const estadoCol = document.getElementById('estadoColumna');
+    const inputGroup = estadoCol?.querySelector('.input-group');
+
+    if (!estadoCol || !inputGroup) {
+        console.error('❌ No se encontró la columna o el input-group del estado.');
+        return;
+    }
+
+    if (inputGroup.querySelector('.clear-filters-btn')) {
+        console.log('ℹ️ Botón de limpiar filtros ya existe.');
+        return;
+    }
+
+    const clearButton = document.createElement('button');
+    clearButton.className = 'btn btn-outline-danger clear-filters-btn';
+    clearButton.setAttribute('onclick', 'limpiarFiltros()');
+    clearButton.setAttribute('type', 'button');
+    clearButton.innerHTML = '🗑️ Borrar Filtros';
+    inputGroup.appendChild(clearButton);
+
+    console.log('✅ Botón de limpiar filtros agregado al input-group.');
+}
+
+
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando pedidos_script.js...');
+
 
     // Arrays globales
     let productosSeleccionados = [];
@@ -8,6 +786,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let edificioSeleccionadoId = null;
 
     // Referencias HTML
+    window.spinner = document.getElementById('loadingSpinner');
     const saludoSpan = document.querySelector('.navbar-saludo');
     const loadingElement = document.getElementById('loading');
     const errorElement = document.getElementById('error-message');
@@ -25,56 +804,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnVerPedidos = document.getElementById('btnVerPedidos');
     const btnConfirmarPedidos = document.getElementById('btnConfirmarPedidos');
 
-    // 🔹 Estado inicial
+    // Estado inicial
     searchProductInput.disabled = true;
 
-    // 🎨 Funciones de estado
-    function obtenerEstadoHtml(estadoPedido) {
-        let texto = '';
-        let claseColor = '';
 
-        switch (estadoPedido) {
-            case 'Entregado':
-                texto = 'Entregado - Sin Facturar';
-                claseColor = 'bg-warning';
-                break;
-            case 'No Entregado':
-                texto = 'No entregado';
-                claseColor = 'bg-danger';
-                break;
-            case 'Facturado':
-                texto = 'Entregado - Facturado';
-                claseColor = 'bg-success';
-                break;
-            default:
-                texto = estadoPedido;
-                claseColor = 'bg-secondary';
-        }
-        return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
+    // --- 2. MOSTRAR EL SPINNER ---
+    if (window.spinner) {
+        window.spinner.classList.remove('d-none');
     }
 
-    function obtenerEstadoProductoHtml(estadoProducto) {
-        let texto = '';
-        let claseColor = '';
 
-        switch (estadoProducto) {
-            case 'Entregado':
-                texto = 'Sí';
-                claseColor = 'bg-success';
-                break;
-            case 'Facturado':
-                texto = 'Sí';
-                claseColor = 'bg-success';
-                break;
-            case 'No Entregado':
-            default:
-                texto = 'No';
-                claseColor = 'bg-danger';
-        }
-        return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
-    }
-
-    // 🌐 Lógica de autenticación
+    // Lógica de autenticación
     try {
         const password = localStorage.getItem('admin_password');
         const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
@@ -89,7 +829,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         saludoSpan.textContent = 'Hola, Usuario !';
     }
 
-    // 📌 Funciones de UI
+    // Funciones de UI
     function showLoading() {
         loadingElement.classList.remove('d-none');
         errorElement.classList.add('d-none');
@@ -121,6 +861,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         userCount.textContent = count;
     }
 
+
+
     function limpiarSeleccionProductos() {
         productosSeleccionados = [];
         const checks = tableBody.querySelectorAll('input[type="checkbox"]');
@@ -130,7 +872,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log("✅ Productos desmarcados correctamente");
     }
 
-    // ✅ Cargar todos los productos desde API
+    // Cargar todos los productos desde API
     async function loadAllProducts() {
         showLoading();
         try {
@@ -145,7 +887,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // ✅ Renderizar tabla de productos de la API
+    // Renderizar tabla de productos de la API
     function renderTable(productos) {
         tableBody.innerHTML = '';
         if (productos.length === 0) {
@@ -211,20 +953,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         showTable(productos.length);
     }
 
-    // 🔍 Buscar producto en memoria
+    // Buscar producto en memoria
     function searchByName() {
         const nombre = searchProductInput.value.trim().toLowerCase();
 
-        // Si el campo de búsqueda está vacío, muestra todos los productos
         if (nombre === '') {
             renderTable(productosGlobal);
             return;
         }
 
-        // Filtra los productos que coincidan con la búsqueda
         const resultados = productosGlobal.filter(p => p.nombre.toLowerCase().includes(nombre));
 
-        // Renderiza la tabla con los resultados
         if (resultados.length > 0) {
             renderTable(resultados);
         } else {
@@ -233,7 +972,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 🔹 Funciones de Edificios
+    // Funciones de Edificios
     function llenarDropdownEdificios(edificios) {
         const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
         if (!dropdown) {
@@ -288,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 📝 Funciones de Pedidos
+    // Funciones de Pedidos
     async function ConfirmarPedido() {
         try {
             const fechaEntrega = document.getElementById('fechaEntrega').value;
@@ -380,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return true;
     }
 
-    // 🆕 Funciones para mostrar y ocultar el spinner de carga de pedidos
+    // Funciones para mostrar y ocultar el spinner de carga de pedidos
     function showLoadingPedidos() {
         const loadingPedidos = document.getElementById('loadingPedidos');
         if (loadingPedidos) {
@@ -406,7 +1145,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function verPedidosRegistrados() {
         const lista = document.getElementById("listaPedidos");
         lista.innerHTML = "";
-
         showLoadingPedidos();
 
         try {
@@ -418,227 +1156,48 @@ document.addEventListener('DOMContentLoaded', async function () {
             const pedidosProductos = await respPedidosProductos.json();
             const pedidos = await respPedidos.json();
 
-            if (!pedidosProductos || pedidosProductos.length === 0) {
-                lista.innerHTML = `<li class="list-group-item text-muted">📭 No hay pedidos registrados</li>`;
-                return;
-            }
-
+            // Crear un mapa de pedidos por ID para acceso rápido
             const pedidosMap = {};
             pedidos.forEach(pedido => {
                 pedidosMap[pedido.idPedido] = pedido;
             });
 
-            const pedidosAgrupados = {};
-            pedidosProductos.forEach(pedidoProducto => {
-                const idPedido = pedidoProducto.idPedido;
-                if (!pedidosAgrupados[idPedido]) {
-                    const pedidoPrincipal = pedidosMap[idPedido];
-                    pedidosAgrupados[idPedido] = {
-                        id: idPedido,
-                        fechaEntrega: pedidoPrincipal ? pedidoPrincipal.fechaEntrega : null,
-                        edificio: pedidoProducto.edificio,
-                        observaciones: pedidoProducto.observaciones,
-                        productos: []
-                    };
-                }
-                pedidosAgrupados[idPedido].productos.push(pedidoProducto);
+            // Combinar los datos: agregar fechaEntrega a cada pedidoProducto
+            const pedidosProductosConFecha = pedidosProductos.map(pedidoProducto => {
+                const pedidoInfo = pedidosMap[pedidoProducto.idPedido];
+                return {
+                    ...pedidoProducto,
+                    fechaEntrega: pedidoInfo ? pedidoInfo.fechaEntrega : null,
+                    fechaActividad: pedidoInfo ? pedidoInfo.fechaEntrega : null // Para compatibilidad
+                };
             });
 
-            Object.values(pedidosAgrupados).forEach(pedido => {
-                let estadoGeneral = 'No Entregado';
-                const todosFacturados = pedido.productos.every(p => p.estadoPedido === 'Facturado');
-                const todosEntregados = pedido.productos.every(p => p.estadoPedido === 'Entregado');
+            console.log('🔍 Datos combinados:', pedidosProductosConFecha[0]);
 
-                if (todosFacturados) {
-                    estadoGeneral = 'Facturado';
-                } else if (todosEntregados) {
-                    estadoGeneral = 'Entregado';
-                }
+            // Guardar la lista original con las fechas
+            originalPedidos = pedidosProductosConFecha;
 
-                let colorBorde;
-                switch (estadoGeneral) {
-                    case 'Entregado':
-                        colorBorde = '#ffc107';
-                        break;
-                    case 'Facturado':
-                        colorBorde = '#198754';
-                        break;
-                    case 'No Entregado':
-                    default:
-                        colorBorde = '#dc3545';
-                        break;
-                }
-
-                const cantidadProductos = pedido.productos.length;
-                let fechaFormateada = "Sin fecha";
-                if (pedido.fechaEntrega) {
-                    try {
-                        const fecha = new Date(pedido.fechaEntrega);
-                        fechaFormateada = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                    } catch (e) {
-                        fechaFormateada = pedido.fechaEntrega;
-                    }
-                }
-
-                const estadoHtml = obtenerEstadoHtml(estadoGeneral);
-
-                // 🆕 SE HA AÑADIDO `flex-wrap` A LA LISTA
-                let item = `
-                    <li class="list-group-item d-flex justify-content-between align-items-start pedido-item flex-wrap"
-                        data-pedido-id="${pedido.id}"
-                        data-estado-general="${estadoGeneral}"
-                        style="cursor: pointer; border-left: 4px solid ${colorBorde};">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Pedido #${pedido.id}</div>
-                            <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
-                            <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
-                            <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
-                            <br>
-                            <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
-                        </div>
-                        <div class="text-end">
-                            ${estadoHtml}
-                            <br>
-                        </div>
-                    </li>
-                `;
-                lista.innerHTML += item;
-            });
-
-            document.querySelectorAll('.pedido-item').forEach(item => {
-                item.addEventListener('click', async function() {
-                    const pedidoId = this.getAttribute('data-pedido-id');
-                    const estadoGeneral = this.getAttribute('data-estado-general');
-                    const pedidoDetalle = Object.values(pedidosAgrupados).find(p => p.id == pedidoId);
-                    if (pedidoDetalle) {
-                        mostrarDetallesPedido(pedidoDetalle, estadoGeneral);
-                    } else {
-                        console.error('No se encontró el pedido con ID:', pedidoId);
-                        alert('Error: No se pudo cargar el detalle del pedido');
-                    }
-                });
-            });
+            // Mostrar los pedidos con las fechas
+            mostrarPedidosFiltrados(originalPedidos);
 
         } catch (error) {
-            console.error("Error cargando pedidos:", error);
-            lista.innerHTML = `<li class="list-group-item text-danger">⚠️ Error cargando pedidos: ${error.message}</li>`;
+            console.error('❌ Error al cargar pedidos registrados:', error);
+            mostrarErrorFiltrado("Error al cargar pedidos. Por favor, reintente.");
         } finally {
             hideLoadingPedidos();
         }
     }
 
-    function mostrarDetallesPedido(pedido, estadoGeneral) {
-        // CERRAR EL MODAL DE PEDIDOS
-        const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
-        if (modalPedidos) {
-            modalPedidos.hide();
-        }
-
-        const modalDetalles = document.getElementById('modalDetallesPedido');
-        if (!modalDetalles) {
-            console.error("El modal de detalles no existe.");
-            return;
-        }
-
-        const titleElement = document.getElementById('modalDetallesPedidoLabel');
-        const infoDiv = document.getElementById('detallesPedidoInfo');
-        const tablaBody = document.getElementById('tablaDetallesProductos');
-        const modalFooter = modalDetalles.querySelector('.modal-footer');
-
-        // Limpiar el footer y recrear el botón volver
-        modalFooter.innerHTML = '';
-        const btnVolver = document.createElement('button');
-        btnVolver.type = 'button';
-        btnVolver.className = 'btn btn-secondary';
-        btnVolver.textContent = '← Volver';
-        btnVolver.addEventListener('click', () => {
-            const modalDetallesInstance = bootstrap.Modal.getInstance(modalDetalles);
-            if (modalDetallesInstance) modalDetallesInstance.hide();
-
-            setTimeout(() => {
-                const modalPedidosInstance = new bootstrap.Modal(document.getElementById('modalPedidos'));
-                modalPedidosInstance.show();
-            }, 300);
-        });
-        modalFooter.appendChild(btnVolver);
-
-        let fechaFormateada = "Sin fecha";
-        if (pedido.fechaEntrega) {
-            try {
-                const fecha = new Date(pedido.fechaEntrega);
-                fechaFormateada = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-            } catch (e) {
-                fechaFormateada = pedido.fechaEntrega;
-            }
-        }
-
-        if (titleElement) titleElement.textContent = `📦 Pedido #${pedido.id}`;
-        if (infoDiv) {
-            const estadoGeneralHTML = obtenerEstadoHtml(estadoGeneral);
-            infoDiv.innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
-                                <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
-                                <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneralHTML}</p>
-                            </div>
-                            <div class="col-12 mt-2">
-                                <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        if (tablaBody) {
-            tablaBody.innerHTML = '';
-            pedido.productos.forEach(producto => {
-                const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
-                    <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
-                    <td>${producto.cantidad || 'N/A'}</td>
-                    <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-                    <td>${estadoBadge}</td>
-                `;
-                tablaBody.appendChild(row);
-            });
-        }
-
-        if (estadoGeneral === 'Entregado') {
-            const btnFacturar = document.createElement('button');
-            btnFacturar.type = 'button';
-            btnFacturar.className = 'btn btn-success ms-2';
-            btnFacturar.textContent = 'FACTURAR';
-            btnFacturar.addEventListener('click', () => {
-                if (confirm("¿Estás seguro de que deseas facturar este pedido?")) {
-                    facturarPedido(pedido.id);
-                }
-            });
-            modalFooter.appendChild(btnFacturar);
-        }
-
-        const modalInstance = new bootstrap.Modal(modalDetalles);
-        modalInstance.show();
-    }
-
-    // 🚀 Función para facturar un pedido
-    async function facturarPedido(pedidoId) {
+    // Función para facturar un pedido
+    window.cambiarEstado = async function (pedidoId, nuevoEstado) {
+        let result = true;
         try {
             const data = {
                 idPedido: pedidoId,
-                nuevoEstado: 'Facturado'
+                nuevoEstado: nuevoEstado
             }
             const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Editar-estado-pedido`, {
                 method: 'PUT',
-                // 🆕 Agregamos el encabezado Content-Type
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -646,22 +1205,26 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
 
             if (response.ok) {
-                alert(`✅ Pedido #${pedidoId} facturado correctamente.`);
-                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesPedido'));
-                if(modalDetalles) modalDetalles.hide();
+                // Solo actualiza la lista de pedidos después de un cambio exitoso
                 await verPedidosRegistrados();
+                return result;
             } else {
-                const errorText = await response.text();
-                alert(`❌ Error al facturar pedido: ${errorText}`);
-                console.error('Error al facturar pedido:', response.status, errorText);
+                // En caso de error, solo devuelve 'false'. El toast se maneja fuera
+                console.error('Error al cambiar estado:', response.status, await response.text());
+                return false;
             }
         } catch (error) {
-            alert('❌ Error de conexión al intentar facturar el pedido.');
+            // En caso de error de conexión, solo devuelve 'false'.
             console.error('Error de conexión:', error);
+            return false;
         }
     }
 
-    // 🔌 Eventos
+
+
+
+
+    // Event listeners
     searchProductInput.addEventListener('input', searchByName);
     btnRetry.addEventListener('click', loadAllProducts);
     btnNewPedido.addEventListener('click', () => {
@@ -679,6 +1242,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // Iniciar la carga de productos al cargar la página
-    loadAllProducts();
+    // Hacer funciones globales para acceso desde fuera del DOM
+    window.verPedidosRegistrados = verPedidosRegistrados;
+
+    // Inicialización
+    await cargarEdificios();
+    initializeFilters();
+    try {
+        loadAllProducts();
+    } finally {
+        // --- 4. OCULTAR EL SPINNER ---
+        // El spinner se oculta una vez que la llamada a la API ha terminado (éxito o error)
+        if (window.spinner) {
+            window.spinner.classList.add('d-none');
+        }
+    }
 });
