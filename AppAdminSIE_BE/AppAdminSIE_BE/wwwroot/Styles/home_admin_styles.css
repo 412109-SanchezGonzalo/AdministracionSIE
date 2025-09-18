@@ -3,6 +3,7 @@ html {
     height: 100%;
 }
 
+
 body {
     margin: 0;
     padding: 0;
@@ -31,6 +32,11 @@ body {
     box-sizing: border-box;
 }
 
+/* Cuando el modal esté activo, mostrarlo */
+.modal-overlay-newTask.show {
+    display: flex;
+}
+
 .modal-overlay,
 .modal-overlay-profile,
 .modal-overlay-history {
@@ -49,16 +55,47 @@ body {
     overflow-y: auto;
 }
 
+/* OPCIÓN 1: Modal extra ancho (90% de la pantalla) */
 .modal-content-location {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    max-width: 500px;
-    width: 100%;
-    text-align: left;
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     max-height: 90vh;
     overflow-y: auto;
+    position: relative;
+    /* Cambia este width para ajustar el ancho */
+    width: 90%;
+    max-width: 1200px; /* Ancho máximo */
+    margin: 20px;
+}
+
+.modal-content-location {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    /* Cambia este width para ajustar el ancho */
+    width: 90%;
+    max-width: 1200px; /* Ancho máximo */
+    margin: 20px;
+}
+
+.modal-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+}
+
+.modal-header-container h2 {
+    margin: 0;
+    color: #495057;
 }
 
 .modal-content h3,
@@ -68,12 +105,7 @@ body {
     color: #0b0a0a;
 }
 
-.modal-header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
+
 
 .modal-buttons {
     display: flex;
@@ -82,6 +114,45 @@ body {
     justify-content: center;
     margin-top: 1.5rem;
 }
+
+
+
+.btn-close {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close:hover {
+    background-color: #f8f9fa;
+    border-radius: 50%;
+}
+
+#filterOptionsContainer {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.loading {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#misBtnsContainer {
+    border-top: 1px solid #dee2e6;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
 
 /* === NAVBAR === */
 .navbar {
@@ -452,6 +523,30 @@ body {
         margin-right: 0;
         font-size: 1rem;
     }
+    .modal-content-location {
+        width: 95%;
+        margin: 10px;
+        padding: 20px;
+    }
+
+    #filterOptionsContainer {
+        flex-direction: column;
+    }
+}
+
+/* Mejoras visuales adicionales */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.form-control, .form-control-sm {
+    border-radius: 6px;
 }
 
 /* Estilo del botón hamburguesa */
