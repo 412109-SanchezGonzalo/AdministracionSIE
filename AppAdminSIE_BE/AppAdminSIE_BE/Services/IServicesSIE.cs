@@ -1,5 +1,5 @@
 ﻿using JobOclock_BackEnd.Models;
-using JobOclock_BackEnd.Data.Interfaces;
+using AppAdminSIE_BE.Data.Interfaces;
 using AppAdminSIE_BE.Models;
 
 namespace JobOclock_BackEnd.Services
@@ -12,6 +12,10 @@ namespace JobOclock_BackEnd.Services
 
         // EDIFICIO
         IEnumerable<Edificio> GetAllEdificios();
+
+        // EDIFICIO X USUARIO
+
+        IEnumerable<EdificioXUsuario> GetEdificioByUser(string contrasena);
 
         // PRODUCTO
 

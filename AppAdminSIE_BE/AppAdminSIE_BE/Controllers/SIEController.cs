@@ -63,6 +63,19 @@ namespace JobOclock_BackEnd.Controllers
          }
 
 
+        // EDIFICIO X USUARIO
+
+        [HttpGet("Obtener-edificios-por-usuario")]
+        public ActionResult<IEnumerable<string>> GetAllEdificiosByUser([FromBody]string contrasena)
+        {
+            try
+            {
+                return Ok(_service.GetEdificioByUser(contrasena));
+            }
+            catch (Exception ex) { return BadRequest("Sin Edificios"); }
+        }
+
+
         // PRODUCTO
 
         [HttpGet("Obtener-todos-los-productos")]

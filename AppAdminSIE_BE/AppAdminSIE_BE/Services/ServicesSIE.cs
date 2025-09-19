@@ -1,6 +1,5 @@
 ﻿using AppAdminSIE_BE.Data.Interfaces;
 using AppAdminSIE_BE.Models;
-using JobOclock_BackEnd.Data.Interfaces;
 using JobOclock_BackEnd.Models;
 
 namespace JobOclock_BackEnd.Services
@@ -12,15 +11,17 @@ namespace JobOclock_BackEnd.Services
         private readonly IUsuarioXServicioRepository _usuarioXActividadRepository;
         private readonly IProductoRepository _productoRepository;
         private readonly IEdificioRepository _edificioRepository;
+        private readonly IEdificioXUsuario _edificioXUsuarioRepository;
         private readonly IPedidoRepository _pedidoRepository;
         private readonly IPedidoXProductoRepository _pedidoXProductoRepository;
-        public ServicesSIE(IServicioRepository actividadRepository,  IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
+        public ServicesSIE(IServicioRepository actividadRepository,  IUsuarioRepository ussuarioRepository, IUsuarioXServicioRepository usuarioXActividadRepository,IProductoRepository productoRepository,IEdificioRepository edificioRepository,IEdificioXUsuario edificioXUsuario,IPedidoRepository pedidoRepository, IPedidoXProductoRepository pedidoXProductoRepository)
         {
             _actividadRepository = actividadRepository;
             _usuarioRepository = ussuarioRepository;
             _usuarioXActividadRepository = usuarioXActividadRepository;
             _productoRepository = productoRepository;
             _edificioRepository = edificioRepository;
+            _edificioXUsuarioRepository = edificioXUsuario;
             _pedidoRepository = pedidoRepository;
             _pedidoXProductoRepository = pedidoXProductoRepository;
         }
@@ -40,6 +41,13 @@ namespace JobOclock_BackEnd.Services
         public IEnumerable<Edificio> GetAllEdificios()
         {
             return _edificioRepository.GetAllEdificios();
+        }
+
+        // EDIFICIO X USUARIO
+
+        public IEnumerable<EdificioXUsuario> GetEdificioByUser(string contrasena)
+        {
+            return _edificioXUsuarioRepository.GetEdificioByUser(contrasena);
         }
 
 

@@ -1,6 +1,5 @@
 using AppAdminSIE_BE.Data.Interfaces;
 using AppAdminSIE_BE.Data.Repositories;
-using JobOclock_BackEnd.Data.Interfaces;
 using JobOclock_BackEnd.Data.Repositories;
 using JobOclock_BackEnd.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +29,7 @@ builder.Services.AddScoped<IUsuarioRepository>(_ => new UsuarioRepository(connSt
 builder.Services.AddScoped<IProductoRepository>(_ => new ProductoRepository(connStr));
 builder.Services.AddScoped<IUsuarioXServicioRepository>(_ => new UsuarioXServicioRepository(connStr));
 builder.Services.AddScoped<IEdificioRepository>(_ => new EdificioRepository(connStr));
+builder.Services.AddScoped<IEdificioXUsuario>(_ => new EdificioXUsuarioRepository(connStr));
 
 // 3️⃣ Autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
