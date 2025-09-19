@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     try {
         const password = sessionStorage.getItem('user_password');
         if (!password) {
-            console.warn('⚠️ No se encontró password en localStorage');
+            console.warn('⚠️ No se encontró password en sessionStorage');
             saludoSpan.textContent = 'Hola, Usuario !';
         } else {
             const response = await safeFetch(`${BASE_URL}/Obtener-nombre-de-usuario-por-contrasena`, {
@@ -316,22 +316,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function ConfirmarPedido() {
-        let result = true;
         try {
             const fechaEntrega = document.getElementById('fechaEntrega').value;
             const fechaISO = new Date(fechaEntrega).toISOString();
             const observaciones = document.getElementById('observaciones').value;
-
 
             const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fechaISO)
             });
-            if (!responsePedido.ok)
-            {
+
+            if (!responsePedido.ok) {
                 throw new Error(`Error al crear pedido: ${responsePedido.status}`);
-                return false;
             }
             const pedidoId = await responsePedido.json();
 
@@ -366,7 +363,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                     console.log(`Producto ${producto.nombre} asociado correctamente`);
                 }
             }
-            return result;
+
+            // --- CÓDIGO A EJECUTAR DESPUÉS DE LA CREACIÓN DEL PEDIDO ---
             const modal = bootstrap.Modal.getInstance(document.getElementById("miModal"));
             modal.hide();
             document.getElementById('fechaEntrega').value = '';
@@ -374,9 +372,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('edificioSelected').textContent = 'Seleccione un edificio';
             limpiarSeleccionProductos();
             renderTable(productosGlobal);
+
+            return true; // <-- Moved to the correct position
         } catch (error) {
-            return false;
             console.error('Error al crear pedido:', error);
+            return false;
         }
     }
 

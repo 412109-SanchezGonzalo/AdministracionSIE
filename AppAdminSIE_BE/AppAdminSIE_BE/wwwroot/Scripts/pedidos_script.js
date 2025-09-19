@@ -438,48 +438,46 @@
     
         console.log(`✅ Mostrados ${pedidos.length} pedidos filtrados`);
     }
-    
+
     function mostrarDetallesPedido(pedido, estadoGeneral) {
         console.log('🔍 INICIO mostrarDetallesPedido');
         console.log('🔍 Pedido recibido:', pedido);
         console.log('🔍 Estado general:', estadoGeneral);
-    
+
         const modalPedidos = bootstrap.Modal.getInstance(document.getElementById('modalPedidos'));
         if (modalPedidos) {
             console.log('🔍 Cerrando modal de pedidos');
             modalPedidos.hide();
         }
-    
+
         const modalDetalles = document.getElementById('modalDetallesPedido');
         console.log('🔍 Modal de detalles encontrado:', !!modalDetalles);
-    
+
         if (!modalDetalles) {
             console.error("❌ El modal de detalles no existe en el DOM");
             alert("Error: Modal de detalles no encontrado en la página");
             return;
         }
-    
+
         const titleElement = document.getElementById('modalDetallesPedidoLabel');
         const infoDiv = document.getElementById('detallesPedidoInfo');
         const tablaBody = document.getElementById('tablaDetallesProductos');
         const modalFooter = modalDetalles.querySelector('.modal-footer');
-    
+
         console.log('🔍 Elementos encontrados:');
         console.log('  - Title:', !!titleElement);
         console.log('  - Info div:', !!infoDiv);
         console.log('  - Tabla body:', !!tablaBody);
         console.log('  - Modal footer:', !!modalFooter);
-    
+
         if (!titleElement || !infoDiv || !tablaBody || !modalFooter) {
             console.error("❌ Algunos elementos del modal no existen");
             console.error("IDs esperados: modalDetallesPedidoLabel, detallesPedidoInfo, tablaDetallesProductos");
             alert("Error: Elementos del modal no encontrados");
             return;
         }
-    
+
         modalFooter.innerHTML = '';
-        // Referencias globales
-        const loadingSpinner = window.spinner;
         const btnVolver = document.createElement('button');
         btnVolver.type = 'button';
         btnVolver.className = 'btn btn-secondary';
@@ -494,175 +492,13 @@
                 modalPedidosInstance.show();
             }, 300);
         });
-    
+
         modalFooter.appendChild(btnVolver);
 
-
         const isPendienteEntrega = estadoGeneral === 'Pendiente - Entregar';
-    
-    // --- BOTÓN PEDIDO ARMADO ---
-        if (estadoGeneral === 'Pendiente - Preparar') {
-            const btnPedidoArmado = document.createElement('button');
-            btnPedidoArmado.type = 'button';
-            btnPedidoArmado.className = 'btn btn-primary';
-            btnPedidoArmado.textContent = 'PEDIDO ARMADO';
-    
-            btnPedidoArmado.addEventListener('click', async () => {
-                if (confirm("¿Confirmas que este pedido ha sido armado y está listo para entregar?")) {
-    
-                    // Mostrar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.remove('d-none');
-                    }
-                    btnPedidoArmado.disabled = true;
-    
-                    // Forzar espera para probar que aparece
-                    await new Promise(r => setTimeout(r, 2000));
-    
-                    let resultado = await window.cambiarEstado(pedido.id, 'Pendiente - Entregar');
-    
-                    // Ocultar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.add('d-none');
-                    }
-                    btnPedidoArmado.disabled = false;
-    
-                    if (resultado) {
-                        showToast('📦 Pedido armado y listo para ser entregado !', "success");
-                    } else {
-                        showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
-                    }
-    
-                    // cerrar modal después de un ratito
-                    setTimeout(() => {
-                        btnVolver.click();
-                    }, 500);
-                }
-            });
-    
-            modalFooter.appendChild(btnPedidoArmado);
-    
-    // --- BOTÓN FACTURAR ---
-        } else if (estadoGeneral === 'Entregado - Sin Facturar') {
-            const btnFacturar = document.createElement('button');
-            btnFacturar.type = 'button';
-            btnFacturar.className = 'btn btn-success';
-            btnFacturar.textContent = 'FACTURAR';
-    
-            btnFacturar.addEventListener('click', async () => {
-                if (confirm("¿Estás seguro de que deseas facturar este pedido?")) {
-                    // Mostrar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.remove('d-none');
-                    }
-                    btnFacturar.disabled = true;
-    
-                    // Forzar espera para probar que aparece
-                    await new Promise(r => setTimeout(r, 2000));
-                    let resultado = await window.cambiarEstado(pedido.id, 'Facturado');
-                    // Ocultar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.add('d-none');
-                    }
-                    btnFacturar.disabled = false;
-                    if (resultado) {
-                        showToast('🧾 Pedido Facturado !', "success");
-                    } else {
-                        showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
-                    }
-                    // cerrar modal después de un ratito
-                    setTimeout(() => {
-                        btnVolver.click();
-                    }, 500);
-                }
-            });
-            modalFooter.appendChild(btnFacturar);
-    
-    // --- BOTÓN CONFIRMAR ENTREGA ---
-        } else if (estadoGeneral === 'Pendiente - Entregar') {
-            const btnPendienteEntrega = document.createElement('button');
-            btnPendienteEntrega.type = 'button';
-            btnPendienteEntrega.className = 'btn btn-warning';
-            btnPendienteEntrega.textContent = 'CONFIRMAR ENTREGA';
+        const isPendientePreparar = estadoGeneral === 'Pendiente - Preparar';
+        const isEntregadoSinFacturar = estadoGeneral === 'Entregado - Sin Facturar';
 
-            // ... dentro del evento de click del botón btnPendienteEntrega
-            btnPendienteEntrega.addEventListener('click', async () => {
-                if (confirm("¿Confirmar entrega de los productos seleccionados?")) {
-                    const checkboxes = document.querySelectorAll('#tablaDetallesProductos input[type="checkbox"]:checked');
-
-                    if (checkboxes.length === 0) {
-                        showToast('⚠️ Debes seleccionar al menos un producto para confirmar la entrega', "warning");
-                        return;
-                    }
-
-                    // Mostrar spinner y deshabilitar botón
-                    if (window.spinner) window.spinner.classList.remove('d-none');
-                    btnPendienteEntrega.disabled = true;
-
-                    const promises = [];
-                    const idPedido = pedido.id;
-
-                    checkboxes.forEach(checkbox => {
-                        const idProducto = checkbox.getAttribute('data-id-producto');
-                        const body = {
-                            idPedido: idPedido,
-                            idProducto: parseInt(idProducto),
-                            observacionesExtras: "",
-                            nuevoEstadoProducto: "Entregado"
-                        };
-
-                        const promise = fetch("https://administracionsie.onrender.com/api/SIE/Editar-pedidoxproducto", {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body)
-                        })
-                            .then(response => {
-                                // Manejar la respuesta del servidor como texto
-                                if (!response.ok) {
-                                    return response.text().then(text => {
-                                        throw new Error(`Error al actualizar el producto ${idProducto}: ${text}`);
-                                    });
-                                }
-                                // Si la respuesta es exitosa, se devuelve el texto
-                                return response.text();
-                            });
-                        promises.push(promise);
-                    });
-
-                    try {
-                        await Promise.all(promises);
-                        let resultado = await window.cambiarEstado(idPedido, 'Entregado - Sin Facturar');
-
-                        // Ocultar spinner
-                        if (window.spinner) window.spinner.classList.add('d-none');
-                        btnPendienteEntrega.disabled = false;
-
-                        if (resultado) {
-                            showToast('✅ Entrega Confirmada !', "success");
-                        } else {
-                            showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
-                        }
-
-                        // Cerrar modal
-                        setTimeout(() => {
-                            btnVolver.click();
-                        }, 500);
-
-                    } catch (error) {
-                        console.error('❌ Error al actualizar uno o más productos:', error);
-                        showToast('❌ Ocurrió un error al confirmar la entrega de los productos', "error");
-
-                        // Ocultar spinner
-                        if (window.spinner) window.spinner.classList.add('d-none');
-                        btnPendienteEntrega.disabled = false;
-                    }
-                }
-            });
-            modalFooter.appendChild(btnPendienteEntrega);
-        }
-    
-    
-    
         let fechaFormateada = "Sin fecha";
         if (pedido.fechaEntrega) {
             try {
@@ -672,75 +508,189 @@
                 fechaFormateada = pedido.fechaEntrega;
             }
         }
-    
-        console.log('🔍 Fecha formateada:', fechaFormateada);
-    
+
         if (titleElement) titleElement.textContent = `📦 Pedido #${pedido.id}`;
         if (infoDiv) {
-            const estadoGeneralHTML =obtenerEstadoHtml(estadoGeneral);
+            const estadoGeneralHTML = obtenerEstadoHtml(estadoGeneral);
             infoDiv.innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-2"><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</p>
-                                <p class="mb-2"><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
-                                <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneralHTML}</p>
-                            </div>
-                            <div class="col-12 mt-2">
-                                <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
-                            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</p>
+                            <p class="mb-2"><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
+                            <p class="mb-2"><strong>📋 Estado:</strong> ${estadoGeneralHTML}</p>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p class="mb-0"><strong>📝 Observaciones:</strong> ${pedido.observaciones || 'Sin observaciones'}</p>
                         </div>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
         }
 
+        // --- AGREGAR EL CAMPO DE OBSERVACIONES ADICIONALES SI CORRESPONDE ---
+        if (isPendienteEntrega) {
+            const observacionesExtrasHTML = `
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="fw-bold">Agregar Observaciones de la Entrega:</h6>
+                    <div class="mb-3">
+                        <label for="observacionesExtras" class="form-label small">Observaciones adicionales:</label>
+                        <textarea class="form-control" id="observacionesExtras" rows="3">${pedido.observaciones || ''}</textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+            if (infoDiv) {
+                infoDiv.innerHTML += observacionesExtrasHTML;
+            }
+        }
+
+        // --- LÓGICA DE LOS BOTONES ---
+        if (isPendientePreparar) {
+            const btnPedidoArmado = document.createElement('button');
+            btnPedidoArmado.type = 'button';
+            btnPedidoArmado.className = 'btn btn-primary';
+            btnPedidoArmado.textContent = 'PEDIDO ARMADO';
+            btnPedidoArmado.addEventListener('click', async () => {
+                if (confirm("¿Confirmas que este pedido ha sido armado y está listo para entregar?")) {
+                    if (window.spinner) window.spinner.classList.remove('d-none');
+                    btnPedidoArmado.disabled = true;
+                    let resultado = await window.cambiarEstado(pedido.id, 'Pendiente - Entregar');
+                    if (window.spinner) window.spinner.classList.add('d-none');
+                    btnPedidoArmado.disabled = false;
+                    if (resultado) {
+                        showToast('📦 Pedido armado y listo para ser entregado !', "success");
+                    } else {
+                        showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                    }
+                    setTimeout(() => { btnVolver.click(); }, 500);
+                }
+            });
+            modalFooter.appendChild(btnPedidoArmado);
+        } else if (isEntregadoSinFacturar) {
+            const btnFacturar = document.createElement('button');
+            btnFacturar.type = 'button';
+            btnFacturar.className = 'btn btn-success';
+            btnFacturar.textContent = 'FACTURAR';
+            btnFacturar.addEventListener('click', async () => {
+                if (confirm("¿Estás seguro de que deseas facturar este pedido?")) {
+                    if (window.spinner) window.spinner.classList.remove('d-none');
+                    btnFacturar.disabled = true;
+                    let resultado = await window.cambiarEstado(pedido.id, 'Facturado');
+                    if (window.spinner) window.spinner.classList.add('d-none');
+                    btnFacturar.disabled = false;
+                    if (resultado) {
+                        showToast('🧾 Pedido Facturado !', "success");
+                    } else {
+                        showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                    }
+                    setTimeout(() => { btnVolver.click(); }, 500);
+                }
+            });
+            modalFooter.appendChild(btnFacturar);
+        } else if (isPendienteEntrega) {
+            const btnPendienteEntrega = document.createElement('button');
+            btnPendienteEntrega.type = 'button';
+            btnPendienteEntrega.className = 'btn btn-warning';
+            btnPendienteEntrega.textContent = 'CONFIRMAR ENTREGA';
+            btnPendienteEntrega.addEventListener('click', async () => {
+                if (confirm("¿Confirmar entrega de los productos seleccionados?")) {
+                    const checkboxes = document.querySelectorAll('#tablaDetallesProductos input[type="checkbox"]:checked');
+                    const observacionesInput = document.getElementById('observacionesExtras');
+                    const observacionesExtras = observacionesInput ? observacionesInput.value : "";
+
+                    if (checkboxes.length === 0) {
+                        showToast('⚠️ Debes seleccionar al menos un producto para confirmar la entrega', "warning");
+                        return;
+                    }
+                    if (window.spinner) window.spinner.classList.remove('d-none');
+                    btnPendienteEntrega.disabled = true;
+                    const promises = [];
+                    const idPedido = pedido.id;
+                    checkboxes.forEach(checkbox => {
+                        const idProducto = checkbox.getAttribute('data-id-producto');
+                        const body = {
+                            idPedido: idPedido,
+                            idProducto: parseInt(idProducto),
+                            observacionesExtras: observacionesExtras,
+                            nuevoEstadoProducto: "Entregado"
+                        };
+                        const promise = fetch("https://administracionsie.onrender.com/api/SIE/Editar-pedidoxproducto", {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.text().then(text => {
+                                        throw new Error(`Error al actualizar el producto ${idProducto}: ${text}`);
+                                    });
+                                }
+                                return response.text();
+                            });
+                        promises.push(promise);
+                    });
+                    try {
+                        await Promise.all(promises);
+                        let resultado = await window.cambiarEstado(idPedido, 'Entregado - Sin Facturar');
+                        if (window.spinner) window.spinner.classList.add('d-none');
+                        btnPendienteEntrega.disabled = false;
+                        if (resultado) {
+                            showToast('✅ Entrega Confirmada !', "success");
+                        } else {
+                            showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                        }
+                        setTimeout(() => { btnVolver.click(); }, 500);
+                    } catch (error) {
+                        console.error('❌ Error al actualizar uno o más productos:', error);
+                        showToast('❌ Ocurrió un error al confirmar la entrega de los productos', "error");
+                        if (window.spinner) window.spinner.classList.add('d-none');
+                        btnPendienteEntrega.disabled = false;
+                    }
+                }
+            });
+            modalFooter.appendChild(btnPendienteEntrega);
+        }
+
+        // --- LÓGICA DE LA TABLA ---
         if (tablaBody) {
             tablaBody.innerHTML = '';
             const tablaHead = document.getElementById('tablaDetallesProductosHead');
-            const isPendienteEntrega = estadoGeneral === 'Pendiente - Entregar';
-
             if (tablaHead) {
                 tablaHead.innerHTML = `
-            <tr>
-                <th scope="col" style="width: 10%;background-color: #0b0a0a">ID</th>
-                <th scope="col" style="width: 40%;background-color: #0b0a0a">Producto</th>
-                <th scope="col" style="width: 15%;background-color: #0b0a0a">Cantidad</th>
-                <th scope="col" style="width: 15%;background-color: #0b0a0a">Unidad</th>
-                ${!isPendienteEntrega ? '<th scope="col" style="width: 20%;background-color: #0b0a0a">Estado</th>' : ''}
-                ${isPendienteEntrega ? '<th scope="col" style="width: 10%;background-color: #0b0a0a">Entregado</th>' : ''}
-            </tr>
-        `;
+                <tr>
+                    <th scope="col" style="width: 10%;background-color: #0b0a0a">ID</th>
+                    <th scope="col" style="width: 40%;background-color: #0b0a0a">Producto</th>
+                    <th scope="col" style="width: 15%;background-color: #0b0a0a">Cantidad</th>
+                    <th scope="col" style="width: 15%;background-color: #0b0a0a">Unidad</th>
+                    ${!isPendienteEntrega && !isPendientePreparar ? '<th scope="col" style="width: 20%;background-color: #0b0a0a">Estado</th>' : ''}
+                    ${isPendienteEntrega ? '<th scope="col" style="width: 10%;background-color: #0b0a0a">Entregado</th>' : ''}
+                </tr>
+            `;
             }
-
             pedido.productos.forEach(producto => {
                 const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
-            <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
-            <td>${producto.cantidad || 'N/A'}</td>
-            <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-            ${!isPendienteEntrega ? `<td>${estadoBadge}</td>` : ''}
-            ${isPendienteEntrega ? `<td><input type="checkbox" class="form-check-input" data-id-producto="${producto.idProducto}"></td>` : ''}
-        `;
+                <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+                <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+                <td>${producto.cantidad || 'N/A'}</td>
+                <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+                ${!isPendienteEntrega && !isPendientePreparar ? `<td>${estadoBadge}</td>` : ''}
+                ${isPendienteEntrega ? `<td><input type="checkbox" class="form-check-input" data-id-producto="${producto.idProducto}"></td>` : ''}
+            `;
                 tablaBody.appendChild(row);
             });
         }
-    
-        console.log('🔍 Intentando mostrar el modal...');
-        try {
-            // --- MEJORA PARA ABRIR EL MODAL ---
-            const modalInstance = bootstrap.Modal.getInstance(modalDetalles) || new bootstrap.Modal(modalDetalles);
-            modalInstance.show();
-        } catch (error) {
-            console.error('❌ Error al mostrar modal:', error);
-            alert('Error al abrir el modal: ' + error.message);
-        }
+
+        const modalInstance = bootstrap.Modal.getInstance(modalDetalles) || new bootstrap.Modal(modalDetalles);
+        modalInstance.show();
     }
     
     function mostrarErrorFiltrado(mensaje) {
