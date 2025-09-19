@@ -401,8 +401,8 @@ function mostrarPedidosFiltrados(pedidos) {
         listItem.innerHTML = `
             <div class="ms-2 me-auto">
                 <div class="fw-bold">Pedido #${pedido.id}</div>
-                <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
-                <div><strong>🏢 Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
+                <div><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</div>
+                <div><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
                 <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
                 <br>
                 <small class="text-muted">📝 ${pedido.observaciones || "Sin observaciones"}</small>
@@ -626,8 +626,8 @@ function mostrarDetallesPedido(pedido, estadoGeneral) {
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-2"><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
-                            <p class="mb-2"><strong>🏢 Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
+                            <p class="mb-2"><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</p>
+                            <p class="mb-2"><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-2"><strong>📦 Total productos:</strong> ${pedido.productos.length}</p>
@@ -647,6 +647,10 @@ function mostrarDetallesPedido(pedido, estadoGeneral) {
         tablaBody.innerHTML = '';
         pedido.productos.forEach(producto => {
             const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
+            if(producto.estadoProducto === 'No Entregado')
+            {
+                estadoBagde = '-';
+            }
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
@@ -816,7 +820,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Lógica de autenticación
     try {
-        const password = localStorage.getItem('admin_password');
+        const password = sessionStorage.getItem('admin_password');
         const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

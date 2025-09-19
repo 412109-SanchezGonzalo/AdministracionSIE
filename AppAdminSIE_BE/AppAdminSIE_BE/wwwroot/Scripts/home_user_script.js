@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 🔐 Autenticación y bienvenida
     try {
-        const password = localStorage.getItem('user_password');
+        const password = sessionStorage.getItem('user_password');
         if (!password) {
             console.warn('⚠️ No se encontró password en localStorage');
             saludoSpan.textContent = 'Hola, Usuario !';

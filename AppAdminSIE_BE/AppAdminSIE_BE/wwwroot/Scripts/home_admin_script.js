@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     try {
-        const password = localStorage.getItem('admin_password');
+        const password = sessionStorage.getItem('admin_password');
         console.log('🔐 Admin password:', password);
 
         const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {

@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (userRole === 'Administrador') {
                 // Guardar datos específicos para el administrador
                 localStorage.setItem('admin_username', username);
-                localStorage.setItem('admin_password', password);
+                sessionStorage.setItem('admin_password', password);
                 localStorage.setItem('admin_token', data.token);
 
                 window.location.href = 'https://administracionsie.onrender.com/Pages/Home_Admin_Page.html';
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
             else if (userRole === 'Usuario') {
                 // Guardar datos específicos para el usuario
                 localStorage.setItem('user_username', username);
-                localStorage.setItem('user_password', password);
+                sessionStorage.setItem('user_password', password);
                 localStorage.setItem('user_token', data.token);
 
                 window.location.href = 'https://administracionsie.onrender.com/Pages/Home_User_Page.html';
