@@ -213,23 +213,25 @@ document.addEventListener('DOMContentLoaded', async function () {
         tableWrapper.classList.remove('d-none');
         userCount.textContent = count;
     }
-    // Funciones de Edificios
-    function llenarDropdownEdificios(edificios) {
+
+    // Funciones de Edificios - ACTUALIZADAS
+    function llenarDropdownEdificios(edificiosUsuario) {
         const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
         if (!dropdown) {
             console.error('❌ No se encontró el dropdown de edificios');
             return;
         }
         dropdown.innerHTML = '';
-        edificios.forEach(edificio => {
+
+        edificiosUsuario.forEach(edificio => {
             const li = document.createElement('li');
             const button = document.createElement('button');
             button.className = 'dropdown-item';
             button.type = 'button';
-            button.textContent = edificio.nombre;
-            button.setAttribute('data-value', edificio.id_Edificio);
+            button.textContent = edificio.nombreEdificio;
+            button.setAttribute('data-value', edificio.idEdificio);
             button.addEventListener('click', () => {
-                seleccionarEdificio(edificio.id_Edificio, edificio.nombre);
+                seleccionarEdificio(edificio.idEdificio, edificio.nombreEdificio);
             });
             li.appendChild(button);
             dropdown.appendChild(li);
@@ -251,20 +253,44 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function cargarEdificios() {
         try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // Obtener la contraseña del usuario desde sessionStorage
+            const password = sessionStorage.getItem('user_password');
+
+            if (!password) {
+                throw new Error('No se encontró la contraseña del usuario en sesión');
             }
-            const edificios = await response.json();
-            if (!Array.isArray(edificios)) {
-                throw new Error('Formato de edificios inválido');
+
+            console.log('🔄 Cargando edificios para el usuario...');
+
+            const response = await safeFetch(`${BASE_URL}/Obtener-edificios-por-usuario`, {
+                method: 'POST',
+                body: JSON.stringify(password)
+            });
+
+            const edificiosUsuario = await response.json();
+
+            if (!Array.isArray(edificiosUsuario)) {
+                throw new Error('Formato de edificios inválido - se esperaba un array');
             }
-            edificiosDisponibles = edificios;
-            llenarDropdownEdificios(edificios);
+
+            if (edificiosUsuario.length === 0) {
+                throw new Error('No se encontraron edificios asignados al usuario');
+            }
+
+            console.log('✅ Edificios cargados:', edificiosUsuario);
+
+            edificiosDisponibles = edificiosUsuario;
+            llenarDropdownEdificios(edificiosUsuario);
+
         } catch (error) {
-            console.error('❌ Error al cargar edificios:', error);
-            alert('Error al cargar edificios: ' + error.message);
+            console.error('❌ Error al cargar edificios del usuario:', error);
+            showToast(`Error al cargar edificios: ${error.message}`, 'error');
+
+            // En caso de error, limpiar el dropdown
+            const dropdown = document.querySelector('#menuEdificios .dropdown-menu');
+            if (dropdown) {
+                dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">Error al cargar edificios</span></li>';
+            }
         }
     }
 
