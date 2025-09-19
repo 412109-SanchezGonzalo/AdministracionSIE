@@ -2814,7 +2814,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 // MODIFICAR la función misTareas() existente para usar el modal correcto:
     async function misTareas() {
         try {
-            const password = localStorage.getItem('admin_password');
+            const password = sessionStorage.getItem('admin_password');
             const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-contrasena', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
