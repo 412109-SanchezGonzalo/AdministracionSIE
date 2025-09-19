@@ -65,7 +65,7 @@ namespace JobOclock_BackEnd.Controllers
 
         // EDIFICIO X USUARIO
 
-        [HttpGet("Obtener-edificios-por-usuario")]
+        [HttpPost("Obtener-edificios-por-usuario")]
         public ActionResult<IEnumerable<string>> GetAllEdificiosByUser([FromBody]string contrasena)
         {
             try
