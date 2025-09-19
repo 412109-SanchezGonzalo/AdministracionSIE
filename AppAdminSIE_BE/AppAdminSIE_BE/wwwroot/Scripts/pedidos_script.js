@@ -129,6 +129,7 @@
     function obtenerEstadoHtml(estadoPedido) {
         let texto = '';
         let claseColor = '';
+
     
         switch (estadoPedido) {
             case 'Entregado - Sin Facturar': // Nuevo caso
@@ -155,9 +156,14 @@
         return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
     }
     
-    function obtenerEstadoProductoHtml(estadoProducto) {
+    function obtenerEstadoProductoHtml(estadoProducto,estadoPedido = null) {
         let texto = '';
         let claseColor = '';
+
+        // Condición especial: si es 'No Entregado' y el pedido está en 'Pendiente - Preparar'
+        if (estadoProducto === 'No Entregado' && estadoPedido === 'Pendiente - Preparar') {
+            return '<span class="text-muted">-</span>';
+        }
     
         switch (estadoProducto) {
             case 'Entregado':
@@ -490,6 +496,9 @@
         });
     
         modalFooter.appendChild(btnVolver);
+
+
+        const isPendienteEntrega = estadoGeneral === 'Pendiente - Entregar';
     
     // --- BOTÓN PEDIDO ARMADO ---
         if (estadoGeneral === 'Pendiente - Preparar') {
@@ -575,32 +584,78 @@
             btnPendienteEntrega.type = 'button';
             btnPendienteEntrega.className = 'btn btn-warning';
             btnPendienteEntrega.textContent = 'CONFIRMAR ENTREGA';
-    
+
+            // ... dentro del evento de click del botón btnPendienteEntrega
             btnPendienteEntrega.addEventListener('click', async () => {
-                if (confirm("¿Confirmar entrega del pedido?")) {
-                    // Mostrar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.remove('d-none');
+                if (confirm("¿Confirmar entrega de los productos seleccionados?")) {
+                    const checkboxes = document.querySelectorAll('#tablaDetallesProductos input[type="checkbox"]:checked');
+
+                    if (checkboxes.length === 0) {
+                        showToast('⚠️ Debes seleccionar al menos un producto para confirmar la entrega', "warning");
+                        return;
                     }
+
+                    // Mostrar spinner y deshabilitar botón
+                    if (window.spinner) window.spinner.classList.remove('d-none');
                     btnPendienteEntrega.disabled = true;
-    
-                    // Forzar espera para probar que aparece
-                    await new Promise(r => setTimeout(r, 2000));
-                    let resultado = await window.cambiarEstado(pedido.id, 'Entregado - Sin Facturar');
-                    // Ocultar spinner
-                    if (window.spinner) {
-                        window.spinner.classList.add('d-none');
+
+                    const promises = [];
+                    const idPedido = pedido.id;
+
+                    checkboxes.forEach(checkbox => {
+                        const idProducto = checkbox.getAttribute('data-id-producto');
+                        const body = {
+                            idPedido: idPedido,
+                            idProducto: parseInt(idProducto),
+                            observacionesExtras: "",
+                            nuevoEstadoProducto: "Entregado"
+                        };
+
+                        const promise = fetch("https://administracionsie.onrender.com/api/SIE/Editar-pedidoxproducto", {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        })
+                            .then(response => {
+                                // Manejar la respuesta del servidor como texto
+                                if (!response.ok) {
+                                    return response.text().then(text => {
+                                        throw new Error(`Error al actualizar el producto ${idProducto}: ${text}`);
+                                    });
+                                }
+                                // Si la respuesta es exitosa, se devuelve el texto
+                                return response.text();
+                            });
+                        promises.push(promise);
+                    });
+
+                    try {
+                        await Promise.all(promises);
+                        let resultado = await window.cambiarEstado(idPedido, 'Entregado - Sin Facturar');
+
+                        // Ocultar spinner
+                        if (window.spinner) window.spinner.classList.add('d-none');
+                        btnPendienteEntrega.disabled = false;
+
+                        if (resultado) {
+                            showToast('✅ Entrega Confirmada !', "success");
+                        } else {
+                            showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
+                        }
+
+                        // Cerrar modal
+                        setTimeout(() => {
+                            btnVolver.click();
+                        }, 500);
+
+                    } catch (error) {
+                        console.error('❌ Error al actualizar uno o más productos:', error);
+                        showToast('❌ Ocurrió un error al confirmar la entrega de los productos', "error");
+
+                        // Ocultar spinner
+                        if (window.spinner) window.spinner.classList.add('d-none');
+                        btnPendienteEntrega.disabled = false;
                     }
-                    btnPendienteEntrega.disabled = false;
-                    if (resultado) {
-                        showToast('✅ Entrega Confirmada !', "success");
-                    } else {
-                        showToast('❌ Ocurrió un error al cambiar el estado del pedido', "error");
-                    }
-                    // cerrar modal después de un ratito
-                    setTimeout(() => {
-                        btnVolver.click();
-                    }, 500);
                 }
             });
             modalFooter.appendChild(btnPendienteEntrega);
@@ -643,33 +698,45 @@
                 </div>
             `;
         }
-    
+
         if (tablaBody) {
-            console.log('🔍 Llenando tabla con', pedido.productos.length, 'productos');
             tablaBody.innerHTML = '';
+            const tablaHead = document.getElementById('tablaDetallesProductosHead');
+            const isPendienteEntrega = estadoGeneral === 'Pendiente - Entregar';
+
+            if (tablaHead) {
+                tablaHead.innerHTML = `
+            <tr>
+                <th scope="col" style="width: 10%;background-color: #0b0a0a">ID</th>
+                <th scope="col" style="width: 40%;background-color: #0b0a0a">Producto</th>
+                <th scope="col" style="width: 15%;background-color: #0b0a0a">Cantidad</th>
+                <th scope="col" style="width: 15%;background-color: #0b0a0a">Unidad</th>
+                ${!isPendienteEntrega ? '<th scope="col" style="width: 20%;background-color: #0b0a0a">Estado</th>' : ''}
+                ${isPendienteEntrega ? '<th scope="col" style="width: 10%;background-color: #0b0a0a">Entregado</th>' : ''}
+            </tr>
+        `;
+            }
+
             pedido.productos.forEach(producto => {
                 const estadoBadge = obtenerEstadoProductoHtml(producto.estadoProducto);
-                if(producto.estadoProducto === 'No Entregado')
-                {
-                    estadoBagde = '-';
-                }
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
-                    <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
-                    <td>${producto.cantidad || 'N/A'}</td>
-                    <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
-                    <td>${estadoBadge}</td>
-                `;
+            <td><span class="badge bg-secondary">${producto.idProducto || 'N/A'}</span></td>
+            <td><strong>${producto.nombreProducto || 'Sin nombre'}</strong></td>
+            <td>${producto.cantidad || 'N/A'}</td>
+            <td><code>${producto.unidadMedidaProducto || 'Sin unidad'}</code></td>
+            ${!isPendienteEntrega ? `<td>${estadoBadge}</td>` : ''}
+            ${isPendienteEntrega ? `<td><input type="checkbox" class="form-check-input" data-id-producto="${producto.idProducto}"></td>` : ''}
+        `;
                 tablaBody.appendChild(row);
             });
         }
     
         console.log('🔍 Intentando mostrar el modal...');
         try {
-            const modalInstance = new bootstrap.Modal(modalDetalles);
+            // --- MEJORA PARA ABRIR EL MODAL ---
+            const modalInstance = bootstrap.Modal.getInstance(modalDetalles) || new bootstrap.Modal(modalDetalles);
             modalInstance.show();
-            console.log('✅ Modal mostrado correctamente');
         } catch (error) {
             console.error('❌ Error al mostrar modal:', error);
             alert('Error al abrir el modal: ' + error.message);
@@ -892,12 +959,12 @@
             productosSeleccionados.forEach(producto => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-            <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-            <td>${producto.cantidad || 1}</td>
-            <td><code>${producto.unidadMedida || 'Sin unidad'}</code></td>
-            <td><span class="badge bg-secondary">No</span></td>
-        `;
+                    <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
+                    <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
+                    <td>${producto.cantidad || 1}</td>
+                    <td><code>${producto.unidadMedida || 'Sin unidad'}</code></td>
+                    <td><span class="text-muted">-</span></td>
+                `;
                 tablaBody.appendChild(row);
             });
         }
