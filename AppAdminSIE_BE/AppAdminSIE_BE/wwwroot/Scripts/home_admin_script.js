@@ -416,9 +416,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             btnVolverLista.innerHTML = '← Volver a Lista';
 
             // Insertar al principio de los botones existentes
-            const btnEditar = document.getElementById('btnEditar');
-            if (btnEditar) {
-                btnEditar.parentNode.insertBefore(btnVolverLista, btnEditar);
+            const btnEliminar = document.getElementById('btnEliminar');
+            if (btnEliminar) {
+                btnEliminar.parentNode.insertBefore(btnVolverLista, btnEliminar);
             }
 
             btnVolverLista.addEventListener('click', () => {
@@ -1807,107 +1807,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 1. CORREGIR la función UpdateTask para recargar datos después de editar
-    async function UpdateTask() {
-        try {
-            console.log("🔍 Debug - tareaSeleccionada completa:", tareaSeleccionada);
-
-            if (!tareaSeleccionada[0]) {
-                throw new Error("No hay tarea seleccionada");
-            }
-
-            const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
-            const fechaEditarTarea = document.getElementById('verDateActivityByUser');
-            const actividadDropdown = document.getElementById('activitySelectedByUser');
-            const edificioDropdown = document.getElementById('edificioSelectedByUser');
-
-            // ✅ Armo el objeto exactamente como lo pide la API
-            const datos = {
-                idServicioXActividad: tareaSeleccionada[0].idUsuarioXActividad, // 👈 lo mapeamos acá
-                idServicio: Number(actividadDropdown.getAttribute('data-selected') || tareaSeleccionada[0].idServicio),
-                idEdificio: Number(edificioDropdown.getAttribute('data-selected') || tareaSeleccionada[0].idEdificio),
-                fecha: new Date(fechaEditarTarea.value).toISOString(), // 👈 en formato ISO
-                observaciones: observacionesEditarTarea.value
-            };
-
-            console.log("📤 Datos finales enviados:", JSON.stringify(datos, null, 2));
-
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datos)
-            });
-
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
-
-            const result = await response.text();
-            console.log("✅ Edición exitosa:", result);
-
-            showToast("Tarea actualizada correctamente ✅", 'success');
-
-            console.log("🔍 ID enviado para recargar:", tareaSeleccionada[0].idUsuarioXActividad);
-
-            // ✅ Recargar datos actualizados desde la API
-            await recargarTareaDespuesDeEditar(
-                empleadosSeleccionados[0].id,
-                tareaSeleccionada[0].idUsuarioXActividad // este lo mapeaste como idServicioXActividad
-            );
-
-
-            tareaSeleccionada = [];
-        } catch (error) {
-            console.error("❌ Error en UpdateTask:", error);
-            showToast("Error al actualizar tarea: " + error.message, 'danger');
-            tareaSeleccionada = [];
-        }
-    }
-
-
-    async function recargarTareaDespuesDeEditar(employeeId, idTareaEditada) {
-        try {
-
-
-            console.log('🔄 Recargando datos actualizados...');
-
-            const response = await fetch(
-                `https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const datosActualizados = await response.json();
-            console.log('✅ Datos actualizados obtenidos:', datosActualizados);
-            console.log('🔍 ID buscado:', idTareaEditada);
-
-
-
-            if (Array.isArray(datosActualizados) && datosActualizados.length > 0) {
-                // ✅ CORRECCIÓN: Convierte idTareaEditada a un número para la comparación
-                const idBuscado = Number(idTareaEditada);
-
-                const tareaEditada = datosActualizados.find(t =>
-                    t.idUsuarioXActividad === idBuscado
-                );
-
-                if (tareaEditada) {
-                    mostrarTareaEnModal(tareaEditada);
-                    console.log('🔄 Interfaz actualizada con datos frescos');
-                } else {
-                    console.warn('⚠️ No se encontró la tarea editada en los datos actualizados.');
-                }
-            }
-
-        } catch (error) {
-            console.error('❌ Error al recargar datos:', error);
-        }
-    }
-
-
-
-
-
 
 
 
@@ -2028,48 +1927,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (btnRetry) btnRetry.addEventListener('click', loadAllUsers);
     if(btnEliminar) btnEliminar.addEventListener('click', DeleteTask);
 
-    btnEditar.addEventListener('click', async () => {
-        console.log("✏️ Editar tarea habilitado");
 
-        // habilitar campos
-        const actividadDropdown = document.getElementById('activitySelectedByUser');
-        const edificioDropdown = document.getElementById('edificioSelectedByUser');
-        const fechaEditarTarea = document.getElementById('verDateActivityByUser');
-        const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
-
-        actividadDropdown.disabled = false;
-        edificioDropdown.disabled = false;
-        fechaEditarTarea.disabled = false;
-        observacionesEditarTarea.disabled = false;
-
-        // CARGAR DATOS ANTES DE LLENAR DROPDOWNS
-        if (actividadesDisponibles.length === 0) {
-            await cargarActividadesParaEdicion();
-        }
-        if (edificiosDisponibles.length === 0) {
-            await cargarEdificiosParaEdicion();
-        }
-
-        // Llenar dropdowns
-        llenarDropdownActividadesEdicion(actividadesDisponibles);
-        llenarDropdownEdificiosEdicion(edificiosDisponibles);
-
-        // ✅ CORREGIDO: resetear el botón correctamente
-        btnConfirmEdit.style.visibility = 'visible';
-        btnConfirmEdit.style.display = 'inline-block'; // Asegurarse de que esté visible
-    });
-
-    // 4. OPCIONAL: Función para limpiar estado cuando se cierra/abre modal
-    function limpiarEstadoModal() {
-        const btnConfirmEdit = document.getElementById('btnConfirmEdit');
-        if (btnConfirmEdit) {
-            btnConfirmEdit.style.visibility = 'hidden';
-            btnConfirmEdit.style.display = 'inline-block';
-        }
-
-        // Limpiar arrays de estado
-        tareaSeleccionada = [];
-    }
 
     async function DeleteTask(){
 
@@ -3097,26 +2955,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('✅ Botón limpiar filtros conectado');
     }
 
-    // Agregar FUERA del evento btnEditar, junto con los otros event listeners
-    if (btnConfirmEdit) {
-        btnConfirmEdit.addEventListener('click', async () => {
-            await UpdateTask();
 
-            // bloquear nuevamente los campos
-            const actividadDropdown = document.getElementById('activitySelectedByUser');
-            const edificioDropdown = document.getElementById('edificioSelectedByUser');
-            const fechaEditarTarea = document.getElementById('verDateActivityByUser');
-            const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
-
-            actividadDropdown.disabled = true;
-            edificioDropdown.disabled = true;
-            fechaEditarTarea.disabled = true;
-            observacionesEditarTarea.disabled = true;
-
-            // ✅ CORREGIDO: usar visibility en lugar de display
-            btnConfirmEdit.style.visibility = 'hidden';
-        });
-    }
 
     if(btnVerMisTasks){
         btnVerMisTasks.addEventListener('click', async () => {
