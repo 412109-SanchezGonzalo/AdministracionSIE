@@ -205,7 +205,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
-    // Función para mostrar el list group de "Ver Tareas Asignadas"
     function mostrarListGroupTareasAsignadas(tareas, nombreEmpleado) {
         console.log('Mostrando tareas asignadas list group con', tareas.length, 'tareas');
 
@@ -218,6 +217,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Buscar o crear el contenedor del list group para "Ver Tareas Asignadas"
         let listGroupContainer = document.getElementById('listGroupContainer');
 
+        // ✅ LÓGICA CORREGIDA: Si el contenedor no existe, créalo. Si existe, no hagas nada.
         if (!listGroupContainer) {
             console.log('Creando contenedor de tareas asignadas list group...');
 
@@ -234,23 +234,29 @@ document.addEventListener('DOMContentLoaded', async function () {
             modalContent.insertBefore(listGroupContainer, userInputDiv.nextSibling);
         }
 
+        // ✅ LIMPIAR EL CONTENIDO del contenedor antes de agregar la nueva lista
+        listGroupContainer.innerHTML = '';
+
         // Mostrar mensaje si no hay resultados
         if (!tareas || tareas.length === 0) {
             listGroupContainer.innerHTML = `
-            <div class="text-center p-4">
-                <h6 class="text-muted">📭 Sin resultados</h6>
-                <p class="small text-muted">No se encontraron tareas con los filtros aplicados.</p>
-            </div>
-        `;
+                <div class="text-center p-4">
+                    <h6 class="text-muted">📭 Sin resultados</h6>
+                    <p class="small text-muted">No se encontraron tareas con los filtros aplicados.</p>
+                </div>
+            `;
             listGroupContainer.style.display = 'block';
             return;
         }
 
         // Crear el HTML del list group
-        listGroupContainer.innerHTML = `
-        <h6 class="fw-bold">Tareas Asignadas a ${nombreEmpleado} (${tareas.length})</h6>
-        <ol class="list-group list-group-numbered mt-3" id="tareasAsignadasListGroup"></ol>
-    `;
+        const titleAndListHtml = `
+            <h6 class="fw-bold">Tareas Asignadas a ${nombreEmpleado} (${tareas.length})</h6>
+            <ol class="list-group list-group-numbered mt-3" id="tareasAsignadasListGroup"></ol>
+        `;
+
+        // ✅ Usar insertAdjacentHTML para agregar la nueva lista sin borrar los filtros
+        listGroupContainer.insertAdjacentHTML('beforeend', titleAndListHtml);
 
         listGroupContainer.style.display = 'block';
 
@@ -264,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Crear elementos del list group
         tareas.forEach((tarea, index) => {
-            // Determinar el estado y color de borde
+            // ... (Tu lógica para determinar el estado y crear el HTML del li) ...
             let estadoTarea = tarea.estado || 'Pendiente';
             let colorBorde;
             let estadoHtml;
@@ -311,19 +317,19 @@ document.addEventListener('DOMContentLoaded', async function () {
             listItem.style.borderLeft = `4px solid ${colorBorde}`;
 
             listItem.innerHTML = `
-            <div class="ms-2 me-auto">
-                <div class="fw-bold">Tarea #${tarea.idUsuarioXActividad || (index + 1)}</div>
-                <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
-                <div><strong>🏢 Edificio:</strong> ${tarea.nombreEdificio || "Sin edificio"}</div>
-                <small class="text-muted">🔧 ${tarea.nombreServicio || 'Actividad sin nombre'}</small>
-                <br>
-                <small class="text-muted">📝 ${tarea.observaciones || "Sin observaciones"}</small>
-            </div>
-            <div class="text-end">
-                ${estadoHtml}
-                <br>
-            </div>
-        `;
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Tarea #${tarea.idUsuarioXActividad || (index + 1)}</div>
+                    <div><strong>📅 Fecha:</strong> ${fechaFormateada}</div>
+                    <div><strong>🏢 Edificio:</strong> ${tarea.nombreEdificio || "Sin edificio"}</div>
+                    <small class="text-muted">🔧 ${tarea.nombreServicio || 'Actividad sin nombre'}</small>
+                    <br>
+                    <small class="text-muted">📝 ${tarea.observaciones || "Sin observaciones"}</small>
+                </div>
+                <div class="text-end">
+                    ${estadoHtml}
+                    <br>
+                </div>
+            `;
 
             // Event listener para abrir el detalle de la tarea (diferente a Mis Tareas)
             listItem.addEventListener('click', (e) => {
@@ -338,6 +344,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Función para abrir el detalle de una tarea asignada (diferente a Mis Tareas)
     function abrirDetalleTareaAsignada(tarea, index, nombreEmpleado) {
         console.log('Abriendo detalle de tarea asignada:', tarea);
+        // Ocultar el botón de cerrar del modal principal
+        document.getElementById('closeVerTaskModalBtn').style.display = 'none';
+
+        empleadosSeleccionados = [{
+            nombre: nombreEmpleado,
+            id: tarea.idUsuario // O el ID que corresponda al usuario
+        }];
+
 
         // Limpiar y guardar la tarea seleccionada
         tareaSeleccionada = [tarea];
@@ -389,6 +403,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             observacionesInput.disabled = true; // Solo lectura inicialmente
         }
 
+        // ✅ NUEVA LÍNEA: Configurar botones según el estado de la tarea
+        configurarBotonesEdicionSegunEstado(tarea.estado);
+
         // Agregar botón para volver a la lista (si no existe)
         let btnVolverLista = document.getElementById('btnVolverLista');
         if (!btnVolverLista) {
@@ -415,29 +432,28 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // Función para volver a mostrar la lista de tareas asignadas
     function volverAListaTareasAsignadas() {
-        // Ocultar formulario
+        console.log('Volviendo a la lista de tareas, recargando el modal...');
+
+        // Ocultar el formulario
         const formContainer = document.getElementById('formContainer');
         if (formContainer) {
             formContainer.style.display = 'none';
         }
 
-        // Mostrar list group
-        const listGroupContainer = document.getElementById('listGroupContainer');
-        if (listGroupContainer) {
-            listGroupContainer.style.display = 'block';
-        }
-
-        // Mostrar el contenedor de filtros
-        const filterOptionsContainer = document.getElementById('filterOptionsContainerTareasAsignadas');
-        if (filterOptionsContainer) {
-            filterOptionsContainer.style.display = 'block';
-        }
-
-        // Ocultar botón volver
+        // Ocultar el botón de volver
         const btnVolverLista = document.getElementById('btnVolverLista');
         if (btnVolverLista) {
             btnVolverLista.style.display = 'none';
         }
+        const empleado = empleadosSeleccionados[0];
+
+        // ✅ La clave: usar closeVerTaskModalBtn para cerrar el modal por completo.
+        const closeBtn = document.getElementById('closeVerTaskModalBtn');
+        if (closeBtn) {
+            closeBtn.click();
+        }
+        openModalVerTask(empleado.id, empleado.nombre);
+
     }
 
 // Variables para filtros de Ver Tareas Asignadas
@@ -480,24 +496,29 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Función para limpiar filtros de Ver Tareas Asignadas
     function limpiarFiltrosTareasAsignadas() {
         console.log('Limpiando filtros de tareas asignadas...');
-
         const fechaInput = document.getElementById('fechaFiltradaEnTareasAsignadas');
         const estadoDropdownBtn = document.getElementById('tareaAsignadaFiltradaByEstado');
 
-        if (fechaInput) fechaInput.value = '';
-        if (estadoDropdownBtn) estadoDropdownBtn.textContent = 'Seleccionar Estado';
-
-        enableFechaInputTareasAsignadas();
-        enableEstadoDropdownTareasAsignadas();
+        if (fechaInput) {
+            fechaInput.value = '';
+        }
+        if (estadoDropdownBtn) {
+            estadoDropdownBtn.textContent = 'Seleccionar Estado';
+        }
         currentFilterTypeTareasAsignadas = null;
 
-        // Volver a mostrar todas las tareas originales
-        if (originalTareasAsignadas.length > 0) {
-            const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
+        // ✅ LÓGICA AGREGADA: Volver a mostrar la lista completa
+        // Se asume que 'originalTareasAsignadas' contiene los datos sin filtrar.
+        // También se necesita el nombre del empleado para la visualización.
+        const nombreEmpleado = document.getElementById('verTareaByUser').value;
+
+        if (originalTareasAsignadas && originalTareasAsignadas.length > 0) {
             mostrarListGroupTareasAsignadas(originalTareasAsignadas, nombreEmpleado);
+        } else {
+            console.warn("No se pudo recargar la lista de tareas. El array de tareas originales está vacío.");
         }
 
-        console.log('Filtros de tareas asignadas limpiados.');
+        console.log('Filtros de tareas asignadas limpiados y lista recargada.');
     }
 
 // Inicializar filtros para Ver Tareas Asignadas
@@ -1028,25 +1049,37 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         const modalVerTask = document.getElementById('modal-VerTask');
         const inputUser = document.getElementById('verTareaByUser');
+        const formContainer = document.getElementById('formContainer');
+        const filterOptionsContainer = document.getElementById('filterOptionsContainerTareasAsignadas');
+        const closeBtn = document.getElementById('closeVerTaskModalBtn'); // ✅ Obtener el botón de cerraR
 
-        if (!modalVerTask || !inputUser) {
-            console.error('Modal o input no encontrado');
+        if (!modalVerTask || !inputUser || !formContainer || !filterOptionsContainer) {
+            console.error('Uno o más elementos del modal no fueron encontrados. Verifique el HTML.');
             return;
         }
 
-        // Rellenar el input con el nombre del empleado
+        // ✅ Mostrar el botón de cerrar inmediatamente
+        closeBtn.style.display = 'block';
+
+        // Asegurarse de que el formulario de detalle de tarea esté oculto
+        formContainer.style.display = 'none';
+
+        // ✅ Asegurarse de que los filtros estén visibles
+        filterOptionsContainer.style.display = 'flex';
+
+        // Rellenar el input y mostrar el modal
         inputUser.value = nombreEmpleado;
         inputUser.disabled = true;
-
-        // Mostrar el modal primero
         modalVerTask.style.display = 'flex';
+
+        // Resetear los filtros y la lista ANTES de cargar nuevos datos
+        limpiarFiltrosTareasAsignadas(); // Esta función solo limpia los valores
 
         // Mostrar loading mientras se cargan los datos
         showLoadingTareas();
 
         try {
             console.log('Realizando consulta para empleado ID:', employeeId);
-
             const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
 
             if (!response.ok) {
@@ -1054,24 +1087,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             const data = await response.json();
-            console.log('Datos obtenidos de la API:', data);
-
-            // Ocultar loading
             hideLoadingTareas();
 
-            // Procesar los datos de la API
             if (Array.isArray(data) && data.length > 0) {
                 console.log(`Empleado tiene ${data.length} tarea(s) asignada(s)`);
-
-                // ✅ AGREGAR ESTAS DOS LÍNEAS AQUÍ:
-                originalTareasAsignadas = data; // Guardar las tareas originales
-                initializeFiltersTareasAsignadas(); // Inicializar filtros
-
+                originalTareasAsignadas = data;
+                initializeFiltersTareasAsignadas();
                 mostrarListGroupTareasAsignadas(data, nombreEmpleado);
-                console.log('Modal Ver Tareas abierto correctamente');
-
             } else {
-                // No hay datos asignados
                 console.log('No se encontraron tareas asignadas para este empleado');
 
                 if (confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿Desea asignarle una?`)) {
@@ -1079,11 +1102,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                     openModalNewTask(empleadosSeleccionados);
                 }
             }
-
         } catch (error) {
             console.error('Error al obtener datos de la API:', error);
             hideLoadingTareas();
-            showToast('Error al cargar las tareas del empleado: ' + error.message,'danger');
+            showToast('Error al cargar las tareas del empleado: ' + error.message, 'danger');
         }
     }
 
@@ -1091,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     function mostrarTareaEnModal(tarea) {
         console.table(tarea);
 
-        // ✅ NUEVO: Limpiar array antes de agregar nueva tarea
+        // Limpiar array antes de agregar nueva tarea
         tareaSeleccionada = [];
         tareaSeleccionada.push(tarea);
 
@@ -1140,14 +1162,43 @@ document.addEventListener('DOMContentLoaded', async function () {
             observacionesInput.disabled = true;
         }
 
-        // Mostrar botones de acción
-        document.getElementById('btnEditar').style.display = 'inline-block';
-        document.getElementById('btnEliminar').style.display = 'inline-block';
+        // ✅ MODIFICACIÓN: Configurar botones según el estado en lugar de mostrarlos siempre
+        configurarBotonesEdicionSegunEstado(tarea.estado);
 
-        // ✅ NUEVO: Asegurar que el botón de confirmación esté oculto inicialmente
+        // Asegurar que el botón de confirmación esté oculto inicialmente
         const btnConfirmEdit = document.getElementById('btnConfirmEdit');
         if (btnConfirmEdit) {
             btnConfirmEdit.style.visibility = 'hidden';
+        }
+    }
+
+    // Función auxiliar para mostrar un mensaje cuando los botones están deshabilitados
+    function mostrarMensajeEdicionDeshabilitada(estadoTarea) {
+        // Opcional: Agregar un mensaje informativo cuando la edición no está disponible
+        const formContainer = document.getElementById('formContainer');
+        if (!formContainer) return;
+
+        // Remover mensaje previo si existe
+        const mensajePrevio = document.getElementById('mensajeEdicionDeshabilitada');
+        if (mensajePrevio) {
+            mensajePrevio.remove();
+        }
+
+        if (estadoTarea !== 'Pendiente') {
+            const mensaje = document.createElement('div');
+            mensaje.id = 'mensajeEdicionDeshabilitada';
+            mensaje.className = 'alert alert-info mt-3';
+            mensaje.innerHTML = `
+            <i class="fas fa-info-circle"></i> 
+            <strong>Información:</strong> Esta tarea no puede ser editada porque está en estado "${estadoTarea}". 
+            Solo las tareas en estado "Pendiente" pueden ser modificadas.
+        `;
+
+            // Insertar antes de los botones
+            const btnEditar = document.getElementById('btnEditar');
+            if (btnEditar) {
+                btnEditar.parentNode.insertBefore(mensaje, btnEditar);
+            }
         }
     }
 
@@ -1322,6 +1373,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Llenar los campos con los datos de la tarea seleccionada
         mostrarTareaEnModal(tarea);
+
+        // ✅ NUEVA LÍNEA: Configurar botones según el estado de la tarea
+        configurarBotonesEdicionSegunEstado(tarea.estado);
 
         // Agregar botón para volver a la lista (si hay múltiples tareas)
         let btnVolver = document.getElementById('btnVolverLista');
@@ -1762,21 +1816,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                 throw new Error("No hay tarea seleccionada");
             }
 
-            const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
             const observacionesEditarTarea = document.getElementById('VerCommentsByUser');
             const fechaEditarTarea = document.getElementById('verDateActivityByUser');
             const actividadDropdown = document.getElementById('activitySelectedByUser');
             const edificioDropdown = document.getElementById('edificioSelectedByUser');
 
+            // ✅ Armo el objeto exactamente como lo pide la API
             const datos = {
-                idServicioXActividad: idServicioXUsuario,
-                idServicio: actividadDropdown.getAttribute('data-selected'),
-                idEdificio: edificioDropdown.getAttribute('data-selected'),
-                fecha: fechaEditarTarea.value,
+                idServicioXActividad: tareaSeleccionada[0].idUsuarioXActividad, // 👈 lo mapeamos acá
+                idServicio: Number(actividadDropdown.getAttribute('data-selected') || tareaSeleccionada[0].idServicio),
+                idEdificio: Number(edificioDropdown.getAttribute('data-selected') || tareaSeleccionada[0].idEdificio),
+                fecha: new Date(fechaEditarTarea.value).toISOString(), // 👈 en formato ISO
                 observaciones: observacionesEditarTarea.value
             };
 
-            console.log("📤 Enviando datos de edición:", datos);
+            console.log("📤 Datos finales enviados:", JSON.stringify(datos, null, 2));
 
             const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario', {
                 method: 'PUT',
@@ -1789,25 +1843,35 @@ document.addEventListener('DOMContentLoaded', async function () {
             const result = await response.text();
             console.log("✅ Edición exitosa:", result);
 
-            showToast("Tarea actualizada correctamente ✅",'success');
+            showToast("Tarea actualizada correctamente ✅", 'success');
 
-            // ✅ NUEVO: Recargar datos actualizados desde la API
-            await recargarTareaDespuesDeEditar(empleadosSeleccionados[0].id);
+            console.log("🔍 ID enviado para recargar:", tareaSeleccionada[0].idUsuarioXActividad);
+
+            // ✅ Recargar datos actualizados desde la API
+            await recargarTareaDespuesDeEditar(
+                empleadosSeleccionados[0].id,
+                tareaSeleccionada[0].idUsuarioXActividad // este lo mapeaste como idServicioXActividad
+            );
+
 
             tareaSeleccionada = [];
         } catch (error) {
             console.error("❌ Error en UpdateTask:", error);
-            showToast("Error al actualizar tarea: " + error.message,'danger');
+            showToast("Error al actualizar tarea: " + error.message, 'danger');
             tareaSeleccionada = [];
         }
     }
 
-// ✅ NUEVA función para recargar datos después de editar
-    async function recargarTareaDespuesDeEditar(employeeId) {
+
+    async function recargarTareaDespuesDeEditar(employeeId, idTareaEditada) {
         try {
+
+
             console.log('🔄 Recargando datos actualizados...');
 
-            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
+            const response = await fetch(
+                `https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`
+            );
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1815,18 +1879,23 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const datosActualizados = await response.json();
             console.log('✅ Datos actualizados obtenidos:', datosActualizados);
+            console.log('🔍 ID buscado:', idTareaEditada);
 
-            // Actualizar la tarea en el array tareaSeleccionada
+
+
             if (Array.isArray(datosActualizados) && datosActualizados.length > 0) {
-                // Buscar la tarea que acabamos de editar
+                // ✅ CORRECCIÓN: Convierte idTareaEditada a un número para la comparación
+                const idBuscado = Number(idTareaEditada);
+
                 const tareaEditada = datosActualizados.find(t =>
-                    t.idUsuarioXActividad === tareaSeleccionada[0]?.idUsuarioXActividad
+                    t.idUsuarioXActividad === idBuscado
                 );
 
                 if (tareaEditada) {
-                    // Actualizar la interfaz con los datos frescos
                     mostrarTareaEnModal(tareaEditada);
                     console.log('🔄 Interfaz actualizada con datos frescos');
+                } else {
+                    console.warn('⚠️ No se encontró la tarea editada en los datos actualizados.');
                 }
             }
 
@@ -1834,6 +1903,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.error('❌ Error al recargar datos:', error);
         }
     }
+
+
+
+
 
 
 
@@ -2670,6 +2743,49 @@ document.addEventListener('DOMContentLoaded', async function () {
         const estadoContainer = document.getElementById('miEstadoContainer');
         if (estadoContainer) {
             estadoContainer.remove();
+        }
+    }
+
+
+
+    // Función para configurar la visibilidad de botones Editar/Eliminar según el estado
+    function configurarBotonesEdicionSegunEstado(estadoTarea) {
+        console.log('🔧 Configurando botones de edición para estado:', estadoTarea);
+
+        const btnEditar = document.getElementById('btnEditar');
+        const btnEliminar = document.getElementById('btnEliminar');
+        const btnConfirmEdit = document.getElementById('btnConfirmEdit');
+
+        if (!btnEditar || !btnEliminar) {
+            console.error('❌ No se encontraron los botones de edición');
+            return;
+        }
+
+        // Normalizar el estado (eliminar espacios y manejar variaciones)
+        const estado = estadoTarea ? estadoTarea.trim() : 'Pendiente';
+        console.log('Estado normalizado para botones de edición:', estado);
+
+        if (estado === 'Pendiente') {
+            // Solo en estado Pendiente se pueden editar/eliminar
+            btnEditar.style.display = 'inline-block';
+            btnEliminar.style.display = 'inline-block';
+
+            // También asegurarse de que el botón de confirmar edición esté oculto inicialmente
+            if (btnConfirmEdit) {
+                btnConfirmEdit.style.visibility = 'hidden';
+            }
+
+            console.log('✅ Botones de edición habilitados (estado Pendiente)');
+        } else {
+            // En cualquier otro estado, ocultar botones de edición
+            btnEditar.style.display = 'none';
+            btnEliminar.style.display = 'none';
+
+            if (btnConfirmEdit) {
+                btnConfirmEdit.style.visibility = 'hidden';
+            }
+
+            console.log('🚫 Botones de edición deshabilitados (estado:', estado + ')');
         }
     }
 
