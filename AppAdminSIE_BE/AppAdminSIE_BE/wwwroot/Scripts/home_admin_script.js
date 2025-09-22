@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         'btnVerTask',
         'btnRetry',
         'btnConfirmar',
-        'btnEditar',
+        //'btnEditar',
         'btnEliminar',
         'btnConfirmEdit'
     ];
@@ -165,9 +165,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnVerTask = document.getElementById('btnVerTask');
     const btnVerMisTasks = document.getElementById('btnVerMisTasks');
     const btnConfirm = document.getElementById('btnConfirmar');
-    const btnEditar = document.getElementById('btnEditar');
+    //const btnEditar = document.getElementById('btnEditar');
     const btnEliminar = document.getElementById('btnEliminar');
-    const btnConfirmEdit = document.getElementById('btnConfirmEdit');
+    const btnConfirmEdit = document.getElementById('btnConfirmarEdicion');
 
 
     // 🔍 VERIFICAR ELEMENTOS HTML
@@ -179,6 +179,196 @@ document.addEventListener('DOMContentLoaded', async function () {
         tableBody: !!tableBody,
         btnAll: !!btnAll
     });
+
+
+
+    function deshabilitarCampos() {
+        // Deshabilitar dropdowns
+        const activityDropdownBtn = document.getElementById("activitySelectedByUser");
+        const edificioDropdownBtn = document.getElementById("edificioSelectedByUser");
+
+        activityDropdownBtn.disabled = true;
+        activityDropdownBtn.classList.add("disabled");
+        edificioDropdownBtn.disabled = true;
+        edificioDropdownBtn.classList.add("disabled");
+
+        // Deshabilitar el input de fecha
+        const dateInput = document.getElementById("verDateActivityByUser");
+        dateInput.disabled = true;
+        dateInput.readOnly = true;
+
+        // Deshabilitar el textarea de observaciones
+        const observacionesTextarea = document.getElementById("VerCommentsByUser");
+        observacionesTextarea.disabled = true;
+        observacionesTextarea.readOnly = true;
+
+        // Ocultar el botón de confirmar cambios
+        const btnConfirmarEdicion = document.getElementById("btnConfirmarEdicion");
+        btnConfirmarEdicion.style.display = "none";
+
+        // Mostrar el botón de editar nuevamente
+        //const btnEditar = document.getElementById("btnEditar");
+        //btnEditar.style.display = "inline-block";
+
+        // Remover la clase de modo edición
+        document.getElementById("formContainer").classList.remove("editing-mode");
+
+        // REVERTIR LOS ESTILOS INLINE - Opción 1: Restaurar al valor original
+        activityDropdownBtn.style.borderColor = "";
+        edificioDropdownBtn.style.borderColor = "";
+        dateInput.style.borderColor = "";
+        observacionesTextarea.style.borderColor = "";
+    }
+
+    const btnVolver = document.getElementById("btnVolverLista");
+    if (btnVolver) {
+        btnVolver.addEventListener("click", volverAListaTareasAsignadas);
+    }
+
+    /*btnEditar.addEventListener("click", function () {
+        // Habilitar dropdowns - activar los botones dropdown
+        const activityDropdownBtn = document.getElementById("activitySelectedByUser");
+        const edificioDropdownBtn = document.getElementById("edificioSelectedByUser");
+
+        // Remover el atributo disabled si existe y habilitar funcionalidad
+        activityDropdownBtn.disabled = false;
+        activityDropdownBtn.classList.remove("disabled");
+        edificioDropdownBtn.disabled = false;
+        edificioDropdownBtn.classList.remove("disabled");
+
+        // Habilitar el input de fecha
+        const dateInput = document.getElementById("verDateActivityByUser");
+        dateInput.disabled = false;
+        dateInput.readOnly = false;
+
+        // Habilitar el textarea de observaciones
+        const observacionesTextarea = document.getElementById("VerCommentsByUser");
+        observacionesTextarea.disabled = false;
+        observacionesTextarea.readOnly = false;
+
+        // Mostrar el botón de confirmar cambios
+        const btnConfirmarEdicion = document.getElementById("btnConfirmarEdicion");
+        btnConfirmarEdicion.style.display = "inline-block";
+
+        // Opcionalmente, ocultar el botón de editar para evitar confusión
+        btnEditar.style.display = "none";
+
+        // Cambiar el estilo visual para indicar que los campos están editables
+        // Agregar una clase CSS para indicar modo edición
+        document.getElementById("formContainer").classList.add("editing-mode");
+
+        // Opcional: Agregar estilos inline para mayor claridad visual
+        activityDropdownBtn.style.borderColor = "#0d6efd";
+        edificioDropdownBtn.style.borderColor = "#0d6efd";
+        dateInput.style.borderColor = "#0d6efd";
+        observacionesTextarea.style.borderColor = "#0d6efd";
+
+        cargarActividadesParaEdicion();
+        cargarEdificiosParaEdicion();
+    });*/
+
+
+    /*btnConfirmEdit.addEventListener("click", function () {
+        if(confirm('¿ Confirmar edición?'))
+        {
+            UpdateTask();
+        }
+
+    })*/
+
+    async function UpdateTask() {
+
+        try {
+            const fecha = document.getElementById('verDateActivityByUser').value;
+            const observaciones = document.getElementById('VerCommentsByUser').value;
+
+            // Validar que la fecha no esté vacía
+            if (!fecha) {
+                showToast('Por favor selecciona una fecha', 'warning');
+                return;
+            }
+
+            // Obtener IDs usando las funciones existentes
+            const idServicio = obtenerIdServicio();
+            const idEdificio = obtenerIdEdificio();
+
+            console.log("🔍 Depuración - Valores obtenidos:");
+            console.log("idServicio:", idServicio, typeof idServicio);
+            console.log("idEdificio:", idEdificio, typeof idEdificio);
+            console.log("tareaSeleccionada:", tareaSeleccionada);
+            console.log("Variables globales:", {
+                servicioSeleccionadoId: window.servicioSeleccionadoId,
+                edificioSeleccionadoId: window.edificioSeleccionadoId
+            });
+
+            // Validar que los IDs sean números válidos
+            if (!idServicio || isNaN(parseInt(idServicio))) {
+                showToast('Error: ID de servicio no válido', 'danger');
+                return;
+            }
+
+            if (!idEdificio || isNaN(parseInt(idEdificio))) {
+                showToast('Error: ID de edificio no válido', 'danger');
+                return;
+            }
+
+            const data = {
+                idServicioXActividad: tareaSeleccionada.idUsuarioXActividad,
+                idServicio: parseInt(idServicio), // ✅ Convertir a número entero
+                idEdificio: parseInt(idEdificio), // ✅ Convertir a número entero
+                fecha: new Date(fecha + 'T00:00:00').toISOString(),
+                observaciones: observaciones || "",
+                servixusu: tareaSeleccionada.idUsuarioXActividad || 0 // ✅ Agregar campo requerido
+            }
+
+            console.log("📤 Enviando datos corregidos:", data);
+            console.log("🌐 URL del endpoint:", "https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario");
+
+            // Agregar timeout a la petición
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos
+
+            const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data),
+                signal: controller.signal // Agregar señal de abort
+            });
+
+            clearTimeout(timeoutId); // Limpiar timeout si la petición fue exitosa
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("❌ Error del servidor:", errorText);
+                showToast(`Error ${response.status}: ${errorText}`, 'danger');
+                return;
+            }
+
+            const result = await response.text();
+            console.log("✅ Respuesta del servidor:", result);
+            showToast('Tarea editada con éxito!', 'success');
+
+            // Deshabilitar campos después del éxito
+            deshabilitarCampos();
+
+        } catch (error) {
+            console.error("❌ Error completo:", error);
+
+            // Manejo más específico de errores
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                showToast('Error de red: Verifica tu conexión a internet', 'danger');
+            } else if (error.name === 'SyntaxError') {
+                showToast('Error: Respuesta del servidor no válida', 'danger');
+            } else if (error.message.includes('timeout')) {
+                showToast('Error: Tiempo de espera agotado', 'danger');
+            } else {
+                showToast(`Error: ${error.message}`, 'danger');
+            }
+        }
+
+    }
 
     if(loadingSpinner) {
         loadingSpinner.classList.remove('d-none');
@@ -344,117 +534,125 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Función para abrir el detalle de una tarea asignada (diferente a Mis Tareas)
     function abrirDetalleTareaAsignada(tarea, index, nombreEmpleado) {
         console.log('Abriendo detalle de tarea asignada:', tarea);
+
         // Ocultar el botón de cerrar del modal principal
         document.getElementById('closeVerTaskModalBtn').style.display = 'none';
 
-        empleadosSeleccionados = [{
-            nombre: nombreEmpleado,
-            id: tarea.idUsuario // O el ID que corresponda al usuario
-        }];
-
-
-        // Limpiar y guardar la tarea seleccionada
+        // Guardar empleado y tarea seleccionada
+        empleadosSeleccionados = [{ nombre: nombreEmpleado, id: tarea.idUsuario }];
         tareaSeleccionada = [tarea];
+        console.table(tarea);
 
-        // Ocultar el listado de tareas
+        // Ocultar listado y filtros
         const listGroupContainer = document.getElementById('listGroupContainer');
-        if (listGroupContainer) {
-            listGroupContainer.style.display = 'none';
-        }
+        if (listGroupContainer) listGroupContainer.style.display = 'none';
 
-        // Ocultar el contenedor de filtros
         const filterOptionsContainer = document.getElementById('filterOptionsContainerTareasAsignadas');
-        if (filterOptionsContainer) {
-            filterOptionsContainer.style.display = 'none';
-        }
+        if (filterOptionsContainer) filterOptionsContainer.style.display = 'none';
 
-        // Mostrar el formulario de tareas asignadas
+        // Mostrar formulario de detalle
         const formContainer = document.getElementById('formContainer');
-        if (formContainer) {
-            formContainer.style.display = 'block';
-        }
+        if (formContainer) formContainer.style.display = 'block';
 
-        // Llenar los campos con los datos de la tarea
+        // Cargar datos en los campos
         const activityButton = document.getElementById('activitySelectedByUser');
-        const edificioButton = document.getElementById('edificioSelectedByUser');
-        const fechaInput = document.getElementById('verDateActivityByUser');
-        const observacionesInput = document.getElementById('VerCommentsByUser');
-
         if (activityButton) {
             activityButton.textContent = tarea.nombreServicio || 'Sin actividad asignada';
-            activityButton.disabled = true; // Solo lectura inicialmente
+            activityButton.disabled = true;
         }
 
+        const edificioButton = document.getElementById('edificioSelectedByUser');
         if (edificioButton) {
             edificioButton.textContent = tarea.nombreEdificio || 'Sin edificio asignado';
-            edificioButton.disabled = true; // Solo lectura inicialmente
+            edificioButton.disabled = true;
         }
 
+        const fechaInput = document.getElementById('verDateActivityByUser');
         if (fechaInput && tarea.fecha) {
             const fecha = new Date(tarea.fecha);
             if (!isNaN(fecha.getTime())) {
                 fechaInput.value = fecha.toISOString().split('T')[0];
             }
-            fechaInput.disabled = true; // Solo lectura inicialmente
+            fechaInput.disabled = true;
         }
 
+        const observacionesInput = document.getElementById('VerCommentsByUser');
         if (observacionesInput) {
             observacionesInput.value = tarea.observaciones || '';
-            observacionesInput.disabled = true; // Solo lectura inicialmente
+            observacionesInput.disabled = true;
         }
 
-        // ✅ NUEVA LÍNEA: Configurar botones según el estado de la tarea
+        // Configurar botones según estado
         configurarBotonesEdicionSegunEstado(tarea.estado);
 
-        // Agregar botón para volver a la lista (si no existe)
-        let btnVolverLista = document.getElementById('btnVolverLista');
-        if (!btnVolverLista) {
-            btnVolverLista = document.createElement('button');
-            btnVolverLista.id = 'btnVolverLista';
-            btnVolverLista.type = 'button';
-            btnVolverLista.className = 'btn btn-secondary me-2';
-            btnVolverLista.innerHTML = '← Volver a Lista';
-
-            // Insertar al principio de los botones existentes
-            const btnEliminar = document.getElementById('btnEliminar');
-            if (btnEliminar) {
-                btnEliminar.parentNode.insertBefore(btnVolverLista, btnEliminar);
-            }
-
-            btnVolverLista.addEventListener('click', () => {
-                volverAListaTareasAsignadas();
-            });
+        // Mostrar botón volver
+        const btnVolverLista = document.getElementById('btnVolverLista');
+        if (btnVolverLista) {
+            btnVolverLista.style.display = 'block';
         }
 
-        // Mostrar el botón de volver
-        btnVolverLista.style.display = 'inline-block';
     }
 
-// Función para volver a mostrar la lista de tareas asignadas
     function volverAListaTareasAsignadas() {
-        console.log('Volviendo a la lista de tareas, recargando el modal...');
+        console.log('🔙 Volviendo a la lista de tareas...');
 
-        // Ocultar el formulario
+        // Ocultar formulario de detalle
         const formContainer = document.getElementById('formContainer');
         if (formContainer) {
             formContainer.style.display = 'none';
         }
 
-        // Ocultar el botón de volver
+        // Mostrar lista de tareas
+        const listGroupContainer = document.getElementById('listGroupContainer');
+        if (listGroupContainer) {
+            listGroupContainer.style.display = 'block';
+        }
+
+        // Mostrar filtros de tareas
+        const filterOptionsContainer = document.getElementById('filterOptionsContainerTareasAsignadas');
+        if (filterOptionsContainer) {
+            filterOptionsContainer.style.display = 'block';
+        }
+
+        // Ocultar botón volver
         const btnVolverLista = document.getElementById('btnVolverLista');
         if (btnVolverLista) {
             btnVolverLista.style.display = 'none';
         }
-        const empleado = empleadosSeleccionados[0];
 
-        // ✅ La clave: usar closeVerTaskModalBtn para cerrar el modal por completo.
+        // Resetear botones
+        //const btnEditar = document.getElementById('btnEditar');
+        const btnEliminar = document.getElementById('btnEliminar');
+        const btnConfirmEdit = document.getElementById('btnConfirmarEdicion');
+
+        //if (btnEditar) btnEditar.style.display = 'inline-block';
+        if (btnEliminar) btnEliminar.style.display = 'inline-block';
+        if (btnConfirmEdit) btnConfirmEdit.style.display = 'none';
+
+        const activityDropdownBtn = document.getElementById("activitySelectedByUser");
+        const edificioDropdownBtn = document.getElementById("edificioSelectedByUser");
+
+        const dateInput = document.getElementById("verDateActivityByUser");
+
+        const observacionesTextarea = document.getElementById("VerCommentsByUser");
+
+        activityDropdownBtn.style.borderColor = "";
+        edificioDropdownBtn.style.borderColor = "";
+        dateInput.style.borderColor = "";
+        observacionesTextarea.style.borderColor = "";
+
         const closeBtn = document.getElementById('closeVerTaskModalBtn');
-        if (closeBtn) {
-            closeBtn.click();
-        }
-        openModalVerTask(empleado.id, empleado.nombre);
+        // ✅ Mostrar el botón de cerrar inmediatamente
+        closeBtn.style.display = 'block';
 
+
+        // Resetear tarea seleccionada
+        tareaSeleccionada = [];
+
+        console.log('✅ Volvió a la lista.');
     }
+
+
 
 // Variables para filtros de Ver Tareas Asignadas
     let originalTareasAsignadas = [];
@@ -496,20 +694,26 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Función para limpiar filtros de Ver Tareas Asignadas
     function limpiarFiltrosTareasAsignadas() {
         console.log('Limpiando filtros de tareas asignadas...');
-        const fechaInput = document.getElementById('fechaFiltradaEnTareasAsignadas');
-        const estadoDropdownBtn = document.getElementById('tareaAsignadaFiltradaByEstado');
 
+        // Limpiar el campo de fecha
+        const fechaInput = document.getElementById('fechaFiltradaEnTareasAsignadas');
         if (fechaInput) {
             fechaInput.value = '';
         }
+
+        // Limpiar el dropdown de estado
+        const estadoDropdownBtn = document.getElementById('tareaAsignadaFiltradaByEstado');
         if (estadoDropdownBtn) {
             estadoDropdownBtn.textContent = 'Seleccionar Estado';
         }
+        enableFechaInputTareasAsignadas();
+        enableEstadoDropdownTareasAsignadas();
+
+
+        // Resetear el tipo de filtro actual
         currentFilterTypeTareasAsignadas = null;
 
-        // ✅ LÓGICA AGREGADA: Volver a mostrar la lista completa
-        // Se asume que 'originalTareasAsignadas' contiene los datos sin filtrar.
-        // También se necesita el nombre del empleado para la visualización.
+        // Volver a mostrar la lista completa
         const nombreEmpleado = document.getElementById('verTareaByUser').value;
 
         if (originalTareasAsignadas && originalTareasAsignadas.length > 0) {
@@ -1057,7 +1261,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.error('Uno o más elementos del modal no fueron encontrados. Verifique el HTML.');
             return;
         }
-
         // ✅ Mostrar el botón de cerrar inmediatamente
         closeBtn.style.display = 'block';
 
@@ -1194,11 +1397,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             Solo las tareas en estado "Pendiente" pueden ser modificadas.
         `;
 
-            // Insertar antes de los botones
+            /* Insertar antes de los botones
             const btnEditar = document.getElementById('btnEditar');
             if (btnEditar) {
                 btnEditar.parentNode.insertBefore(mensaje, btnEditar);
-            }
+            }*/
         }
     }
 
@@ -1213,9 +1416,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         // Ocultar botones de acción
-        const btnEditar = document.getElementById('btnEditar');
+        //const btnEditar = document.getElementById('btnEditar');
         const btnEliminar = document.getElementById('btnEliminar');
-        if (btnEditar) btnEditar.style.display = 'none';
+        //if (btnEditar) btnEditar.style.display = 'none';
         if (btnEliminar) btnEliminar.style.display = 'none';
 
         // Buscar o crear el contenedor del list group
@@ -1355,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return `<span class="badge rounded-pill ${claseColor}">${texto}</span>`;
     }
 
-// Función para abrir el detalle de una tarea específica
+    // Función para abrir el detalle de una tarea específica
     function abrirDetalleTarea(tarea, index, nombreEmpleado) {
         console.log('Abriendo detalle de tarea:', tarea);
 
@@ -1377,35 +1580,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         // ✅ NUEVA LÍNEA: Configurar botones según el estado de la tarea
         configurarBotonesEdicionSegunEstado(tarea.estado);
 
-        // Agregar botón para volver a la lista (si hay múltiples tareas)
-        let btnVolver = document.getElementById('btnVolverLista');
-        if (!btnVolver) {
-            btnVolver = document.createElement('button');
-            btnVolver.id = 'btnVolverLista';
-            btnVolver.type = 'button';
-            btnVolver.className = 'btn btn-secondary';
-            btnVolver.innerHTML = '← Volver a la Lista';
-            btnVolver.style.marginRight = '10px';
 
-            // Insertar antes del primer botón de acción
-            const btnEditar = document.getElementById('btnEditar');
-            btnEditar.parentNode.insertBefore(btnVolver, btnEditar);
-
-            btnVolver.addEventListener('click', () => {
-                tareaSeleccionada = [];
-                const modalVerTask = document.getElementById('modal-VerTask');
-                modalVerTask.style.display = 'none';
-                verTareas();
-                volverAListaTareas(nombreEmpleado);
-            });
-        }
-        btnVolver.style.display = 'inline-block';
-
-        // Actualizar el título del modal para indicar qué tarea se está viendo
+// Actualizar el título del modal para indicar qué tarea se está viendo
         const modalTitle = document.querySelector('#modal-VerTask .modal-header-container h2');
         if (modalTitle) {
             modalTitle.innerHTML = `📝 Tarea ${index + 1}: ${tarea.nombreServicio || 'Sin nombre'}`;
         }
+
     }
 
 // Función para volver a mostrar la lista de tareas
@@ -1810,113 +1991,165 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
-    // Función para llenar dropdown de actividades en modal "Ver Tareas"
-    function llenarDropdownActividadesEdicion(actividades) {
-        const dropdown = document.querySelector('#VerMenuActivities .dropdown-menu');
+    // 🔹 Función para llenar el dropdown de actividades EN EL FORMULARIO DE EDICIÓN
+    async function cargarActividadesParaEdicion() {
+        console.log('🔄 Cargando actividades para edición...');
 
-        if (!dropdown) {
-            console.error('❌ No se encontró dropdown de actividades en modal Ver Tareas');
-            return;
-        }
+        try {
+            // Si ya tienes las actividades cargadas, úsalas
+            let actividades = actividadesDisponibles;
 
-        dropdown.innerHTML = '';
+            // Si no están cargadas, cargarlas desde la API
+            if (!actividades || actividades.length === 0) {
+                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                actividades = await response.json();
+                actividadesDisponibles = actividades; // Guardar globalmente
+            }
 
-        actividades.forEach((actividad) => {
-            const li = document.createElement('li');
-            const button = document.createElement('button');
-            button.className = 'dropdown-item';
-            button.type = 'button';
-            button.textContent = actividad.descripcion;
-            button.setAttribute('data-value', actividad.idServicio);
+            // Buscar el dropdown del formulario de EDICIÓN (no el de creación)
+            const dropdown = document.querySelector('#VerMenuActivities .dropdown-menu');
 
-            button.addEventListener('click', () => {
-                seleccionarActividadEdicion(actividad.idServicio, actividad.descripcion);
+            if (!dropdown) {
+                console.error('❌ No se encontró el dropdown de actividades para edición');
+                return;
+            }
+
+            console.log('✅ Dropdown de actividades para edición encontrado:', dropdown);
+
+            // Limpiar opciones existentes
+            dropdown.innerHTML = '';
+
+            // Agregar actividades como <li> con <button> dentro
+            actividades.forEach((actividad) => {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.className = 'dropdown-item';
+                button.type = 'button';
+                button.textContent = actividad.descripcion;
+                button.setAttribute('data-value', actividad.idServicio);
+
+                button.addEventListener('click', () => {
+                    seleccionarActividadParaEdicion(actividad.idServicio, actividad.descripcion);
+                });
+
+                li.appendChild(button);
+                dropdown.appendChild(li);
             });
 
-            li.appendChild(button);
-            dropdown.appendChild(li);
-        });
+            console.log('✅ Dropdown de actividades para edición poblado con', actividades.length, 'actividades');
+
+        } catch (error) {
+            console.error('❌ Error al cargar actividades para edición:', error);
+            showToast('Error al cargar actividades: ' + error.message, 'danger');
+        }
     }
 
-// Función para seleccionar actividad en modal "Ver Tareas"
-    function seleccionarActividadEdicion(id, descripcion) {
+// 🔹 Función para seleccionar una actividad EN EL FORMULARIO DE EDICIÓN
+    function seleccionarActividadParaEdicion(id, descripcion) {
+        console.log('🎯 Actividad seleccionada para edición:', { id, descripcion });
+
+        // Guardar el ID en variable global
+        servicioSeleccionadoId = id;
+
+        // Actualizar el botón del formulario de EDICIÓN
         const botonDropdown = document.getElementById('activitySelectedByUser');
+
         if (botonDropdown) {
             botonDropdown.textContent = descripcion;
             botonDropdown.setAttribute('data-selected', id);
-            botonDropdown.setAttribute('data-nombre', descripcion); // Guardar también el nombre
+            console.log('✅ Botón dropdown de actividades (edición) actualizado:', id);
+
+            // Cerrar el dropdown después de seleccionar
+            try {
+                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+                if (dropdown) dropdown.hide();
+            } catch (e) {
+                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
+            }
+        } else {
+            console.error('❌ No se encontró el botón activitySelectedByUser');
         }
     }
 
-// Función similar para edificios
-    function llenarDropdownEdificiosEdicion(edificios) {
-        const dropdown = document.querySelector('#VerMenuEdificios .dropdown-menu');
+    // 🔹 Función para llenar el dropdown de edificios EN EL FORMULARIO DE EDICIÓN
+    async function cargarEdificiosParaEdicion() {
+        console.log('🔄 Cargando edificios para edición...');
 
-        if (!dropdown) {
-            console.error('❌ No se encontró dropdown de edificios en modal Ver Tareas');
-            return;
-        }
+        try {
+            // Si ya tienes los edificios cargados, úsalos
+            let edificios = edificiosDisponibles;
 
-        dropdown.innerHTML = '';
+            // Si no están cargados, cargarlos desde la API
+            if (!edificios || edificios.length === 0) {
+                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                edificios = await response.json();
+                edificiosDisponibles = edificios; // Guardar globalmente
+            }
 
-        edificios.forEach((edificio) => {
-            const li = document.createElement('li');
-            const button = document.createElement('button');
-            button.className = 'dropdown-item';
-            button.type = 'button';
-            button.textContent = edificio.nombre;
-            button.setAttribute('data-value', edificio.id_Edificio);
+            // Buscar el dropdown del formulario de EDICIÓN (no el de creación)
+            const dropdown = document.querySelector('#VerMenuEdificios .dropdown-menu');
 
-            button.addEventListener('click', () => {
-                seleccionarEdificioEdicion(edificio.id_Edificio, edificio.nombre);
+            if (!dropdown) {
+                console.error('❌ No se encontró el dropdown de edificios para edición');
+                return;
+            }
+
+            console.log('✅ Dropdown de edificios para edición encontrado:', dropdown);
+
+            // Limpiar opciones existentes
+            dropdown.innerHTML = '';
+
+            // Agregar edificios como <li> con <button> dentro
+            edificios.forEach((edificio) => {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.className = 'dropdown-item';
+                button.type = 'button';
+                button.textContent = edificio.nombre;
+                button.setAttribute('data-value', edificio.id_Edificio);
+
+                button.addEventListener('click', () => {
+                    seleccionarEdificioParaEdicion(edificio.id_Edificio, edificio.nombre);
+                });
+
+                li.appendChild(button);
+                dropdown.appendChild(li);
             });
 
-            li.appendChild(button);
-            dropdown.appendChild(li);
-        });
+            console.log('✅ Dropdown de edificios para edición poblado con', edificios.length, 'edificios');
+
+        } catch (error) {
+            console.error('❌ Error al cargar edificios para edición:', error);
+            showToast('Error al cargar edificios: ' + error.message, 'danger');
+        }
     }
 
-    function seleccionarEdificioEdicion(id, nombre) {
+// 🔹 Función para seleccionar un edificio EN EL FORMULARIO DE EDICIÓN
+    function seleccionarEdificioParaEdicion(id, nombre) {
+        console.log('🎯 Edificio seleccionado para edición:', { id, nombre });
+
+        // Guardar el ID en variable global
+        edificioSeleccionadoId = id;
+
+        // Actualizar el botón del formulario de EDICIÓN
         const botonDropdown = document.getElementById('edificioSelectedByUser');
+
         if (botonDropdown) {
             botonDropdown.textContent = nombre;
             botonDropdown.setAttribute('data-selected', id);
-            botonDropdown.setAttribute('data-nombre', nombre); // Guardar también el nombre
-        }
-    }
+            console.log('✅ Botón dropdown de edificios (edición) actualizado:', id);
 
-
-    async function cargarActividadesParaEdicion() {
-        if (actividadesDisponibles.length > 0) return;
-
-        try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const actividades = await response.json();
-            if (!Array.isArray(actividades)) throw new Error('Formato de actividades inválido');
-
-            actividadesDisponibles = actividades;
-            console.log('✅ Actividades cargadas para edición:', actividades.length);
-        } catch (error) {
-            console.error('❌ Error al cargar actividades para edición:', error);
-        }
-    }
-
-    async function cargarEdificiosParaEdicion() {
-        if (edificiosDisponibles.length > 0) return;
-
-        try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const edificios = await response.json();
-            if (!Array.isArray(edificios)) throw new Error('Formato de edificios inválido');
-
-            edificiosDisponibles = edificios;
-            console.log('✅ Edificios cargados para edición:', edificios.length);
-        } catch (error) {
-            console.error('❌ Error al cargar edificios para edición:', error);
+            // Cerrar el dropdown después de seleccionar
+            try {
+                const dropdown = bootstrap.Dropdown.getInstance(botonDropdown);
+                if (dropdown) dropdown.hide();
+            } catch (e) {
+                console.log('ℹ️ No se pudo cerrar dropdown automáticamente:', e);
+            }
+        } else {
+            console.error('❌ No se encontró el botón edificioSelectedByUser');
         }
     }
 
@@ -2606,49 +2839,35 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
-    // Función para configurar la visibilidad de botones Editar/Eliminar según el estado
     function configurarBotonesEdicionSegunEstado(estadoTarea) {
-        console.log('🔧 Configurando botones de edición para estado:', estadoTarea);
+        console.log('🔧 Configurando botones para estado:', estadoTarea);
 
-        const btnEditar = document.getElementById('btnEditar');
+        //const btnEditar = document.getElementById('btnEditar');
         const btnEliminar = document.getElementById('btnEliminar');
-        const btnConfirmEdit = document.getElementById('btnConfirmEdit');
+        const btnConfirmEdit = document.getElementById('btnConfirmarEdicion');
 
-        if (!btnEditar || !btnEliminar) {
-            console.error('❌ No se encontraron los botones de edición');
+        /*if (!btnEditar || !btnEliminar || !btnConfirmEdit) {
+            console.error('❌ No se encontraron los botones');
             return;
-        }
+        }*/
 
-        // Normalizar el estado (eliminar espacios y manejar variaciones)
         const estado = estadoTarea ? estadoTarea.trim() : 'Pendiente';
-        console.log('Estado normalizado para botones de edición:', estado);
 
         if (estado === 'Pendiente') {
-            // Solo en estado Pendiente se pueden editar/eliminar
-            btnEditar.style.display = 'inline-block';
+            //btnEditar.style.display = 'inline-block';
             btnEliminar.style.display = 'inline-block';
-
-            // También asegurarse de que el botón de confirmar edición esté oculto inicialmente
-            if (btnConfirmEdit) {
-                btnConfirmEdit.style.visibility = 'hidden';
-            }
-
-            console.log('✅ Botones de edición habilitados (estado Pendiente)');
+            btnConfirmEdit.style.display = 'none';
+            console.log('✅ Editar/Eliminar habilitados');
         } else {
-            // En cualquier otro estado, ocultar botones de edición
-            btnEditar.style.display = 'none';
+            //btnEditar.style.display = 'none';
             btnEliminar.style.display = 'none';
-
-            if (btnConfirmEdit) {
-                btnConfirmEdit.style.visibility = 'hidden';
-            }
-
-            console.log('🚫 Botones de edición deshabilitados (estado:', estado + ')');
+            btnConfirmEdit.style.display = 'none';
+            console.log('🚫 Botones de edición deshabilitados');
         }
     }
 
 
-// Configura los botones y el campo observaciones según el estado
+    // Configura los botones y el campo observaciones según el estado
     // Configura los botones y el campo observaciones según el estado
     function configurarBotonSegunEstado(estadoTarea) {
         const btnComenzar = document.getElementById('btnComenzarTarea');
@@ -2977,7 +3196,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     btnVerTask.addEventListener('click', async () => {
 
-            verTareas();
+        verTareas();
     })
 
     if (btnConfirm) {
