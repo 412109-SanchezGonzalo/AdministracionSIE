@@ -529,7 +529,8 @@ body {
         padding: 20px;
     }
 
-    #filterOptionsContainer {
+    #filterOptionsContainer,
+    #filterOptionsContainerTareasAsignadas{
         flex-direction: column;
     }
 }
