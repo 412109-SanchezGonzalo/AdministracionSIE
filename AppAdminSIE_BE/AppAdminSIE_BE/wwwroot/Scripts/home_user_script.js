@@ -436,7 +436,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             <td class="text-center checkbox-cell"></td>
             <td style="text-align: center"><strong>${producto.nombre || 'Sin nombre'}</strong></td>
             <td class="cantidad-cell"></td>
-            <td class="acciones-cell"></td>
         `;
 
             // Agregar el checkbox a su celda
