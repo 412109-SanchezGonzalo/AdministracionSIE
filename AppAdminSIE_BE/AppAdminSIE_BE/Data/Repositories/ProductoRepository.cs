@@ -43,7 +43,7 @@ namespace AppAdminSIE_BE.Data.Repositories
 
             int idxIdProducto = reader.GetOrdinal("id");
             int idxNombre = reader.GetOrdinal("Nombre");
-            int idxIVA = reader.GetOrdinal("IVA");
+            int idxIva = reader.GetOrdinal("IVA");
             int idxUnidadMedida = reader.GetOrdinal("UnidadMedida");
 
             if (reader.Read())
@@ -52,7 +52,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                 {
                     Id = reader.GetInt32(idxIdProducto),
                     Nombre = reader.GetString(idxNombre),
-                    Iva = reader.GetInt32(idxIVA),
+                    Iva = reader.GetInt32(idxIva),
                     UnidadMedida = reader.GetString(idxUnidadMedida)
                 };
             }

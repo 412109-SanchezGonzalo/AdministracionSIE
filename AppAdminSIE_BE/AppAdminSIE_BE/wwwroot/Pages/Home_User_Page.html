@@ -51,8 +51,11 @@
                     <div class="search-container">
                         <div class="row g-2 align-items-end">
                             <div class="col-6">
-                                <label for="search-product" class="form-label small">Ingrese un producto :</label>
+                                <label for="search-product" class="form-label small">Ingrese un producto</label>
                                 <input type="text" class="form-control form-control-sm" id="search-product" placeholder="Producto...">
+                            </div>
+                            <div class="col-6 text-end">
+                                <button type="button" class="btn btn-primary" id="btnContinuarRegistro">Continuar</button>
                             </div>
                         </div>
                         <div class="row g-2 mt-1">
@@ -87,11 +90,10 @@
                                 <table class="table table-striped table-hover compact-table">
                                     <thead class="table-dark">
                                     <tr>
-                                        <th scope="col" style="width: 15%;background-color: black;">ID</th>
-                                        <th scope="col" style="width: 40%;background-color: black;">Producto</th>
-                                        <th scope="col" style="width: 15%;background-color: black;">IVA</th>
-                                        <th scope="col" style="width: 20%;background-color: black;">Cantidad</th>
-                                        <th scope="col" style="width: 40%;background-color: black;">Acciones</th>
+                                        <th scope="col" style="width: 15%;background-color: black;text-align: center">✔</th>
+                                        <th scope="col" style="width: 40%;background-color: black;text-align: center">Producto</th>
+                                        <th scope="col" style="width: 20%;background-color: black;text-align: center">Cantidad</th>
+
                                     </tr>
                                     </thead>
                                     <tbody id="table-body">
@@ -111,9 +113,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="btnContinuarRegistro">Continuar</button>
                 </div>
             </div>
         </div>

@@ -423,15 +423,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
         productos.forEach(producto => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-                <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-                <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-                <td class="cantidad-cell"></td>
-                <td class="acciones-cell"></td>
-            `;
 
+            // Crear checkbox primero
             const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'form-check-input';
+            check.checked = !!seleccionado;
+
+            // Agregar la columna de checkbox al principio
+            tr.innerHTML = `
+            <td class="text-center checkbox-cell"></td>
+            <td style="text-align: center"><strong>${producto.nombre || 'Sin nombre'}</strong></td>
+            <td class="cantidad-cell"></td>
+            <td class="acciones-cell"></td>
+        `;
+
+            // Agregar el checkbox a su celda
+            const checkboxCell = tr.querySelector('.checkbox-cell');
+            checkboxCell.appendChild(check);
+
             const cantidadInput = document.createElement('input');
             cantidadInput.type = 'number';
             cantidadInput.value = seleccionado ? seleccionado.cantidad : 1;
@@ -454,11 +465,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             unidadSpan.textContent = producto.unidadMedida || 'Sin unidad';
             cantidadCell.appendChild(unidadSpan);
 
-            const check = document.createElement('input');
-            check.type = 'checkbox';
-            check.className = 'form-check-input';
-            check.checked = !!seleccionado;
-
             check.addEventListener('change', () => {
                 if (check.checked) {
                     producto.cantidad = parseFloat(cantidadInput.value);
@@ -473,8 +479,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 console.log("Productos seleccionados:", productosSeleccionados);
             });
 
-            const accionesCell = tr.querySelector('.acciones-cell');
-            accionesCell.appendChild(check);
+            // Ya no agregamos el checkbox aquí, ya está en la primera columna
             tableBody.appendChild(tr);
         });
         showTable(productos.length);
