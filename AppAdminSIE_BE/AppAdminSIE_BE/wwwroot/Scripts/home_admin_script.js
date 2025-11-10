@@ -468,12 +468,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             switch (estadoTarea) {
                 case 'Completado':
                 case 'Finalizado':
-                    colorBorde = '#198754';
-                    estadoHtml = '<span class="badge rounded-pill bg-success">Completado</span>';
+                    colorBorde = '#005488';
+                    estadoHtml = '<span class="badge rounded-pill bg-info">Completado</span>';
                     break;
                 case 'En Progreso':
                     colorBorde = '#ffc107';
                     estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                    break;
+                case 'FACTURADO':
+                    colorBorde = '#198754';
+                    estadoHtml = '<span class="badge rounded-pill bg-success">FACTURADO</span>';
                     break;
                 case 'Pendiente':
                 default:
@@ -1548,6 +1552,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             case 'En Progreso':
                 texto = 'En Progreso';
                 claseColor = 'bg-warning';
+                break;
+            case 'FACTURADO':
+                texto = 'FACTURADO';
+                claseColor = 'bg-success';
                 break;
             case 'Pendiente':
             default:
@@ -2845,6 +2853,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         //const btnEditar = document.getElementById('btnEditar');
         const btnEliminar = document.getElementById('btnEliminar');
         const btnConfirmEdit = document.getElementById('btnConfirmarEdicion');
+        const btnFacturar = document.getElementById("btnFacturar");
 
         /*if (!btnEditar || !btnEliminar || !btnConfirmEdit) {
             console.error('❌ No se encontraron los botones');
@@ -2859,10 +2868,23 @@ document.addEventListener('DOMContentLoaded', async function () {
             btnConfirmEdit.style.display = 'none';
             console.log('✅ Editar/Eliminar habilitados');
         } else {
-            //btnEditar.style.display = 'none';
-            btnEliminar.style.display = 'none';
-            btnConfirmEdit.style.display = 'none';
-            console.log('🚫 Botones de edición deshabilitados');
+            if(estado === 'Completado')
+            {
+                btnEliminar.style.display = 'inline-block';
+                btnFacturar.style.display = 'inline-block';
+            }else {
+                if(estado === 'FACTURADO')
+                {
+                    btnEliminar.style.display = 'none';
+                    btnFacturar.style.display = 'none';
+                }else {
+                    //btnEditar.style.display = 'none';
+                    btnConfirmEdit.style.display = 'none';
+                    btnEliminar.style.display = 'none';
+                    console.log('🚫 Botones de edición deshabilitados');
+                }
+            }
+
         }
     }
 
@@ -2893,13 +2915,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             // --- ESTADO: EN PROGRESO ---
         } else if (estadoTarea === 'En Progreso') {
             observacionesInput.disabled = false;
+            btnEliminar.style.display = 'none';
             btnConfirmarCambios.style.display = 'inline-block';
             btnFinalizar.style.display = 'inline-block';
 
             // --- ESTADO: COMPLETADO / FINALIZADO ---
         } else if (estadoTarea === 'Completado' || estadoTarea === 'Finalizado') {
             observacionesInput.disabled = true;
-            // ✅ CAMBIO: No mostrar ningún botón de acción
+
         }
     }
 
@@ -3167,6 +3190,47 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    const btnFacturar = document.getElementById('btnFacturar');
+    if (btnFacturar) {
+        btnFacturar.addEventListener('click', async () => {
+            try {
+                if(confirm('Desea FACTURAR esta Tarea?'))
+                {
+                    const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
+                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: idServicioXUsuario, newStatus: "FACTURADO" })
+                    });
+
+                    if (!response.ok) throw new Error("Error al actualizar estado");
+                    tareaSeleccionada[0].estado = "FACTURADO";
+
+                    // Refrescar el badge y los botones
+                    const spanEstado = document.getElementById("estadoTarea");
+                    if (spanEstado) {
+                        spanEstado.innerHTML = '<span class="badge rounded-pill bg-success">FACTURADO</span>';
+                    }
+                    configurarBotonesEdicionSegunEstado('FACTURADO')
+
+                    // Actualizar el elemento en el listGroup
+                    const listItem = document.querySelector(`.tarea-item[data-tarea-id="${idServicioXUsuario}"]`);
+                    if (listItem) {
+                        listItem.style.borderLeft = `4px solid #198754`;
+                        const estadoDiv = listItem.querySelector('.text-end');
+                        if(estadoDiv) {
+                            estadoDiv.innerHTML = `<span class="badge rounded-pill bg-success">FACTURADO</span><br>`;
+                        }
+                    }
+                    showToast("✅ Tarea FACTURADA",'success');
+                }
+
+            } catch (error) {
+                console.error("❌ Error al facturar la tarea:", error);
+                showToast("Error al facturar la tarea: " + error.message,'warning');
+            }
+        });
+    }
 
     const limpiarBtn = document.getElementById('limpiarFiltrosBtn');
     if (limpiarBtn) {
