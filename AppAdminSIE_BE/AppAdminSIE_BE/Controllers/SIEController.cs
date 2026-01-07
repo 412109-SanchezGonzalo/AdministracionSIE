@@ -307,47 +307,60 @@ namespace JobOclock_BackEnd.Controllers
         }
 
         [HttpPost("Obtener-usuario-por-credenciales")]
-
-        public ActionResult<string> PostUsuarioByCredenciales([FromBody] CredencialesRequest request)
+        public IActionResult PostUsuarioByCredenciales([FromBody] CredencialesRequest request)
         {
             try
             {
                 var usuario = _service.GetUsuarioByCredenciales(request.nickName, request.contrasena);
-                if (usuario != null)
+
+                if (usuario == null)
                 {
-                    var issuer = _configuration["Jwt:Issuer"];
-                    var audience = _configuration["Jwt:Audience"];
-                    var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-
-                    var tokenDescriptor = new SecurityTokenDescriptor
+                    return Unauthorized(new
                     {
-                        Subject = new ClaimsIdentity(new[]
-                        {
-                            new Claim("Id", Guid.NewGuid().ToString()),
-                            new Claim(JwtRegisteredClaimNames.Sub, usuario.NicknameDni),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                            new Claim(ClaimTypes.Role, usuario.Rol) // Añade el rol del usuario aquí
-                        }),
-                        Expires = DateTime.UtcNow.AddMinutes(5), // El token expira en 5 minutos
-                        Issuer = issuer,
-                        Audience = audience,
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
-                    };
-
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var token = tokenHandler.CreateToken(tokenDescriptor);
-                    var jwtToken = tokenHandler.WriteToken(token);
-
-                    // 3. Devolver el token al cliente
-                    return Ok(new { token = jwtToken });
+                        error = "Credenciales inválidas"
+                    });
                 }
-                return NotFound();
+
+                var issuer = _configuration["Jwt:Issuer"];
+                var audience = _configuration["Jwt:Audience"];
+                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.NicknameDni),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, usuario.Rol)
+            }),
+                    Expires = DateTime.UtcNow.AddMinutes(5),
+                    Issuer = issuer,
+                    Audience = audience,
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha512Signature)
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var jwtToken = tokenHandler.WriteToken(token);
+
+                return Ok(new
+                {
+                    token = jwtToken,
+                    rol = usuario.Rol
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    stack = ex.StackTrace
+                });
             }
         }
+
 
         [HttpPost("Crear-usuario")]
 

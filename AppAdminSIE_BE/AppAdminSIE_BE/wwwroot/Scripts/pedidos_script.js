@@ -194,11 +194,11 @@
             console.log('🔍 Filtrando por fecha:', fecha);
     
             const [respPedidosProductos, respPedidos] = await Promise.all([
-                fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto-por-fecha?fecha=${encodeURIComponent(fecha)}`, {
+                fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidoxproducto-por-fecha?fecha=${encodeURIComponent(fecha)}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 }),
-                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos", {
+                fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidos`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 })
@@ -247,11 +247,11 @@
             console.log('🔍 Filtrando por estado:', estado);
     
             const [respPedidosProductos, respPedidos] = await Promise.all([
-                fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto-por-estado?estado=${encodeURIComponent(estado)}`, {
+                fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidoxproducto-por-estado?estado=${encodeURIComponent(estado)}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 }),
-                fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos", {
+                fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidos`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 })
@@ -621,7 +621,7 @@
                             observacionesExtras: observacionesExtras,
                             nuevoEstadoProducto: "Entregado"
                         };
-                        const promise = fetch("https://administracionsie.onrender.com/api/SIE/Editar-pedidoxproducto", {
+                        const promise = fetch(`${API_BASE_URL}/api/SIE/Editar-pedidoxproducto`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(body)
@@ -800,6 +800,10 @@
     
     document.addEventListener('DOMContentLoaded', async function () {
         console.log('🚀 Iniciando pedidos_script.js...');
+
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5152'  // Local
+            : 'https://administracionsie.onrender.com';  // Producción
     
     
         // Arrays globales
@@ -840,7 +844,7 @@
         // Lógica de autenticación
         try {
             const password = sessionStorage.getItem('admin_password');
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-nombre-de-usuario-por-contrasena`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(password)
@@ -934,7 +938,7 @@
         async function loadAllProducts() {
             showLoading();
             try {
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-productos');
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-productos`);
                 const productos = await response.json();
                 if (!Array.isArray(productos)) throw new Error('Formato inválido');
                 searchProductInput.disabled = false;
@@ -1068,7 +1072,7 @@
     
         async function cargarEdificios() {
             try {
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-edificios`);
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1097,7 +1101,7 @@
                     return;
                 }
     
-                const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
+                const responsePedido = await fetch(`${API_BASE_URL}/api/SIE/Crear-pedido`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(fechaISO)
@@ -1122,7 +1126,7 @@
                         estadoProducto: "No Entregado"
                     };
     
-                    const responsePedidoProducto = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedidoxproducto', {
+                    const responsePedidoProducto = await fetch(`${API_BASE_URL}/api/SIE/Crear-pedidoxproducto`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(bodyPedidoProducto)
@@ -1207,8 +1211,8 @@
     
             try {
                 const [respPedidosProductos, respPedidos] = await Promise.all([
-                    fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidoxproducto"),
-                    fetch("https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-pedidos")
+                    fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidoxproducto`),
+                    fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-pedidos`)
                 ]);
     
                 const pedidosProductos = await respPedidosProductos.json();
@@ -1254,7 +1258,7 @@
                     idPedido: pedidoId,
                     nuevoEstado: nuevoEstado
                 }
-                const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Editar-estado-pedido`, {
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-pedido`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'

@@ -89,6 +89,10 @@ async function executeWithLoading(button, asyncOperation, loadingText = 'Cargand
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando admin_home.js...');
 
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5152'  // Local
+        : 'https://administracionsie.onrender.com';  // Producción
+
     // LOADING
     // Lista de IDs de botones que deben tener loading automático
     const buttonIds = [
@@ -322,13 +326,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             console.log("📤 Enviando datos corregidos:", data);
-            console.log("🌐 URL del endpoint:", "https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario");
+            console.log("🌐 URL del endpoint:", `${API_BASE_URL}/api/SIE/Editar-servicioxusuario`);
 
             // Agregar timeout a la petición
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos
 
-            const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-servicioxusuario", {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-servicioxusuario`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -378,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const password = sessionStorage.getItem('admin_password');
         console.log('🔐 Admin password:', password);
 
-        const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-nombre-de-usuario-por-contrasena', {
+        const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-nombre-de-usuario-por-contrasena`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(password)
@@ -1042,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('🔄 Cargando actividades desde la API...');
 
         try {
-            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades';
+            const url = `${API_BASE_URL}/api/SIE/Obtener-todas-las-actividades`;
             console.log('📡 URL completa:', url);
 
             const response = await fetch(url);
@@ -1090,7 +1094,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('🔄 Cargando edificios desde la API...');
 
         try {
-            const url = 'https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios';
+            const url = `${API_BASE_URL}/api/SIE/Obtener-todos-los-edificios`;
             console.log('📡 URL completa:', url);
 
             const response = await fetch(url);
@@ -1287,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         try {
             console.log('Realizando consulta para empleado ID:', employeeId);
-            const response = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1671,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         showLoading();
 
         try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-nombre', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-usuario-por-nombre`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1728,7 +1732,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function loadAllUsers() {
         showLoading();
         try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-usuarios');
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-usuarios`);
             const usuarios = await response.json();
 
             if (!Array.isArray(usuarios)) throw new Error('Formato inválido');
@@ -1954,7 +1958,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     }
 
                     // Enviar petición HTTP
-                    const response = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-servicioXactividad-por-usuario', {
+                    const response = await fetch(`${API_BASE_URL}/api/SIE/Crear-servicioXactividad-por-usuario`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2009,7 +2013,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // Si no están cargadas, cargarlas desde la API
             if (!actividades || actividades.length === 0) {
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todas-las-actividades');
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todas-las-actividades`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 actividades = await response.json();
                 actividadesDisponibles = actividades; // Guardar globalmente
@@ -2090,7 +2094,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // Si no están cargados, cargarlos desde la API
             if (!edificios || edificios.length === 0) {
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-edificios');
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-edificios`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 edificios = await response.json();
                 edificiosDisponibles = edificios; // Guardar globalmente
@@ -2179,7 +2183,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             {
                 const idServicioXActividad = tareaSeleccionada[0].idUsuarioXActividad;
 
-                const response = await fetch('https://administracionsie.onrender.com/api/SIE/Eliminar-servicioxusuario',{
+                const response = await fetch(`${API_BASE_URL}/api/SIE/Eliminar-servicioxusuario`,{
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(idServicioXActividad)
@@ -2934,7 +2938,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
 
             const datos = { id: idServicioXUsuario, newStatus: "En Proceso" };
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-servicioxusuario`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
@@ -2966,7 +2970,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 observaciones: nuevasObservaciones
             };
 
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-observaciones-servicioxusuario', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-observaciones-servicioxusuario`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
@@ -3010,7 +3014,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
 
             const datos = { id: idServicioXUsuario, newStatus: "Finalizado" };
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-servicioxusuario`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
@@ -3031,7 +3035,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function misTareas() {
         try {
             const password = sessionStorage.getItem('admin_password');
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-contrasena', {
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-usuario-por-contrasena`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(password)
@@ -3060,7 +3064,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             modalVerMisTasks.style.display = 'flex';
             showLoadingMisTareas();
 
-            const response2 = await fetch(`https://administracionsie.onrender.com/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${empleadoSeleccionado.id}`);
+            const response2 = await fetch(`${API_BASE_URL}/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${empleadoSeleccionado.id}`);
             if (!response2.ok) throw new Error(`HTTP error! status: ${response2.status}`);
 
             const taskData = await response2.json();
@@ -3108,7 +3112,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if(confirm('Desea Comenzar esta Tarea?'))
                 {
                     const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                    const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-servicioxusuario`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ id: idServicioXUsuario, newStatus: "En Progreso" })
@@ -3150,7 +3154,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if(confirm('Desea Finalizar esta Tarea?'))
                 {
                     const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                    const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-servicioxusuario`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ id: idServicioXUsuario, newStatus: "Completado" })
@@ -3197,7 +3201,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if(confirm('Desea FACTURAR esta Tarea?'))
                 {
                     const idServicioXUsuario = tareaSeleccionada[0].idUsuarioXActividad;
-                    const response = await fetch("https://administracionsie.onrender.com/api/SIE/Editar-estado-servicioxusuario", {
+                    const response = await fetch(`${API_BASE_URL}/api/SIE/Editar-estado-servicioxusuario`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ id: idServicioXUsuario, newStatus: "FACTURADO" })

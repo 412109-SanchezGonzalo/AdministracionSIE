@@ -266,6 +266,10 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
         window.loginLoader = new LoginLoader();
 
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5152'  // Local
+            : 'https://administracionsie.onrender.com';  // Producción
+
         console.log('Submit detectado');
 
         const username = document.getElementById('username').value.trim();
@@ -277,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const apiUrlLogin = 'https://administracionsie.onrender.com/api/SIE/Obtener-usuario-por-credenciales';
+        const apiUrlLogin = `${API_BASE_URL}/api/SIE/Obtener-usuario-por-credenciales`;
 
         try {
             const response = await fetch(apiUrlLogin, {
@@ -289,14 +293,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
             });
 
-            if (!response.ok) {
-                // Si la respuesta no es exitosa (ej. 400, 401), el backend envía un JSON con un mensaje de error.
-                const errorData = await response.json();
-                errorMessage.textContent = errorData.message || '* Usuario y/o contraseña incorrectos.';
-                return;
-            }
+
+
 
             const data = await response.json();
+
+            if (!response.ok) {
+                // Si la respuesta no es exitosa (ej. 400, 401), el backend envía un JSON con un mensaje de error.
+
+                throw new Error(data.error || '* Usuario y/o contraseña incorrectos.');
+
+            }
+
+
 
             if (!data.token) {
                 errorMessage.textContent = 'No se recibió el token.';
@@ -318,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 sessionStorage.setItem('admin_password', password);
                 localStorage.setItem('admin_token', data.token);
 
-                window.location.href = 'https://administracionsie.onrender.com/Pages/Home_Admin_Page.html';
+                window.location.href = `${API_BASE_URL}/Pages/Home_Admin_Page.html`;
             }
             else if (userRole === 'Usuario') {
                 // Guardar datos específicos para el usuario
@@ -326,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 sessionStorage.setItem('user_password', password);
                 localStorage.setItem('user_token', data.token);
 
-                window.location.href = 'https://administracionsie.onrender.com/Pages/Home_User_Page.html';
+                window.location.href = `${API_BASE_URL}/Pages/Home_User_Page.html`;
             }
             else {
                 errorMessage.textContent = 'Rol desconocido. Contacte al administrador.';

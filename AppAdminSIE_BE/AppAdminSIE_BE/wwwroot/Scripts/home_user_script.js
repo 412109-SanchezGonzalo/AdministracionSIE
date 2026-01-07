@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', async function () {
 
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5152'  // Local
+        : 'https://administracionsie.onrender.com';  // Producción
+
+
     const navbarToggle = document.querySelector('.navbar-toggle');
     const navbarMenu = document.querySelector('.navbar-menu');
     const saludoSpan = document.querySelector('.navbar-saludo');
@@ -9,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // Base URL para la API
-    const BASE_URL = 'https://administracionsie.onrender.com/api/SIE';
+    const BASE_URL = `${API_BASE_URL}/api/SIE`;
 
     // ----------------------------------------------------
     //              FUNCIONES UTILITY GLOBALES
@@ -88,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     navbarToggle.addEventListener('click', () => {
-        window.location.href = "https://administracionsie.onrender.com/Pages/Login_page.html";
+        window.location.href = `${API_BASE_URL}/Pages/Login_page.html`;
     });
 
 
@@ -187,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function loadAllProducts() {
         showLoading();
         try {
-            const response = await fetch('https://administracionsie.onrender.com/api/SIE/Obtener-todos-los-productos');
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-todos-los-productos`);
             const productos = await response.json();
             if (!Array.isArray(productos)) throw new Error('Formato inválido');
             searchProductInput.disabled = false;
@@ -347,7 +352,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const fechaISO = new Date(fechaEntrega).toISOString();
             const observaciones = document.getElementById('observaciones').value;
 
-            const responsePedido = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedido', {
+            const responsePedido = await fetch(`${API_BASE_URL}/api/SIE/Crear-pedido`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fechaISO)
@@ -375,7 +380,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     estadoProducto: "No Entregado"
                 };
 
-                const responsePedidoProducto = await fetch('https://administracionsie.onrender.com/api/SIE/Crear-pedidoxproducto', {
+                const responsePedidoProducto = await fetch(`${API_BASE_URL}/api/SIE/Crear-pedidoxproducto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bodyPedidoProducto)
