@@ -1,4 +1,5 @@
 ﻿using AppAdminSIE_BE.Data.Interfaces;
+using AppAdminSIE_BE.Models;
 using JobOclock_BackEnd.Models;
 using MySql.Data.MySqlClient;
 using System.Data.SqlClient;
@@ -16,21 +17,51 @@ namespace JobOclock_BackEnd.Data.Repositories
         public void Add(Usuario usuario)
         {
             using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(
-                "INSERT INTO Usuario (Nickname_dni, Contrasena, telefono, email, nombre, apellido, Rol) " +
-                "VALUES (@nick, @pass, @telefono, @email, @nombre, @apellido, @rol)", conn);
-
-            cmd.Parameters.AddWithValue("@nick", usuario.NicknameDni);
-            cmd.Parameters.AddWithValue("@pass", usuario.Contraseña);
-            cmd.Parameters.AddWithValue("@rol", (object)usuario.Rol ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@telefono", usuario.Telefono);
-            cmd.Parameters.AddWithValue("@email", usuario.Email);
-            cmd.Parameters.AddWithValue("@nombre", usuario.Nombre);
-            cmd.Parameters.AddWithValue("@apellido", usuario.Apellido);
-
             conn.Open();
-            cmd.ExecuteNonQuery();
+            using var transaction = conn.BeginTransaction(); // Usamos transacción para seguridad
+
+            try
+            {
+                // 1. Insertar el Usuario y obtener su ID generado
+                string sqlUsuario = @"INSERT INTO Usuario (Nickname_dni, Contrasena, telefono, email, nombre, apellido, Rol) 
+                              VALUES (@nick, @pass, @telefono, @email, @nombre, @apellido, @rol);
+                              SELECT LAST_INSERT_ID();"; // Obtenemos el ID recién creado
+
+                using var cmdUser = new MySqlCommand(sqlUsuario, conn, transaction);
+                cmdUser.Parameters.AddWithValue("@nick", usuario.NicknameDni);
+                cmdUser.Parameters.AddWithValue("@pass", usuario.Contraseña);
+                cmdUser.Parameters.AddWithValue("@rol", usuario.Rol);
+                cmdUser.Parameters.AddWithValue("@telefono", usuario.Telefono);
+                cmdUser.Parameters.AddWithValue("@email", usuario.Email);
+                cmdUser.Parameters.AddWithValue("@nombre", usuario.Nombre);
+                cmdUser.Parameters.AddWithValue("@apellido", usuario.Apellido);
+
+                int nuevoIdUsuario = Convert.ToInt32(cmdUser.ExecuteScalar());
+
+                // 2. Si es empleado y tiene edificios, insertamos en UsuarioXEdificio
+                if (usuario.Rol?.Trim().Equals("Usuario", StringComparison.OrdinalIgnoreCase) == true
+                    && usuario.EdificiosAsociados != null
+                    && usuario.EdificiosAsociados.Count > 0)
+                {
+                    foreach (var edificio in usuario.EdificiosAsociados)
+                    {
+                        string sqlRelacion = "INSERT INTO UsuarioXEdificio (id_usuario, id_edificio) VALUES (@uId, @eId)";
+                        using var cmdRel = new MySqlCommand(sqlRelacion, conn, transaction);
+                        cmdRel.Parameters.AddWithValue("@uId", nuevoIdUsuario);
+                        cmdRel.Parameters.AddWithValue("@eId", edificio.IdEdificio);
+                        cmdRel.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
+        
 
         public void Delete(int id)
         {

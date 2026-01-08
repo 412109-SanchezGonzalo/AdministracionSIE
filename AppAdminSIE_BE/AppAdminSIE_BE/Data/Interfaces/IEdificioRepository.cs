@@ -5,5 +5,6 @@ namespace AppAdminSIE_BE.Data.Interfaces
     public interface IEdificioRepository
     {
         IEnumerable<Edificio> GetAllEdificios();
+        void Add(Edificio edificio);
     }
 }

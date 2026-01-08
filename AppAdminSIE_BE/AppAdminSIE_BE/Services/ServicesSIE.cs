@@ -42,6 +42,11 @@ namespace JobOclock_BackEnd.Services
         {
             return _edificioRepository.GetAllEdificios();
         }
+        public void AddEdificio(Edificio edificio)
+        {
+            _edificioRepository.Add(edificio);
+        }
+
 
         // EDIFICIO X USUARIO
 
@@ -52,6 +57,11 @@ namespace JobOclock_BackEnd.Services
 
 
         // PRODUCTO
+
+        public void AddProducto(Producto producto)
+        {
+            _productoRepository.Add(producto);
+        }
 
         public IEnumerable<Producto> GetAllProductos()
         {

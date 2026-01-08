@@ -380,7 +380,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     try {
         const password = sessionStorage.getItem('admin_password');
-        console.log('🔐 Admin password:', password);
 
         const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-nombre-de-usuario-por-contrasena`, {
             method: 'POST',

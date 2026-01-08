@@ -7,6 +7,8 @@ namespace AppAdminSIE_BE.Data.Interfaces
     {
         IEnumerable<Producto> GetAllProducto();
         Producto GetByName(string name);
+
+        void Add(Producto producto);
         
     }
 }

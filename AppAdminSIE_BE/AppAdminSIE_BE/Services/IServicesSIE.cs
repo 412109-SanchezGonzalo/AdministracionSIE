@@ -12,6 +12,7 @@ namespace JobOclock_BackEnd.Services
 
         // EDIFICIO
         IEnumerable<Edificio> GetAllEdificios();
+        void AddEdificio(Edificio edificio);
 
         // EDIFICIO X USUARIO
 
@@ -21,6 +22,7 @@ namespace JobOclock_BackEnd.Services
 
         IEnumerable<Producto> GetAllProductos();
         Producto GetProductoByName(string name);
+        void AddProducto(Producto producto);
 
         // PEDIDO
         IEnumerable<Pedido> GetAllPedidos();

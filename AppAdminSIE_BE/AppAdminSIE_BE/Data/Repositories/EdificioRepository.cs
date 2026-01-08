@@ -31,6 +31,33 @@ namespace AppAdminSIE_BE.Data.Repositories
             }
             return list;
         }
+
+        public void Add(Edificio edificio)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            conn.Open();
+            using var transaction = conn.BeginTransaction();
+            try
+            {
+                string sqlEdificio = @"INSERT INTO Edificio (nombre, calle, numeracion) 
+                              VALUES (@nombre, @calle, @numeracion);
+                              SELECT LAST_INSERT_ID();";
+
+                using var cmd = new MySqlCommand(sqlEdificio, conn, transaction);
+                cmd.Parameters.AddWithValue("@nombre", edificio.Nombre);
+                cmd.Parameters.AddWithValue("@calle", edificio.Calle);
+                cmd.Parameters.AddWithValue("@numeracion", edificio.Numeracion);
+
+                int nuevoIdEdificio = Convert.ToInt32(cmd.ExecuteScalar());
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
     }
 }
 

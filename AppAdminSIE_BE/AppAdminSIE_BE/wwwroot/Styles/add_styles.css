@@ -1,0 +1,566 @@
+/* Reset y base */
+html {
+    height: 100%;
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: linear-gradient(#141e30, #243b55);
+    font-size: 14px;
+    min-height: 100vh;
+}
+
+/* === MODALES === */
+.modal-overlay,
+.modal-overlay-newEdificio,
+.modal-overlay-newProduct,
+.modal-overlay-newUser {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* Cuando el modal esté activo, mostrarlo */
+.modal-overlay-newUser.show {
+    display: flex;
+}
+.modal-overlay-newProduct.show {
+    display: flex;
+}
+.modal-overlay-newEdificio.show {
+    display: flex;
+}
+
+.modal-overlay,
+.modal-overlay-profile,
+.modal-overlay-history {
+    background-color: rgb(255, 255, 255);
+}
+
+.modal-content {
+    background-color: rgb(255, 255, 255);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: left;
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* OPCIÓN 1: Modal extra ancho (90% de la pantalla) */
+.modal-content-location {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    /* Cambia este width para ajustar el ancho */
+    width: 90%;
+    max-width: 1200px; /* Ancho máximo */
+    margin: 20px;
+}
+
+.modal-content-location {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    /* Cambia este width para ajustar el ancho */
+    width: 90%;
+    max-width: 1200px; /* Ancho máximo */
+    margin: 20px;
+}
+
+.modal-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+}
+
+.modal-header-container h2 {
+    margin: 0;
+    color: #495057;
+}
+
+.modal-content h3,
+.modal-content-location h3 {
+    text-align: center;
+    margin-top: 0;
+    color: #0b0a0a;
+}
+
+
+
+.modal-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+
+
+.btn-close {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close:hover {
+    background-color: #f8f9fa;
+    border-radius: 50%;
+}
+
+#filterOptionsContainer {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.loading {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#misBtnsContainer {
+    border-top: 1px solid #dee2e6;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+
+/* === NAVBAR === */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 60px;
+}
+
+.logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 3rem;
+    max-width: 150px;
+    object-fit: contain;
+}
+
+.navbar-saludo {
+    order: 2;
+    margin-left: auto;
+    margin-right: 1rem;
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.navbar-toggle {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    order: 1;
+    padding: 0.5rem;
+    position: relative;
+}
+
+.navbar-toggle span {
+    display: none;
+}
+
+.navbar-toggle::before {
+    content: '';
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background-image: url('../Images/salida.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+.navbar-menu {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 100;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.3s ease-in-out;
+    list-style: none;
+    padding: 0.5rem;
+    margin: 0;
+}
+
+.navbar-menu li {
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.navbar-menu li:last-child {
+    border-bottom: none;
+}
+
+.navbar-menu a,
+.navbar-menu li {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.navbar-menu li:hover {
+    background-color: #f5f5f5;
+}
+
+.navbar-menu.active {
+    transform: scaleY(1);
+}
+
+/* === NAVBAR BOOTSTRAP FIXES === */
+.navbar-brand {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10;
+}
+
+.navbar .container-fluid {
+    position: relative;
+}
+
+.navbar-brand img {
+    height: 50px;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    text-align: center;
+    min-height: calc(100vh - 140px);
+}
+
+/* === BUSCADOR === */
+.search-container {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 2rem auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-box {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex: 1;
+    min-width: 200px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.search-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: 40px;
+    background-color: rgba(255,157,60,0.87);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* === PANEL DERECHO === */
+.right-panel {
+    position: fixed;
+    right: 0;
+    top: 70px;
+    width: 100vw;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    padding: 1rem;
+    background: linear-gradient(#141e30, #243b55);
+    z-index: 10;
+}
+
+.table-container {
+    background: white;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+/* === TABLAS === */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.compact-table {
+    font-size: 0.85rem;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 0.5rem 0.3rem;
+    vertical-align: middle;
+}
+
+.compact-header {
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.compact-header h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+/* === DROPDOWN === */
+#menuEdificios .dropdown-menu {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* === LOADING Y ERRORES === */
+.loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.error-message {
+    color: #dc3545;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+/* === BADGES Y BOTONES PEQUEÑOS === */
+.btn-xs {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+/* Menú lateral */
+.offcanvas {
+    width: 250px;
+}
+
+.offcanvas-header {
+    background-color: #f8f9fa;
+    padding: 10px;
+}
+
+.offcanvas-body {
+    background-color: #fff;
+}
+
+.offcanvas-title {
+    font-size: 1.25rem;
+}
+
+.list-group-item {
+    font-size: 1rem;
+}
+
+/* Ocultar el menú hamburguesa en pantallas grandes */
+@media (min-width: 768px) {
+    .navbar-toggler {
+        display: none;
+    }
+}
+
+/* Ajustes solo en dispositivos móviles */
+@media (max-width: 768px) {
+    /* Navbar Saludo */
+    .navbar-saludo {
+        display: block; /* Asegura que sea visible */
+        font-size: 1rem; /* Ajusta el tamaño de la fuente */
+        margin-left: 1rem;
+        margin-right: 1rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Contenedor de búsqueda */
+    .search-container {
+        background: white;
+        padding: 0.5rem; /* Mantén un padding cómodo */
+        border-radius: 6px;
+        margin: 1rem auto;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        max-width: 600px; /* Un tamaño razonable para móviles */
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Asegura que los botones de búsqueda tengan suficiente espacio */
+    .search-container button {
+        font-size: 0.85rem; /* Tamaño de fuente más grande */
+        padding: 0.5rem; /* Aumenta el tamaño de los botones */
+    }
+
+    /* Ajustes en las columnas dentro del contenedor de búsqueda */
+    .search-container .row.g-2 {
+        flex-direction: column; /* Los botones irán en una columna */
+    }
+
+    .search-container .col-6, .search-container .col-3 {
+        width: 100%; /* Los botones ocuparán el 100% del ancho */
+        margin-bottom: 1rem; /* Añade espacio entre los botones */
+    }
+
+    /* Navbar Toggler */
+    .navbar-toggler {
+        display: block; /* Asegura que el botón hamburguesa sea visible */
+    }
+
+    /* El logo estará centrado solo en pantallas pequeñas */
+    .logo {
+        max-width: 80px; /* Reduce el tamaño del logo en móviles */
+    }
+
+    /* Menú lateral en móviles */
+    .offcanvas {
+        width: 80%; /* Asegura que el menú lateral no ocupe todo el ancho */
+    }
+
+    /* Ajustes en el saludo de la navbar */
+    .navbar-saludo {
+        margin-left: auto;
+        margin-right: 0;
+        font-size: 1rem;
+    }
+    .modal-content-location {
+        width: 95%;
+        margin: 10px;
+        padding: 20px;
+    }
+
+    #filterOptionsContainer,
+    #filterOptionsContainerTareasAsignadas{
+        flex-direction: column;
+    }
+}
+
+/* Mejoras visuales adicionales */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.form-control, .form-control-sm {
+    border-radius: 6px;
+}
+
+/* Estilo del botón hamburguesa */
+.navbar-toggler-icon {
+    width: 30px;
+    height: 30px;
+    background-image: url('../Images/menu.png'); /* Opcional: cambiar la imagen del icono */
+    background-size: cover;
+}
+

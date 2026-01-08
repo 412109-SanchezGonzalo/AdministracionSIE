@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../Images/logo_SIE.png">
+    <link rel="stylesheet" href="../Styles/add_styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="../Scripts/add_script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <title>Agregar Nuevo</title>
+</head>
+<body>
+<!-- Navbar con el botón hamburguesa -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <img src="../Images/logo_SIE.png" alt="Sie logo" class="logo">
+        <div class="navbar-saludo"><span>Hola, Usuario !</span></div>
+        <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Opciones
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                        <li><a class="dropdown-item" href="../Pages/Home_Admin_Page.html">Tareas</a></li>
+                        <li><a class="dropdown-item" href="../Pages/Pedidos_Page.html">Pedidos</a></li>
+                        <li><a class="dropdown-item" href="../Pages/Add_Page.html">Agregar Nuevo</a></li>
+                        <li><hr class="dropdown-divider" style="background-color: white"></li>
+                        <li><a class="dropdown-item" href="../Pages/Login_page.html">Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Menú lateral en móviles -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasMenuLabel">Opciones</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-group">
+            <li class="list-group-item"><a href="../Pages/Home_Admin_Page.html">Tareas</a></li>
+            <li class="list-group-item"><a href="../Pages/Pedidos_Page.html">Pedidos</a></li>
+            <li class="list-group-item"><a href="../Pages/Add_Page.html">Agregar Nuevo</a></li>
+            <li class="list-group-item"><a href="../Pages/Login_page.html">Cerrar Sesión</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="right-panel">
+    <div class="compact-header text-center">
+        <h4 style="color: white">➕ Crear</h4>
+    </div>
+
+    <div class="search-container d-flex flex-column align-items-center gap-3">
+
+        <div class="col-10 col-md-6">
+            <button class="btn btn-success btn-sm w-100" id="btnNewUser" style="background-color: #dc6900; border: none;">
+                👤 Nuevo Usuario
+            </button>
+        </div>
+
+        <div class="col-10 col-md-6">
+            <button class="btn btn-success btn-sm w-100" id="btnNewProduct" style="background-color: #457715; border: none;">
+                📦 Nuevo Insumo
+            </button>
+        </div>
+
+        <div class="col-10 col-md-6">
+            <button class="btn btn-success btn-sm w-100" id="btnNewEdificio" style="background-color: #005488; border: none;">
+                🏢 Nuevo Edificio
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de Nueva Usuario -->
+<div class="modal-overlay-newUser" id="modal-NewUser">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>👤 Nuevo Usuario</h2>
+            <button type="button" class="btn-close" id="closeNewUserModalBtn" aria-label="Close"></button>
+        </div>
+        <div class="mb-3">
+            <label for="Name-New-User" class="form-label">Nombre: </label>
+            <input type="text" class="form-control" id="Name-New-User" placeholder="ej; Juan" required>
+        </div>
+        <div class="mb-3">
+            <label for="LastName-New-User" class="form-label">Apellido: </label>
+            <input type="text" class="form-control" id="LastName-New-User" placeholder="ej; Perez" required>
+        </div>
+        <div class="mb-3">
+            <label for="Nickname-New-User" class="form-label">Nombre de Usuario: </label>
+            <input type="text" class="form-control" id="Nickname-New-User" placeholder="ej; jperez (admin) / nroDNI (empleado)" required>
+        </div>
+        <div class="mb-3">
+            <label for="Password-New-User" class="form-label">Contraseña: </label>
+            <input type="text" class="form-control" id="Password-New-User" placeholder="ej; jperez123 (admin) / últ. 4 nrosDNI (empleado)" required>
+        </div>
+        <div class="mb-3">
+            <label for="Email-New-User" class="form-label">Email (Opcional): </label>
+            <input type="email" class="form-control" id="Email-New-User" placeholder="ej; jperez123@gmail.com">
+        </div>
+        <div class="mb-3">
+            <label for="NumberPhone-New-User" class="form-label">Teléfono (Opcional): </label>
+            <input type="number" class="form-control" id="NumberPhone-New-User" placeholder="ej; 3512841550">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Seleccione el Rol: </label>
+            <select id="selectedRol" class="form-select" aria-label="Selected Rol">
+                <option selected value="1">Administrador</option>
+                <option value="2">Usuario</option>
+            </select>
+        </div>
+        <div id="container-edificios-asociados" style="display: none;" class="mt-3">
+            <label class="form-label">Seleccione los edificios asociados al empleado: </label>
+            <div id="edificios-list" class="row g-2">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4" style="background-color: #2e7700" id="btnConfirmarNewUser">Confirmar</button>
+    </div>
+</div>
+
+<!-- Modal de Nuevo Producto -->
+<div class="modal-overlay-newProduct" id="modal-NewProduct">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>📦 Nuevo Insumo</h2>
+            <button type="button" class="btn-close" id="closeNewProductModalBtn" aria-label="Close"></button>
+        </div>
+        <div class="mb-3">
+            <label for="Name-New-Product" class="form-label">Nombre Producto: </label>
+            <input type="text" class="form-control" id="Name-New-Product">
+        </div>
+        <div class="mb-3">
+            <label for="IVA-New-Product" class="form-label">IVA: </label>
+            <input type="number" class="form-control" id="IVA-New-Product">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Seleccione la Unidad de Medida: </label>
+            <select id="selectedUnit" class="form-select" aria-label="Selected Unit">
+                <option selected value="1">LITROS</option>
+                <option value="2">METROS</option>
+                <option value="3">UNIDADES</option>
+                <option value="4">PAQUETES</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4" style="background-color: #2e7700" id="btnConfirmarNewProduct">Confirmar</button>
+    </div>
+</div>
+
+<!-- Modal de Nuevo Edificio -->
+<div class="modal-overlay-newEdificio" id="modal-NewEdificio">
+    <div class="modal-content-location">
+        <div class="modal-header-container">
+            <h2>🏢 Nuevo Edificio</h2>
+            <button type="button" class="btn-close" id="closeNewEdificioModalBtn" aria-label="Close"></button>
+        </div>
+        <div class="mb-3">
+            <label for="Name-New-Edificio" class="form-label">Nombre Edificio: </label>
+            <input type="text" class="form-control" id="Name-New-Edificio">
+        </div>
+        <div class="mb-3">
+            <label for="Street-New-Edificio" class="form-label">Calle: </label>
+            <input type="text" class="form-control" id="Street-New-Edificio">
+        </div>
+        <div class="mb-3">
+            <label for="Number-New-Edificio" class="form-label">Numeración: </label>
+            <input type="text" class="form-control" id="Number-New-Edificio">
+        </div>
+        <button type="submit" class="btn btn-primary mt-4" style="background-color: #2e7700" id="btnConfirmarNewEdificio">Confirmar</button>
+    </div>
+</div>
+
+
+<div id="loadingSpinner" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 2000;">
+    <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Cargando ...</span>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-message">
+                <!-- El mensaje se setea desde JS -->
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

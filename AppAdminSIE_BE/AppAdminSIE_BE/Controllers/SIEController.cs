@@ -62,6 +62,20 @@ namespace JobOclock_BackEnd.Controllers
              catch (Exception ex) { return BadRequest("Sin Edificios"); }
          }
 
+        [HttpPost("Crear-edificio")]
+        public IActionResult CrearEdificio([FromBody] Edificio edificio)
+        {
+            try
+            {
+                _service.AddEdificio(edificio);
+                return Ok($"Edificio '{edificio.Nombre}' creado exitosamente");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al crear el edificio: {ex.Message}");
+            }
+        }
+
 
         // EDIFICIO X USUARIO
 
@@ -107,6 +121,27 @@ namespace JobOclock_BackEnd.Controllers
                 return NotFound();
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPost("Crear-producto")]
+        public IActionResult CrearProducto([FromBody] Producto producto)
+        {
+            try
+            {
+                // Validar que el producto no exista ya
+                var productoExistente = _service.GetProductoByName(producto.Nombre);
+                if (productoExistente != null)
+                {
+                    return BadRequest($"Ya existe un producto con el nombre '{producto.Nombre}'");
+                }
+
+                _service.AddProducto(producto);
+                return Ok($"Producto '{producto.Nombre}' creado exitosamente");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al crear el producto: {ex.Message}");
+            }
         }
 
         // PEDIDO
@@ -364,7 +399,7 @@ namespace JobOclock_BackEnd.Controllers
 
         [HttpPost("Crear-usuario")]
 
-        public ActionResult CreateUser([FromQuery] Usuario usuario)
+        public ActionResult CreateUser([FromBody] Usuario usuario)
         {
             try
             {

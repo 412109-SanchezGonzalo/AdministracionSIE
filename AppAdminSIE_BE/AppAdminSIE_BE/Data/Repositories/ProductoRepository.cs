@@ -12,6 +12,34 @@ namespace AppAdminSIE_BE.Data.Repositories
         {
             _connectionString = connectionString;
         }
+
+        public void Add(Producto producto)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            conn.Open();
+            using var transaction = conn.BeginTransaction();
+            try
+            {
+                string sqlProducto = @"INSERT INTO Productos (Nombre, IVA, UnidadMedida) 
+                              VALUES (@nombre, @iva, @unidadMedida);
+                              SELECT LAST_INSERT_ID();";
+
+                using var cmd = new MySqlCommand(sqlProducto, conn, transaction);
+                cmd.Parameters.AddWithValue("@nombre", producto.Nombre);
+                cmd.Parameters.AddWithValue("@iva", producto.Iva);
+                cmd.Parameters.AddWithValue("@unidadMedida", producto.UnidadMedida);
+
+                int nuevoIdProducto = Convert.ToInt32(cmd.ExecuteScalar());
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
         public IEnumerable<Producto> GetAllProducto()
         {
             var list = new List<Producto>();

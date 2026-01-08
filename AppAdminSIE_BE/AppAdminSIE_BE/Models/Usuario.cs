@@ -1,4 +1,6 @@
-﻿namespace JobOclock_BackEnd.Models
+﻿using AppAdminSIE_BE.Models;
+
+namespace JobOclock_BackEnd.Models
 {
     public class Usuario
     {
@@ -10,5 +12,7 @@
         public string NicknameDni { get ; set; }
         public string Contraseña { get; set; }
         public string Rol { get; set; }
+
+        public List<EdificioXUsuario> EdificiosAsociados { get; set; } = new List<EdificioXUsuario>();
     }
 }
