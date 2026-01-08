@@ -200,12 +200,48 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     document.getElementById('btnConfirmarNewUser').addEventListener('click', async () => {
+
+        if(loadingSpinner) {
+            loadingSpinner.classList.remove('d-none');
+        }
+
         const selectElement = document.getElementById('selectedRol');
         const rolTexto = selectElement.options[selectElement.selectedIndex].text;
 
         // Capturamos los valores de los inputs
         const emailInput = document.getElementById('Email-New-User').value.trim();
         const telefonoInput = document.getElementById('NumberPhone-New-User').value.trim();
+
+        // Capturar valores
+        const nombreUsuario = document.getElementById('Name-New-User').value.trim();
+        const apellidoUsuario = document.getElementById('LastName-New-User').value.trim();
+        const nicknameUsuario = document.getElementById('Nickname-New-User').value.trim();
+        const passwordUsuario = document.getElementById('Password-New-User').value.trim();
+
+        // Validaciones básicas
+        if (nombreUsuario === "") {
+            alert("⚠️ El nombre es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
+            return;
+        }
+
+        if (apellidoUsuario === "") {
+            alert("⚠️ El apellido es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
+            return;
+        }
+
+        if (nicknameUsuario === "") {
+            alert("⚠️ El DNI/Nickname es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
+            return;
+        }
+
+        if (passwordUsuario === "") {
+            alert("⚠️ La contraseña es obligatoria");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
+            return;
+        }
 
         // Lógica de reemplazo para campos vacíos
         const emailFinal = emailInput === "" ? "-" : emailInput;
@@ -277,6 +313,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (error) {
             console.error("Error en la petición:", error);
             showToast("No se pudo conectar con el servidor.",'warning');
+        } finally {
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('d-none');
+            }
         }
     });
 
@@ -340,17 +380,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Validaciones básicas
         if (nombreProducto === "") {
             alert("⚠️ El nombre del producto es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
         if (ivaProducto === "") {
             alert("⚠️ El IVA es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
         const ivaNumerico = parseInt(ivaProducto);
         if (isNaN(ivaNumerico) || ivaNumerico < 0) {
             alert("⚠️ El IVA debe ser un número válido mayor o igual a 0");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
@@ -437,16 +480,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Validaciones básicas
         if (nombreEdificio === "") {
             alert("⚠️ El nombre del edificio es obligatorio");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
         if (calleEdificio === "") {
             alert("⚠️ La calle es obligatoria");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
         if (numeroEdificio === "") {
             alert("⚠️ La numeración es obligatoria");
+            if(loadingSpinner) loadingSpinner.classList.add('d-none');
             return;
         }
 
