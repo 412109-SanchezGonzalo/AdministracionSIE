@@ -84,12 +84,12 @@
                     </small>
                 </div>
             </div>
-            <div class="col-3">
-                <button class="btn btn-success btn-sm w-100" id="btnVerTask" style="background-color: #78b638">Ver Tareas Asignadas</button>
+            <div class="col-6">
+                <button class="btn btn-success btn-sm w-100" id="btnVerMisTasks" style="background-color: #78b638">Ver Tareas Asignadas</button>
             </div>
-            <div class="col-3">
+            <!-- <div class="col-3">
                 <button class="btn btn-success btn-sm w-100" id="btnVerMisTasks" style="background-color: #005488">Mis Tareas Asignadas</button>
-            </div>
+            </div> -->
 
         </div>
 
@@ -172,48 +172,48 @@
 </div>
 
 <!-- Modal de Ver Tarea Asignada - CON LOADING AGREGADO -->
-<div class="modal-overlay-newTask" id="modal-VerTask">
-    <div class="modal-content-location">
-        <div class="modal-header-container">
-            <h2>📝 Tarea asignada</h2>
-            <button type="button" class="btn-close" id="closeVerTaskModalBtn" aria-label="Close"></button>
-        </div>
+<!-- <div class="modal-overlay-newTask" id="modal-VerTask">
+   <div class="modal-content-location">
+       <div class="modal-header-container">
+           <h2> Tarea asignada</h2>
+           <button type="button" class="btn-close" id="closeVerTaskModalBtn" aria-label="Close"></button>
+       </div>
 
-        <div id="filterOptionsContainerTareasAsignadas">
-            <div class="col-md-4 col-sm-6">
-                <label for="fechaFiltradaEnTareasAsignadas" class="form-label">Filtrar por Fecha:</label>
-                <input type="date" class="form-control form-control-sm" id="fechaFiltradaEnTareasAsignadas">
-            </div>
+       <div id="filterOptionsContainerTareasAsignadas">
+           <div class="col-md-4 col-sm-6">
+               <label for="fechaFiltradaEnTareasAsignadas" class="form-label">Filtrar por Fecha:</label>
+               <input type="date" class="form-control form-control-sm" id="fechaFiltradaEnTareasAsignadas">
+           </div>
 
-            <div class="col-md-5 col-sm-6" id="estadoColumnaEnTareasAsignadas">
-                <label for="tareaAsignadaFiltradaByEstado" class="form-label">Filtrar por Estado:</label>
-                <div class="d-flex align-items-end">
-                    <div class="input-group input-group-sm">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tareaAsignadaFiltradaByEstado">
-                            Seleccionar Estado
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Pendiente</a></li>
-                            <li><a class="dropdown-item" href="#">En Progreso</a></li>
-                            <li><a class="dropdown-item" href="#">Completado</a></li>
-                            <li><a class="dropdown-item" href="#">FACTURADO</a></li>
-                        </ul>
-                        <!-- Botón Limpiar pegado al dropdown -->
+           <div class="col-md-5 col-sm-6" id="estadoColumnaEnTareasAsignadas">
+               <label for="tareaAsignadaFiltradaByEstado" class="form-label">Filtrar por Estado:</label>
+               <div class="d-flex align-items-end">
+                   <div class="input-group input-group-sm">
+                       <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tareaAsignadaFiltradaByEstado">
+                           Seleccionar Estado
+                       </button>
+                       <ul class="dropdown-menu">
+                           <li><a class="dropdown-item" href="#">Pendiente</a></li>
+                           <li><a class="dropdown-item" href="#">En Progreso</a></li>
+                           <li><a class="dropdown-item" href="#">Completado</a></li>
+                           <li><a class="dropdown-item" href="#">FACTURADO</a></li>
+                       </ul>
+                        Botón Limpiar pegado al dropdown
                         <button class="btn btn-outline-danger" type="button" id="limpiarFiltrosBtnEnTareasAsignadas" title="Limpiar Filtros">
-                            🗑️ Borrar Filtros
+                            ️ Borrar Filtros
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Input del empleado (siempre visible) -->
+         Input del empleado (siempre visible)
         <div class="mb-3">
             <label for="verTareaByUser" class="form-label">Empleado</label>
             <input type="input" class="form-control" id="verTareaByUser" aria-describedby="username">
         </div>
 
-        <!-- NUEVO: Loading spinner para las tareas -->
+         NUEVO: Loading spinner para las tareas
         <div id="loadingTareas" class="loading d-none text-center mt-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
@@ -221,9 +221,9 @@
             <p class="mt-2 small">Cargando tareas...</p>
         </div>
 
-        <!-- El contenedor para List Group se creará dinámicamente aquí -->
+         El contenedor para List Group se creará dinámicamente aquí
 
-        <!-- Formulario original (se muestra para tarea individual o detalle) -->
+         Formulario original (se muestra para tarea individual o detalle)
         <div id="formContainer">
             <div class="mb-3">
                 <label for="VerMenuActivities" class="form-label">Actividad</label>
@@ -250,7 +250,7 @@
                 <textarea class="form-control" id="VerCommentsByUser" rows="3"></textarea>
             </div>
 
-            <!-- Botones de acciones -->
+             Botones de acciones
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-secondary" id="btnVolverLista">← Volver a la lista</button>
                 <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
@@ -259,7 +259,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>-->
 
 <!-- Modal Ver Mis Tareas Asignadas -->
 
@@ -287,6 +287,7 @@
                             <li><a class="dropdown-item" href="#">Pendiente</a></li>
                             <li><a class="dropdown-item" href="#">En Progreso</a></li>
                             <li><a class="dropdown-item" href="#">Completado</a></li>
+                            <li><a class="dropdown-item" href="#">FACTURADO</a></li>
                         </ul>
                         <!-- Botón Limpiar pegado al dropdown -->
                         <button class="btn btn-outline-danger" type="button" id="limpiarFiltrosBtn" title="Limpiar Filtros">
@@ -345,6 +346,7 @@
                 <button id="btnComenzarTarea" type="button" class="btn btn-warning">Comenzar Tarea</button>
                 <button id="btnConfirmarCambios" type="button" class="btn btn-primary">Confirmar Cambios</button>
                 <button id="btnFinalizarTarea" type="button" class="btn btn-success">Finalizar Tarea</button>
+                <button type="button" class="btn btn-success" id="btnFacturar" style="display: none;">FACTURAR</button>
             </div>
         </div>
     </div>

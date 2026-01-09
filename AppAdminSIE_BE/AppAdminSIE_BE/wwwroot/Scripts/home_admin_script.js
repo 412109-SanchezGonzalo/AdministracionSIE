@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const buttonIds = [
         'btnNewTask',
         'btnClear',
-        'btnVerTask',
+        /*'btnVerTask',*/
         'btnRetry',
         'btnConfirmar',
         //'btnEditar',
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const btnClear = document.getElementById('btnClear');
     const btnRetry = document.getElementById('btnRetry');
     const btnNewTask = document.getElementById('btnNewTask');
-    const btnVerTask = document.getElementById('btnVerTask');
+    /*const btnVerTask = document.getElementById('btnVerTask');*/
     const btnVerMisTasks = document.getElementById('btnVerMisTasks');
     const btnConfirm = document.getElementById('btnConfirmar');
     //const btnEditar = document.getElementById('btnEditar');
@@ -2394,6 +2394,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                     colorBorde = '#ffc107';
                     estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
                     break;
+                case 'FACTURADO':
+                    colorBorde = '#198754';
+                    estadoHtml = '<span class="badge rounded-pill bg-success">FACTURADO</span>';
+                    break;
                 case 'Pendiente':
                 default:
                     colorBorde = '#dc3545';
@@ -2609,6 +2613,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                     colorBorde = '#ffc107';
                     estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
                     break;
+                case 'FACTURADO':
+                    colorBorde = '#198754'; // Verde
+                    estadoHtml = '<span class="badge rounded-pill bg-success">FACTURADO</span>';
+                    break;
                 case 'Pendiente':
                 default:
                     colorBorde = '#dc3545';
@@ -2704,6 +2712,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             case 'En Progreso':
                 colorBorde = '#ffc107'; // Amarillo
                 estadoHtml = '<span class="badge rounded-pill bg-warning">En Progreso</span>';
+                break;
+            case 'FACTURADO':
+                colorBorde = '#198754'; // Verde
+                estadoHtml = '<span class="badge rounded-pill bg-success">FACTURADO</span>';
                 break;
             case 'Pendiente':
             default:
@@ -2878,7 +2890,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }else {
                 if(estado === 'FACTURADO')
                 {
-                    btnEliminar.style.display = 'none';
+                    /*btnEliminar.style.display = 'none';*/
                     btnFacturar.style.display = 'none';
                 }else {
                     //btnEditar.style.display = 'none';
@@ -2918,12 +2930,17 @@ document.addEventListener('DOMContentLoaded', async function () {
             // --- ESTADO: EN PROGRESO ---
         } else if (estadoTarea === 'En Progreso') {
             observacionesInput.disabled = false;
-            btnEliminar.style.display = 'none';
+            /*btnEliminar.style.display = 'none';*/
             btnConfirmarCambios.style.display = 'inline-block';
             btnFinalizar.style.display = 'inline-block';
 
             // --- ESTADO: COMPLETADO / FINALIZADO ---
         } else if (estadoTarea === 'Completado' || estadoTarea === 'Finalizado') {
+            observacionesInput.disabled = true;
+            btnFacturar.style.display = 'inline-block';
+
+            // --- ESTADO: FACTURADO ---
+        } else if (estadoTarea === 'FACTURADO') {
             observacionesInput.disabled = true;
 
         }
@@ -3033,7 +3050,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 // MODIFICAR la función misTareas() existente para usar el modal correcto:
     async function misTareas() {
         try {
-            const password = sessionStorage.getItem('admin_password');
+            /*const password = sessionStorage.getItem('admin_password');
             const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-usuario-por-contrasena`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -3052,7 +3069,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 dni: userData.nicknameDni || 'Sin DNI'
             };
 
-            empleadosSeleccionados = [empleadoInfo];
+            empleadosSeleccionados = [empleadoInfo];*/
             const empleadoSeleccionado = empleadosSeleccionados[0];
 
             const modalVerMisTasks = document.getElementById('modal-VerMisTasks');
@@ -3245,6 +3262,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if(btnVerMisTasks){
         btnVerMisTasks.addEventListener('click', async () => {
+            if (empleadosSeleccionados.length === 0) {
+                showToast("Por favor selecciona un empleado.",'warning');
+                return;
+            }
+
             await misTareas();
             initializeFiltersMisTareas(); // ✅ Llamar a la función de inicialización aquí
         });
@@ -3261,10 +3283,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         openModalNewTask(empleadosSeleccionados);
     })
 
-    btnVerTask.addEventListener('click', async () => {
+    /*btnVerTask.addEventListener('click', async () => {
 
         verTareas();
-    })
+    })*/
 
     if (btnConfirm) {
         btnConfirm.addEventListener('click', handleFormSubmit);
@@ -3309,7 +3331,7 @@ async function handleNewTaskButton() {
 /**
  * Maneja el loading del botón de ver tareas
  */
-async function handleVerTaskButton() {
+/*async function handleVerTaskButton() {
     await executeWithLoading('btnVerTask', async () => {
         // Aquí va tu lógica para ver tareas
         console.log('Cargando tareas asignadas...');
@@ -3342,7 +3364,7 @@ window.ButtonLoading = {
     set: setButtonLoading,
     remove: removeButtonLoading,
     executeWith: executeWithLoading,
-    handleSearch: handleSearchButton,
+    /*handleSearch: handleSearchButton,*/
     handleNewTask: handleNewTaskButton,
     handleVerTask: handleVerTaskButton,
     handleConfirmar: handleConfirmarButton
