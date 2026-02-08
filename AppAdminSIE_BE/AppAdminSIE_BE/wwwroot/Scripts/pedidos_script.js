@@ -959,11 +959,10 @@
             productos.forEach(producto => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
-                    <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
-                    <td><code>${producto.iva ?? 'Sin IVA'}</code></td>
-                    <td class="cantidad-cell"></td>
                     <td class="acciones-cell"></td>
+                    <td><strong>${producto.nombre || 'Sin nombre'}</strong></td>
+                    <td class="cantidad-cell"></td>
+                    <td><span class="badge bg-secondary">${producto.id || 'N/A'}</span></td>
                 `;
     
                 const seleccionado = productosSeleccionados.find(p => p.id === producto.id);
