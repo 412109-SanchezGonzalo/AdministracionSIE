@@ -26,7 +26,7 @@ namespace JobOclock_BackEnd.Services
 
         // PEDIDO
         IEnumerable<Pedido> GetAllPedidos();
-        int AddPedido(DateTime fechaEntrega);
+        int AddPedido(NewPedido newPedido);
         void UpdateEstado(int idPedido, string nuevoEstado);
 
         // PEDIDO X PRODUCTO

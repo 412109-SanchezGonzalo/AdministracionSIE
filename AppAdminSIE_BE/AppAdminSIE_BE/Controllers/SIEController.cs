@@ -9,7 +9,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
-
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace JobOclock_BackEnd.Controllers
@@ -163,11 +162,11 @@ namespace JobOclock_BackEnd.Controllers
 
 
         [HttpPost("Crear-pedido")]
-        public ActionResult<int> AddPedidos([FromBody] DateTime fechaPedido)
+        public ActionResult<int> AddPedidos([FromBody] NewPedido newPedido)
         {
             try
             {
-                return Ok(_service.AddPedido(fechaPedido));
+                return Ok(_service.AddPedido(newPedido));
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
