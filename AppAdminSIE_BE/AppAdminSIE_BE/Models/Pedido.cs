@@ -6,7 +6,6 @@
         public DateTime FechaEntrega { get; set; }
         public string Estado { get; set; }
         public DateTime FechaCreacion { get; set; }
-        public string Periodo { get; set; }
 
     }
 }

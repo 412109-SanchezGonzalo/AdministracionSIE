@@ -79,9 +79,9 @@ namespace JobOclock_BackEnd.Services
         {
             return _pedidoRepository.GetAllPedidos();
         }
-        public int AddPedido(NewPedido newPedido)
+        public int AddPedido(DateTime fechaEntrega)
         {
-            return _pedidoRepository.AddPedido(newPedido);
+            return _pedidoRepository.AddPedido(fechaEntrega);
         }
         public void UpdateEstado(int idPedido, string nuevoEstado)
         {

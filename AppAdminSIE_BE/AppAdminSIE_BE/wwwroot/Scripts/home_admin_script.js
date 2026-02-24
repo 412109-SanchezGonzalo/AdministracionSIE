@@ -1,15 +1,4 @@
-
-console.log('🔥🔥🔥 HOME_ADMIN_SCRIPT.JS CARGADO - TIMESTAMP:', Date.now());// ===================================
-console.log('🔥🔥🔥 HOME_ADMIN_SCRIPT.JS CARGADO - TIMESTAMP:', Date.now());
-
-// 👇 AÑADE ESTO INMEDIATAMENTE DESPUÉS
-console.log('🟢 Interceptando openModalVerTask original');
-const openModalVerTaskOriginal = window.openModalVerTask;
-
-window.openModalVerTask = function(employeeId, nombreEmpleado) {
-    console.log('🟢 openModalVerTask INTERCEPTADA:', employeeId, nombreEmpleado);
-    return openModalVerTaskOriginal.call(this, employeeId, nombreEmpleado);
-};
+// ===================================
 // SISTEMA DE LOADING PARA BOTONES
 // ===================================
 
@@ -18,13 +7,6 @@ window.openModalVerTask = function(employeeId, nombreEmpleado) {
  * @param {string|HTMLElement} button - ID del botón o elemento del botón
  * @param {string} loadingText - Texto opcional para mostrar durante el loading
  */
-
-console.log("%c🚀 SCRIPT CARGADO CORRECTAMENTE", "color: yellow; background: black; font-size: 20px");
-
-let originalTareasAsignadas = [];
-let tareasFiltradas = [];
-let currentFilterTypeTareasAsignadas = null;
-
 function setButtonLoading(button, loadingText = null) {
     const btn = typeof button === 'string' ? document.getElementById(button) : button;
     if (!btn) return;
@@ -102,199 +84,7 @@ async function executeWithLoading(button, asyncOperation, loadingText = 'Cargand
     }
 }
 
-// Inicializar filtros para Mis Tareas Asignadas
 
-function initializeFiltersTareasAsignadas() {
-    console.log('🔵 [INIT] Iniciando filtros');
-
-    const fechaInput = document.getElementById('fechaFiltrada');
-    const estadoDropdownBtn = document.getElementById('tareaFiltradaByEstado');
-    const edificioInput = document.getElementById('edificioTareaFiltrado');
-
-    console.log('🔵 [CHECK] edificioInput existe?', !!edificioInput);
-    console.log('🔵 [CHECK] edificioInput valor:', edificioInput);
-
-    const estadoDropdownItems = document.querySelectorAll('#modal-VerMisTasks .dropdown-menu a');
-
-    if (!fechaInput || !estadoDropdownBtn || !edificioInput) {
-        console.error('❌ Faltan elementos:', {
-            fechaInput: !!fechaInput,
-            estadoDropdownBtn: !!estadoDropdownBtn,
-            edificioInput: !!edificioInput
-        });
-        return; // ← AQUÍ SE DETIENE TODO
-    }
-
-    // Filtro por fecha
-    fechaInput.addEventListener('change', function() {
-        console.log('📅 Filtro de fecha activado:', this.value);
-
-        if (this.value) {
-            disableEstadoDropdownTareasAsignadas();
-            currentFilterTypeTareasAsignadas = 'fecha';
-
-            tareasFiltradas = originalTareasAsignadas.filter(tarea => {
-                const fecha = new Date(tarea.fecha).toISOString().split('T')[0];
-                return fecha === this.value;
-            });
-
-            console.log('📅 Tareas filtradas por fecha:', tareasFiltradas.length);
-
-            const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
-            mostrarListGroupTareasAsignadas(tareasFiltradas, nombreEmpleado);
-        } else {
-            enableEstadoDropdownTareasAsignadas();
-            currentFilterTypeTareasAsignadas = null;
-            tareasFiltradas = [];
-
-            const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
-            mostrarListGroupTareasAsignadas(originalTareasAsignadas, nombreEmpleado);
-        }
-    });
-
-    // Filtro por estado
-    estadoDropdownItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            if (estadoDropdownBtn.disabled) {
-                console.log('Dropdown deshabilitado, ignorando click');
-                return;
-            }
-
-            const estado = this.textContent.trim();
-            console.log('🏷️ Filtro de estado activado:', estado);
-
-            disableFechaInputTareasAsignadas();
-            estadoDropdownBtn.textContent = estado;
-            currentFilterTypeTareasAsignadas = 'estado';
-
-            tareasFiltradas = originalTareasAsignadas.filter(tarea => tarea.estado === estado);
-
-            console.log('🏷️ Tareas filtradas por estado:', tareasFiltradas.length);
-
-            const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
-            mostrarListGroupTareasAsignadas(tareasFiltradas, nombreEmpleado);
-        });
-    });
-
-    // Filtro por edificio
-    // Filtro por edificio - VERSIÓN SIMPLIFICADA
-    edificioInput.addEventListener('input', function() {
-        console.log('🏢 [INPUT] Evento disparado, valor:', this.value);
-        filtrarPorEdificioTarea();
-    });
-
-    console.log('✅ Filtros de Mis Tareas Asignadas inicializados correctamente');
-}
-
-// Función para filtrar por edificio
-function filtrarPorEdificioTarea() {
-    console.log('🟢 [1] filtrarPorEdificioTarea EJECUTADA');
-
-    const edificioInput = document.getElementById('edificioTareaFiltrado');
-    console.log('🟢 [2] edificioInput:', edificioInput);
-
-    const edificioFiltro = edificioInput?.value?.toLowerCase()?.trim();
-    console.log('🟢 [3] edificioFiltro:', edificioFiltro);
-    console.log('🟢 [4] originalTareasAsignadas:', originalTareasAsignadas);
-    console.log('🟢 [5] originalTareasAsignadas.length:', originalTareasAsignadas?.length);
-
-    let base = originalTareasAsignadas;
-
-    if (currentFilterTypeTareasAsignadas === 'fecha' ||
-        currentFilterTypeTareasAsignadas === 'estado') {
-        base = tareasFiltradas;
-        console.log('🟢 [6] Usando tareasFiltradas como base:', base.length);
-    }
-
-    console.log('🟢 [7] Primera tarea completa:', base[0]);
-    console.log('🟢 [8] Campos de la primera tarea:', Object.keys(base[0] || {}));
-
-    const tareasFiltradasPorEdificio = base.filter(tarea => {
-        if (!edificioFiltro) {
-            console.log('🟢 [9] Sin filtro, retornando todas');
-            return true;
-        }
-
-        const nombreEdif = tarea.nombreEdificio?.toLowerCase();
-        console.log(`🟢 [10] Tarea: ${tarea.id}, nombreEdificio: "${tarea.nombreEdificio}", coincide: ${nombreEdif?.includes(edificioFiltro)}`);
-
-        return nombreEdif?.includes(edificioFiltro);
-    });
-
-    console.log('🟢 [11] Tareas filtradas:', tareasFiltradasPorEdificio.length);
-
-    const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
-    mostrarListGroupTareasAsignadas(tareasFiltradasPorEdificio, nombreEmpleado);
-
-    console.log('🟢 [12] mostrarListGroupTareasAsignadas ejecutada');
-}
-// Función ACTUALIZADA para abrir el modal de Ver Tareas con List Group
-async function openModalVerTask(employeeId, nombreEmpleado) {
-    console.log('🔴 [1] openModalVerTask INICIADA para:', nombreEmpleado);
-    console.log('Buscando modal:', document.getElementById('modal-VerMisTasks'));
-    console.log('Buscando inputUser:', document.getElementById('verTareaByUser'));
-
-    const modalVerTask = document.getElementById('modal-VerMisTasks');
-    const inputUser = document.getElementById('verMiTareaByUser');
-    const formContainer = document.getElementById('miFormContainer');
-    const filterOptionsContainer = document.getElementById('filterOptionsContainer');
-    const closeBtn = document.getElementById('closeVerMisTaskModalBtn');
-
-    if (!modalVerTask || !inputUser || !formContainer || !filterOptionsContainer) {
-        console.error('Uno o más elementos del modal no fueron encontrados. Verifique el HTML.');
-        return;
-    }
-
-    closeBtn.style.display = 'block';
-    formContainer.style.display = 'none';
-    filterOptionsContainer.style.display = 'flex';
-    inputUser.value = nombreEmpleado;
-    inputUser.disabled = true;
-    modalVerTask.style.display = 'flex';
-
-    limpiarFiltrosTareasAsignadas();
-    showLoadingTareas();
-
-    try {
-        console.log('🟢 [2] Haciendo fetch...');
-        const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('🟢 [3] Data recibida:', data);
-        hideLoadingTareas();
-
-        if (Array.isArray(data) && data.length > 0) {
-            console.log('🔴 [2] Data recibida, cantidad:', data.length);
-            originalTareasAsignadas = data;
-
-            console.log('🔴 [3] Llamando mostrarListGroupTareasAsignadas');
-            mostrarListGroupTareasAsignadas(data, nombreEmpleado);
-
-            console.log('🔴 [4] Programando setTimeout');
-            setTimeout(() => {
-                console.log('🔴 [5] setTimeout ejecutándose');
-                initializeFiltersTareasAsignadas();
-                console.log('🔴 [6] initializeFiltersTareasAsignadas llamada');
-            }, 500);
-        }
-    } catch (error) {
-        console.error('Error al obtener datos de la API:', error);
-        hideLoadingTareas();
-        showToast('Error al cargar las tareas del empleado: ' + error.message, 'danger');
-    }
-}
-
-
-// Luego expones a window
-window.initializeFiltersTareasAsignadas = initializeFiltersTareasAsignadas;
-window.openModalVerTask = openModalVerTask;
-window.filtrarPorEdificioTarea = filtrarPorEdificioTarea;
 
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('🚀 Iniciando admin_home.js...');
@@ -302,9 +92,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5152'  // Local
         : 'https://administracionsie.onrender.com';  // Producción
-
-
-
 
     // LOADING
     // Lista de IDs de botones que deben tener loading automático
@@ -748,8 +535,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
 
             listGroup.appendChild(listItem);
-            console.log("✅ List group creado, inicializando filtros...");
-            initializeFiltersTareasAsignadas();
         });
     }
 
@@ -876,6 +661,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
+// Variables para filtros de Ver Tareas Asignadas
+    let originalTareasAsignadas = [];
+    let currentFilterTypeTareasAsignadas = null;
+
 // Funciones para habilitar/deshabilitar filtros en Ver Tareas Asignadas
     function disableFechaInputTareasAsignadas() {
         const fechaInput = document.getElementById('fechaFiltradaEnTareasAsignadas');
@@ -943,12 +732,66 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('Filtros de tareas asignadas limpiados y lista recargada.');
     }
 
-    // Variable para mantener las tareas filtradas actuales
+// Inicializar filtros para Ver Tareas Asignadas
+    function initializeFiltersTareasAsignadas() {
+        console.log('Inicializando filtros de Ver Tareas Asignadas...');
 
-    let tareasFiltradas = [];
+        const fechaInput = document.getElementById('fechaFiltradaEnTareasAsignadas');
+        const estadoDropdownItems = document.querySelectorAll('#modal-VerTask .dropdown-menu a');
+        const estadoDropdownBtn = document.getElementById('tareaAsignadaFiltradaByEstado');
 
+        if (!fechaInput || !estadoDropdownItems.length || !estadoDropdownBtn) {
+            console.error('No se encontraron todos los elementos de filtro necesarios para Ver Tareas Asignadas.');
+            return;
+        }
 
+        // Filtro por fecha
+        fechaInput.addEventListener('change', function() {
+            if (this.value) {
+                disableEstadoDropdownTareasAsignadas();
+                currentFilterTypeTareasAsignadas = 'fecha';
+                const filteredTareas = originalTareasAsignadas.filter(tarea => {
+                    const fecha = new Date(tarea.fecha).toISOString().split('T')[0];
+                    return fecha === this.value;
+                });
 
+                // Filtrar y mostrar tareas por fecha
+                const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
+                mostrarListGroupTareasAsignadas(filteredTareas, nombreEmpleado);
+            } else {
+                enableEstadoDropdownTareasAsignadas();
+                currentFilterTypeTareasAsignadas = null;
+
+                // Mostrar todas las tareas sin filtro
+                const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
+                mostrarListGroupTareasAsignadas(originalTareasAsignadas, nombreEmpleado);
+            }
+        });
+
+        // Filtro por estado
+        estadoDropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                if (estadoDropdownBtn.disabled) {
+                    console.log('Dropdown deshabilitado, ignorando click');
+                    return;
+                }
+
+                const estado = this.textContent.trim();
+                disableFechaInputTareasAsignadas();
+                estadoDropdownBtn.textContent = estado;
+                currentFilterTypeTareasAsignadas = 'estado';
+                const filteredTareas = originalTareasAsignadas.filter(tarea => tarea.estado === estado);
+
+                // Filtrar y mostrar tareas por estado
+                const nombreEmpleado = empleadosSeleccionados[0]?.nombre || 'Usuario';
+                mostrarListGroupTareasAsignadas(filteredTareas, nombreEmpleado);
+            });
+        });
+
+        console.log('Filtros de Ver Tareas Asignadas inicializados correctamente');
+    }
 
 // Event listener para el botón limpiar filtros en Ver Tareas Asignadas
     const limpiarBtnTareasAsignadas = document.getElementById('limpiarFiltrosBtnEnTareasAsignadas');
@@ -1411,6 +1254,70 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
+    // Función ACTUALIZADA para abrir el modal de Ver Tareas con List Group
+    async function openModalVerTask(employeeId, nombreEmpleado) {
+        console.log('Abriendo modal Ver Tareas para:', { employeeId, nombreEmpleado });
+
+        const modalVerTask = document.getElementById('modal-VerTask');
+        const inputUser = document.getElementById('verTareaByUser');
+        const formContainer = document.getElementById('formContainer');
+        const filterOptionsContainer = document.getElementById('filterOptionsContainerTareasAsignadas');
+        const closeBtn = document.getElementById('closeVerTaskModalBtn'); // ✅ Obtener el botón de cerraR
+
+        if (!modalVerTask || !inputUser || !formContainer || !filterOptionsContainer) {
+            console.error('Uno o más elementos del modal no fueron encontrados. Verifique el HTML.');
+            return;
+        }
+        // ✅ Mostrar el botón de cerrar inmediatamente
+        closeBtn.style.display = 'block';
+
+        // Asegurarse de que el formulario de detalle de tarea esté oculto
+        formContainer.style.display = 'none';
+
+        // ✅ Asegurarse de que los filtros estén visibles
+        filterOptionsContainer.style.display = 'flex';
+
+        // Rellenar el input y mostrar el modal
+        inputUser.value = nombreEmpleado;
+        inputUser.disabled = true;
+        modalVerTask.style.display = 'flex';
+
+        // Resetear los filtros y la lista ANTES de cargar nuevos datos
+        limpiarFiltrosTareasAsignadas(); // Esta función solo limpia los valores
+
+        // Mostrar loading mientras se cargan los datos
+        showLoadingTareas();
+
+        try {
+            console.log('Realizando consulta para empleado ID:', employeeId);
+            const response = await fetch(`${API_BASE_URL}/api/SIE/Obtener-servicioXusuario-por-usuario?userId=${employeeId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            hideLoadingTareas();
+
+            if (Array.isArray(data) && data.length > 0) {
+                console.log(`Empleado tiene ${data.length} tarea(s) asignada(s)`);
+                originalTareasAsignadas = data;
+                initializeFiltersTareasAsignadas();
+                mostrarListGroupTareasAsignadas(data, nombreEmpleado);
+            } else {
+                console.log('No se encontraron tareas asignadas para este empleado');
+
+                if (confirm(`El empleado ${nombreEmpleado} no tiene ninguna tarea asignada. ¿Desea asignarle una?`)) {
+                    modalVerTask.style.display = 'none';
+                    openModalNewTask(empleadosSeleccionados);
+                }
+            }
+        } catch (error) {
+            console.error('Error al obtener datos de la API:', error);
+            hideLoadingTareas();
+            showToast('Error al cargar las tareas del empleado: ' + error.message, 'danger');
+        }
+    }
 
 // Función para mostrar una tarea individual en el modal
     function mostrarTareaEnModal(tarea) {
@@ -2550,90 +2457,60 @@ document.addEventListener('DOMContentLoaded', async function () {
 // ✅ Function to initialize event listeners for filters
     function initializeFiltersMisTareas() {
         console.log('🔧 Inicializando filtros del modal de Mis Tareas...');
+
         const fechaInput = document.getElementById('fechaFiltrada');
         const estadoDropdownItems = document.querySelectorAll('#modal-VerMisTasks .dropdown-menu a');
         const estadoDropdownBtn = document.getElementById('tareaFiltradaByEstado');
-        const edificioInput = document.getElementById('edificioTareaFiltrado');
 
-        if (!fechaInput || !estadoDropdownItems.length || !estadoDropdownBtn || !edificioInput) {
+
+
+        if (!fechaInput || !estadoDropdownItems.length || !estadoDropdownBtn) {
             console.error('❌ No se encontraron todos los elementos de filtro necesarios.');
             return;
         }
 
-        // Inicializamos dataset para estado
-        estadoDropdownBtn.dataset.estado = '';
-
-        // 🔎 FUNCIÓN INTERNA PARA FILTRAR (no es global)
-        function filtrarTareas() {
-
-            const fechaValor = fechaInput.value;
-            const estadoValor = estadoDropdownBtn.dataset.estado;
-            const edificioValor = edificioInput.value?.toLowerCase()?.trim();
-
-            // Si no hay ningún filtro activo → mostrar todo
-            if (!fechaValor && !estadoValor && !edificioValor) {
-                mostrarMisListGroupTareas(originalTareas, empleadosSeleccionados[0].nombre);
-                return;
-            }
-
-            const tareasFiltradas = originalTareas.filter(tarea => {
-
-                // 📅 Fecha
-                if (fechaValor) {
-                    const fechaTarea = new Date(tarea.fecha)
-                        .toLocaleDateString('sv-SE');
-
-                    if (fechaTarea !== fechaValor) return false;
-                }
-
-
-                // 📌 Estado
-                if (estadoValor) {
-                    if (tarea.estado !== estadoValor) return false;
-                }
-
-                // 🏢 Edificio
-                if (edificioValor) {
-                    const nombre = String(tarea.nombreEdificio || '')
-                        .toLowerCase()
-                        .trim();
-
-                    if (!nombre.includes(edificioValor)) return false;
-                }
-
-                return true;
-            });
-
-            mostrarMisListGroupTareas(tareasFiltradas, empleadosSeleccionados[0].nombre);
-        }
-
-        // 📅 Evento fecha
         fechaInput.addEventListener('change', function() {
-            filtrarTareas();
+            if (this.value) {
+                disableEstadoDropdown();
+                currentFilterType = 'fecha';
+                const filteredTareas = originalTareas.filter(tarea => {
+                    const fecha = new Date(tarea.fecha).toISOString().split('T')[0];
+                    return fecha === this.value;
+                });
+                // ✅ CORRECCIÓN: Llamar a la función correcta con los argumentos necesarios
+                mostrarMisListGroupTareas(filteredTareas, empleadosSeleccionados[0].nombre);
+            } else {
+                enableEstadoDropdown();
+                currentFilterType = null;
+                // ✅ CORRECCIÓN: Llamar a la función correcta con los argumentos necesarios
+                mostrarMisListGroupTareas(originalTareas, empleadosSeleccionados[0].nombre);
+            }
         });
 
-        // 📌 Evento estado
         estadoDropdownItems.forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
 
-                const estadoSeleccionado = this.textContent.trim();
+                if (estadoDropdownBtn.disabled) {
+                    console.log('🚫 Dropdown deshabilitado, ignorando click');
+                    return;
+                }
 
-                estadoDropdownBtn.textContent = estadoSeleccionado;
-                estadoDropdownBtn.dataset.estado = estadoSeleccionado;
-
-                filtrarTareas();
+                const estado = this.textContent.trim();
+                disableFechaInput();
+                estadoDropdownBtn.textContent = estado;
+                currentFilterType = 'estado';
+                const filteredTareas = originalTareas.filter(tarea => tarea.estado === estado);
+                // ✅ CORRECCIÓN: Llamar a la función correcta con los argumentos necesarios
+                mostrarMisListGroupTareas(filteredTareas, empleadosSeleccionados[0].nombre);
             });
         });
 
-        // 🏢 Evento edificio
-        edificioInput.addEventListener('input', function() {
-            filtrarTareas();
-        });
-
-        console.log('✅ Filtros de Mis Tareas inicializados correctamente');
+        console.log('✅ Filtros del modal de Mis Tareas inicializados correctamente');
     }
 
+
+    // Agregar estas funciones después de la función misTareas() existente
 
     // Función específica para mostrar loading en modal "Mis Tareas"
     function showLoadingMisTareas() {
@@ -3479,9 +3356,6 @@ async function handleConfirmarButton() {
 // EXPORTAR FUNCIONES PARA USO GLOBAL
 // ===================================
 
-// Exponer funciones al objeto window para que el HTML pueda verlas
-// Exponer funciones al objeto global window
-
 // Si estás usando módulos ES6
 // export { setButtonLoading, removeButtonLoading, executeWithLoading };
 
@@ -3492,5 +3366,6 @@ window.ButtonLoading = {
     executeWith: executeWithLoading,
     /*handleSearch: handleSearchButton,*/
     handleNewTask: handleNewTaskButton,
+    handleVerTask: handleVerTaskButton,
     handleConfirmar: handleConfirmarButton
 };

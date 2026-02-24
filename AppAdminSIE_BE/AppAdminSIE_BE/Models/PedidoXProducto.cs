@@ -14,7 +14,6 @@ namespace AppAdminSIE_BE.Models
         public string EstadoPedido { get; set; }
         public string NombreProducto { get; set; }
         public string UnidadMedidaProducto { get; set; }
-        public string Periodo { get; set; }
         public string? Observaciones { get; set; }
         public string EstadoProducto { get; set; }
 

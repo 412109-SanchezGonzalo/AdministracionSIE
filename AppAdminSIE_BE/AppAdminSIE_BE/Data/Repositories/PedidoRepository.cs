@@ -29,25 +29,23 @@ namespace AppAdminSIE_BE.Data.Repositories
                     IdPedido = reader.GetInt32(reader.GetOrdinal("id_pedido")),
                     FechaEntrega = reader.GetDateTime(reader.GetOrdinal("FechaEntrega")),
                     Estado = reader.GetString(reader.GetOrdinal("Estado")),
-                    FechaCreacion = reader.GetDateTime(reader.GetOrdinal("FechaCreacion")),
-                    Periodo = reader.GetString(reader.GetOrdinal("Periodo"))
+                    FechaCreacion = reader.GetDateTime(reader.GetOrdinal("FechaCreacion"))
                 });
             }
             return list;
         }
-        public int AddPedido(NewPedido newPedido)
+        public int AddPedido(DateTime fechaEntrega)
         {
             using (var conn = new MySqlConnection(_connectionString))
             using (var cmd = new MySqlCommand(
-                "INSERT INTO Pedidos (FechaEntrega,Estado , FechaCreacion, Periodo) " +
-                "VALUES (@FechaEntrega,@Estado,@fechaCreacion,@Periodo); " +
+                "INSERT INTO Pedidos (FechaEntrega,Estado , FechaCreacion) " +
+                "VALUES (@FechaEntrega,@Estado,@fechaCreacion); " +
                 "SELECT LAST_INSERT_ID();", conn))
             {
-                cmd.Parameters.AddWithValue("@FechaEntrega",newPedido.FechaEntrega);
+                cmd.Parameters.AddWithValue("@FechaEntrega",fechaEntrega);
                 cmd.Parameters.AddWithValue("@Estado", "Pendiente - Preparar");
                 DateTime fechaCreacion = DateTime.Now;
                 cmd.Parameters.AddWithValue("@fechaCreacion", fechaCreacion);
-                cmd.Parameters.AddWithValue("@Periodo", newPedido.Periodo);
 
                 conn.Open();
 

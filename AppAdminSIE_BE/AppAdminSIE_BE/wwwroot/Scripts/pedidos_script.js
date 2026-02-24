@@ -3,9 +3,7 @@
     // ===================================
     let currentFilterType = null; // 'fecha' | 'estado' | null
     let originalPedidos = []; // Para guardar los pedidos originales
-    let pedidosFiltradosActuales = [];
-
-
+    
     // ===================================
     // FUNCIONES GLOBALES DE FILTROS Y UTILIDADES
     // ===================================
@@ -46,42 +44,31 @@
             toast.show();
         }
     }
-
-
-
+    
+    
+    
     // Función GLOBAL para limpiar todos los filtros
     function limpiarFiltros() {
         console.log('🗑️ Limpiando filtros...');
-
+    
         const fechaInput = document.getElementById('fechaFiltrada');
         const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
-        const periodoDropdown = document.getElementById('pedidoFiltradoByPeriodo');
-
-        if (!fechaInput || !estadoDropdown || !periodoDropdown) {
+    
+        if (!fechaInput || !estadoDropdown) {
             console.error('❌ No se encontraron los elementos de filtro');
             return;
         }
-
-        // Resetear valores visuales
+    
         fechaInput.value = '';
         estadoDropdown.textContent = 'Seleccionar Estado';
-        periodoDropdown.textContent = 'Seleccionar Periodo';
-
-        // Rehabilitar todos los controles
         enableFechaInput();
         enableEstadoDropdown();
-        enablePeriodoDropdown();
-
-        // Resetear tipo de filtro
         currentFilterType = null;
-
-        // Mostrar todos los pedidos nuevamente
         mostrarTodosPedidos();
-
+    
         console.log('✅ Filtros limpiados correctamente');
     }
-
-
+    
     // Funciones de habilitación/deshabilitación
     function enableEstadoDropdown() {
         const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
@@ -109,23 +96,7 @@
             fechaInput.style.opacity = '1';
         }
     }
-    function enablePeriodoDropdown() {
-        const periodoDropdown = document.getElementById('pedidoFiltradoByPeriodo');
-        const periodoDropdownItems = document.querySelectorAll('#periodoColumna .dropdown-item');
-
-        if (periodoDropdown) {
-            periodoDropdown.disabled = false;
-            periodoDropdown.classList.remove('disabled');
-            periodoDropdown.style.pointerEvents = 'auto';
-            periodoDropdown.style.opacity = '1';
-        }
-
-        periodoDropdownItems.forEach(item => {
-            item.style.pointerEvents = 'auto';
-            item.style.opacity = '1';
-        });
-    }
-
+    
     function disableEstadoDropdown() {
         const estadoDropdown = document.getElementById('pedidoFiltradoByEstado');
         const estadoDropdownItems = document.querySelectorAll('#modalPedidos .dropdown-menu a');
@@ -256,10 +227,8 @@
             console.log('✅ Pedidos obtenidos por fecha:', pedidosProductosConFecha);
     
             if (loadingElement) loadingElement.classList.add('d-none');
-            pedidosFiltradosActuales = pedidosProductosConFecha;
-            mostrarPedidosFiltrados(pedidosFiltradosActuales);
-
-
+            mostrarPedidosFiltrados(pedidosProductosConFecha);
+    
         } catch (error) {
             console.error('❌ Error al filtrar por fecha:', error);
             if (loadingElement) loadingElement.classList.add('d-none');
@@ -311,8 +280,7 @@
             console.log('✅ Pedidos obtenidos por estado:', pedidosProductosConFecha);
     
             if (loadingElement) loadingElement.classList.add('d-none');
-            pedidosFiltradosActuales = pedidosProductosConFecha
-            mostrarPedidosFiltrados(pedidosFiltradosActuales);
+            mostrarPedidosFiltrados(pedidosProductosConFecha);
     
         } catch (error) {
             console.error('❌ Error al filtrar por estado:', error);
@@ -321,52 +289,8 @@
         }
     }
 
-    function filtrarPorNombreEdificio() {
-        const edificioFiltro = document.getElementById("edificioFiltrado")?.value
-            ?.toLowerCase()
-            ?.trim();
 
-        // 👉 si ya hay filtros aplicados, usamos esos
-        const base = pedidosFiltradosActuales.length > 0
-            ? pedidosFiltradosActuales
-            : originalPedidos;
-
-        const pedidosFiltrados = base.filter(p => {
-            if (!edificioFiltro) return true;
-
-            return (
-                p.edificio &&
-                p.edificio.toLowerCase().includes(edificioFiltro)
-            );
-        });
-
-        mostrarPedidosFiltrados(pedidosFiltrados);
-    }
-
-
-    function filtrarPorPeriodoLocal(periodo) {
-
-        console.log("🔍 Filtrando por periodo (local):", periodo);
-
-        const base = pedidosFiltradosActuales.length > 0
-            ? pedidosFiltradosActuales
-            : originalPedidos;
-
-        pedidosFiltradosActuales = base.filter(p => {
-            if (!p.periodo) return false;
-
-            return p.periodo.toUpperCase() === periodo.toUpperCase();
-        });
-
-        mostrarPedidosFiltrados(pedidosFiltradosActuales);
-    }
-
-
-
-
-
-
-
+    
     function mostrarPedidosFiltrados(pedidos) {
         console.log("🔍 Datos recibidos en mostrarPedidosFiltrados:", pedidos);
         console.log("🔍 Tipo de datos:", typeof pedidos);
@@ -402,7 +326,6 @@
                 pedidosAgrupados[idPedido] = {
                     id: idPedido,
                     fechaEntrega: pedidoProducto.fechaEntrega || pedidoProducto.fechaActividad,
-                    periodo: pedidoProducto.periodo,
                     edificio: pedidoProducto.edificio,
                     observaciones: pedidoProducto.observaciones,
                     productos: []
@@ -487,7 +410,6 @@
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Pedido #${pedido.id}</div>
                     <div><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</div>
-                    <div><strong>📅 Periodo:</strong> ${pedido.periodo || "Sin Periodo de Fecha"}</div>
                     <div><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || "Sin edificio"}</div>
                     <small class="text-muted">📦 ${cantidadProductos} producto(s)</small>
                     <br>
@@ -596,7 +518,6 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-2"><strong>📅 Fecha de Entrega:</strong> ${fechaFormateada}</p>
-                            <p class="mb-2"><strong>📅 Periodo:</strong> ${pedido.periodo || 'Sin Periodo'}</p>
                             <p class="mb-2"><strong>🏢 Entregar en Edificio:</strong> ${pedido.edificio || 'Sin especificar'}</p>
                         </div>
                         <div class="col-md-6">
@@ -802,9 +723,7 @@
         console.log('🔧 Inicializando filtros...');
     
         const fechaInput = document.getElementById('fechaFiltrada');
-        const estadoDropdownItems = document.querySelectorAll('#pedidoFiltradoByEstado + .dropdown-menu .dropdown-item');
-        const periodoDropdownItems = document.querySelectorAll('#periodoColumna .dropdown-item');
-        const periodoDropdownBtn = document.getElementById('pedidoFiltradoByPeriodo');
+        const estadoDropdownItems = document.querySelectorAll('#modalPedidos .dropdown-menu a');
     
         if (!fechaInput) {
             console.error('❌ No se encontró el input de fecha');
@@ -813,10 +732,6 @@
     
         if (estadoDropdownItems.length === 0) {
             console.error('❌ No se encontraron los items del dropdown de estado');
-            return;
-        }
-        if (periodoDropdownItems.length === 0) {
-            console.error('❌ No se encontraron los items del dropdown de periodo');
             return;
         }
     
@@ -853,27 +768,6 @@
                 filtrarPorEstado(estado);
             });
         });
-
-        periodoDropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                if (!periodoDropdownBtn || periodoDropdownBtn.disabled) {
-                    console.log('🚫 Dropdown periodo deshabilitado, ignorando click');
-                    return;
-                }
-
-                const periodo = this.textContent.trim();
-                console.log('📅 Periodo seleccionado:', periodo);
-
-                disableFechaInput();
-                disableEstadoDropdown();
-
-                periodoDropdownBtn.textContent = periodo;
-                currentFilterType = 'periodo';
-                filtrarPorPeriodoLocal(periodo);
-            });
-        });
     
         addClearFiltersButton();
         console.log('✅ Filtros inicializados correctamente');
@@ -902,26 +796,15 @@
     
         console.log('✅ Botón de limpiar filtros agregado al input-group.');
     }
-
-    // 🌍 BASE URL GLOBAL
-    window.API_BASE_URL =
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:5152'
-            : 'https://administracionsie.onrender.com';
+    
     
     document.addEventListener('DOMContentLoaded', async function () {
         console.log('🚀 Iniciando pedidos_script.js...');
 
-
-
-        const edificioInput = document.getElementById("edificioFiltrado");
-
-        if (edificioInput) {
-            edificioInput.addEventListener("input", filtrarPorNombreEdificio);
-        }
-
-
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5152'  // Local
+            : 'https://administracionsie.onrender.com';  // Producción
+    
     
         // Arrays globales
         let productosSeleccionados = [];
@@ -1205,49 +1088,11 @@
                 alert('Error al cargar edificios: ' + error.message);
             }
         }
-
-        // Obtener elementos
-        const periodoBtn = document.getElementById('pedidoFiltradoByPeriodo');
-        const periodoItems = document.querySelectorAll('#periodoColumna .dropdown-item');
-
-// Evento click en cada item
-        periodoItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault(); // Evita que el link haga scroll al top
-
-                const periodoSeleccionado = this.textContent.trim(); // Obtenemos el texto
-                console.log('Periodo seleccionado:', periodoSeleccionado);
-
-                // Cambiamos el texto del botón
-                periodoBtn.textContent = periodoSeleccionado;
-
-                // Aquí puedes llamar a tu función de filtrado
-                filtrarPorPeriodoLocal(periodoSeleccionado);
-            });
-        });
-
-        const periodoBtnNew = document.getElementById('periodoSelected');
-        const periodoItemsNew = document.querySelectorAll('#periodo .dropdown-item');
-
-// Evento click en cada item
-        let periodoSeleccionadoNew = ''; // fuera de cualquier función
-
-        periodoItemsNew.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                periodoSeleccionadoNew = this.textContent.trim(); // ahora sí accesible globalmente
-                console.log('Periodo seleccionado:', periodoSeleccionadoNew);
-                periodoBtnNew.textContent = periodoSeleccionadoNew;
-            });
-        });
-
-
-
+    
         // Funciones de Pedidos
         async function ConfirmarPedido() {
             try {
                 const fechaEntrega = document.getElementById('fechaEntrega').value;
-                const periodo = periodoSeleccionadoNew;
                 const fechaISO = new Date(fechaEntrega).toISOString();
                 const observaciones = document.getElementById('observaciones').value;
     
@@ -1259,11 +1104,7 @@
                 const responsePedido = await fetch(`${API_BASE_URL}/api/SIE/Crear-pedido`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fechaEntrega: fechaISO,
-                        periodo: periodo
-                    })
-
+                    body: JSON.stringify(fechaISO)
                 });
                 if (!responsePedido.ok) throw new Error(`Error al crear pedido: ${responsePedido.status}`);
                 const pedidoId = await responsePedido.json();
@@ -1282,7 +1123,6 @@
                         estadoPedido: "No Entregado",
                         nombreProducto: producto.nombre || "Sin nombre",
                         unidadMedidaProducto: producto.unidadMedida || "Sin unidad",
-                        periodo: periodoSeleccionadoNew,
                         estadoProducto: "No Entregado"
                     };
     
@@ -1383,6 +1223,7 @@
                 pedidos.forEach(pedido => {
                     pedidosMap[pedido.idPedido] = pedido;
                 });
+    
                 // Combinar los datos: agregar fechaEntrega a cada pedidoProducto
                 const pedidosProductosConFecha = pedidosProductos.map(pedidoProducto => {
                     const pedidoInfo = pedidosMap[pedidoProducto.idPedido];
