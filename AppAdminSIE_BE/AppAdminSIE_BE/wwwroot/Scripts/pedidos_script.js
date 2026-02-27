@@ -326,21 +326,21 @@
             ?.toLowerCase()
             ?.trim();
 
-        // 👉 si ya hay filtros aplicados, usamos esos
-        const base = pedidosFiltradosActuales.length > 0
-            ? pedidosFiltradosActuales
-            : originalPedidos;
+        // 🔥 SIEMPRE usar la base original
+        const base = originalPedidos;
 
-        const pedidosFiltrados = base.filter(p => {
-            if (!edificioFiltro) return true;
+        if (!edificioFiltro) {
+            pedidosFiltradosActuales = originalPedidos;
+            mostrarPedidosFiltrados(originalPedidos);
+            return;
+        }
 
-            return (
-                p.edificio &&
-                p.edificio.toLowerCase().includes(edificioFiltro)
-            );
-        });
+        pedidosFiltradosActuales = base.filter(p =>
+            p.edificio &&
+            p.edificio.toLowerCase().includes(edificioFiltro)
+        );
 
-        mostrarPedidosFiltrados(pedidosFiltrados);
+        mostrarPedidosFiltrados(pedidosFiltradosActuales);
     }
 
 
@@ -1389,7 +1389,7 @@
                     return {
                         ...pedidoProducto,
                         fechaEntrega: pedidoInfo ? pedidoInfo.fechaEntrega : null,
-                        fechaActividad: pedidoInfo ? pedidoInfo.fechaEntrega : null // Para compatibilidad
+                        fechaActividad: pedidoInfo ? pedidoInfo.fechaEntrega : null
                     };
                 });
     
