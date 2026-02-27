@@ -5,7 +5,7 @@ namespace AppAdminSIE_BE.Data.Interfaces
     public interface IPedidoRepository
     {
         IEnumerable<Pedido> GetAllPedidos();
-        int AddPedido(DateTime fechaEntrega);
+        int AddPedido(NewPedido newPedido);
         void UpdateEstado(int idPedido, string nuevoEstado);
     }
 }

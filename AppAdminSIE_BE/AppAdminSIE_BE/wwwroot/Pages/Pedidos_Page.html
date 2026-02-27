@@ -169,6 +169,32 @@
                         <input type="date" class="form-control form-control-sm" id="fechaEntrega">
                     </div>
                 </div>
+                <!-- Periodo -->
+                <div class="m3" id="periodo">
+                    <label for="periodo" class="form-label">Periodo :</label>
+                    <div class="d-flex align-items-end">
+                        <div class="input-group input-group-sm me-2">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="periodoSelected">
+                                Seleccionar Periodo
+                            </button>
+                            <ul class="dropdown-menu periodo-scroll">
+                                <li><a class="dropdown-item" href="#">ENERO</a></li>
+                                <li><a class="dropdown-item" href="#">FEBRERO</a></li>
+                                <li><a class="dropdown-item" href="#">MARZO</a></li>
+                                <li><a class="dropdown-item" href="#">ABRIL</a></li>
+                                <li><a class="dropdown-item" href="#">MAYO</a></li>
+                                <li><a class="dropdown-item" href="#">JUNIO</a></li>
+                                <li><a class="dropdown-item" href="#">JULIO</a></li>
+                                <li><a class="dropdown-item" href="#">AGOSTO</a></li>
+                                <li><a class="dropdown-item" href="#">SEPTIEMBRE</a></li>
+                                <li><a class="dropdown-item" href="#">OCTUBRE</a></li>
+                                <li><a class="dropdown-item" href="#">NOVIEMBRE</a></li>
+                                <li><a class="dropdown-item" href="#">DICIEMBRE</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="mb-3">
                     <label for="observaciones" class="form-label">Observaciones</label>
@@ -222,6 +248,47 @@
                         </div>
                         </div>
                     </div>
+
+                    <!-- Edificio -->
+                    <div class="col-md-5 col-sm-12">
+                        <label for="edificioFiltrado" class="form-label">
+                            Filtrar por Edificio
+                        </label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               id="edificioFiltrado"
+                               placeholder="Ej: CHACABUCO 123">
+                    </div>
+
+                    <!-- Periodo -->
+                    <div class="col-md-5 col-sm-6" id="periodoColumna">
+                        <label for="periodoColumna" class="form-label">Filtrar por Periodo :</label>
+                        <div class="d-flex align-items-end">
+                            <div class="input-group input-group-sm me-2">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="pedidoFiltradoByPeriodo">
+                                    Seleccionar Periodo
+                                </button>
+                                <ul class="dropdown-menu periodo-scroll">
+                                    <li><a class="dropdown-item" href="#">ENERO</a></li>
+                                    <li><a class="dropdown-item" href="#">FEBRERO</a></li>
+                                    <li><a class="dropdown-item" href="#">MARZO</a></li>
+                                    <li><a class="dropdown-item" href="#">ABRIL</a></li>
+                                    <li><a class="dropdown-item" href="#">MAYO</a></li>
+                                    <li><a class="dropdown-item" href="#">JUNIO</a></li>
+                                    <li><a class="dropdown-item" href="#">JULIO</a></li>
+                                    <li><a class="dropdown-item" href="#">AGOSTO</a></li>
+                                    <li><a class="dropdown-item" href="#">SEPTIEMBRE</a></li>
+                                    <li><a class="dropdown-item" href="#">OCTUBRE</a></li>
+                                    <li><a class="dropdown-item" href="#">NOVIEMBRE</a></li>
+                                    <li><a class="dropdown-item" href="#">DICIEMBRE</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
                 </div>
 
                 <div id="loadingPedidos" class="loading d-none text-center mt-4">

@@ -31,6 +31,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
                                         pro.UnidadMedida,
+                                        ped.Periodo,
                                         pxp.observaciones 
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id_pedido
@@ -53,6 +54,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
+                    var ordPeriodo = reader.GetOrdinal("Periodo");
                     var ordObservaciones = reader.GetOrdinal("observaciones");
 
                     while (reader.Read())
@@ -69,6 +71,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
                             UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
+                            Periodo = reader.GetString(ordPeriodo),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             EstadoProducto = reader.GetString(ordEstadoProducto)
                         });
@@ -95,6 +98,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
                                         pro.UnidadMedida,
+                                        ped.Periodo,
                                         pxp.observaciones 
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id_pedido
@@ -115,6 +119,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
+                    var ordPeriodo = reader.GetOrdinal("Periodo");
                     var ordObservaciones = reader.GetOrdinal("observaciones");
 
                     while (reader.Read())
@@ -131,6 +136,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
                             UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
+                            Periodo = reader.GetString(ordPeriodo),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             EstadoProducto = reader.GetString(ordEstadoProducto)
                         });
@@ -157,6 +163,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
                                         pro.UnidadMedida,
+                                        ped.Periodo,
                                         pxp.observaciones 
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id_pedido
@@ -179,6 +186,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
+                    var ordPeriodo = reader.GetOrdinal("Periodo");
                     var ordObservaciones = reader.GetOrdinal("observaciones");
 
                     while (reader.Read())
@@ -195,6 +203,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
                             UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
+                            Periodo = reader.GetString(ordPeriodo),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             EstadoProducto = reader.GetString(ordEstadoProducto)
                         });
@@ -220,6 +229,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                                         pro.Nombre as Producto,
                                         pxp.cantidad as Cantidad,
                                         pro.UnidadMedida,
+                                        ped.Periodo,
                                         pxp.observaciones 
                                     FROM PedidoXProducto pxp
                                     JOIN Pedidos ped ON pxp.pedido_id = ped.id_pedido
@@ -242,6 +252,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                     var ordNombreProducto = reader.GetOrdinal("Producto");
                     var ordCantidad = reader.GetOrdinal("Cantidad");
                     var ordUnidadMedida = reader.GetOrdinal("UnidadMedida");
+                    var ordPeriodo = reader.GetOrdinal("Periodo");
                     var ordObservaciones = reader.GetOrdinal("observaciones");
 
                     while (reader.Read())
@@ -258,6 +269,7 @@ namespace AppAdminSIE_BE.Data.Repositories
                             EstadoPedido = reader.GetString(ordEstado),
                             NombreProducto = reader.GetString(ordNombreProducto),
                             UnidadMedidaProducto = reader.GetString(ordUnidadMedida),
+                            Periodo = reader.GetString(ordPeriodo),
                             Observaciones = reader.IsDBNull(ordObservaciones) ? null : reader.GetString(ordObservaciones),
                             EstadoProducto = reader.GetString(ordEstadoProducto)
                         });

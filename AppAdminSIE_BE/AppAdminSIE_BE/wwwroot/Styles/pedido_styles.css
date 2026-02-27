@@ -336,6 +336,13 @@ body {
     overflow-y: auto;
 }
 
+/* Limita la altura del dropdown y agrega scroll */
+.periodo-scroll {
+    max-height: 250px;  /* Ajusta la altura máxima a tu gusto */
+    overflow-y: auto;   /* Permite scroll vertical */
+}
+
+
 /* === LOADING Y ERRORES === */
 .loading {
     text-align: center;
